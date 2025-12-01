@@ -1,0 +1,38 @@
+# Environnements virtuels
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+.venv/
+env/
+ENV/
+
+# Poetry
+.venv/
+poetry.lock  # Optionnel : commitez-le pour reproductibilité ; sinon, ignorez-le pour les environnements locaux
+
+# Logs et caches
+*.log
+local/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache
+
+# IDE et éditeurs
+.vscode/settings.json  # Optionnel : ignorez les paramètres sensibles VSCode
+.idea/
+*.swp
+*~
+
+# Système d'exploitation
+.DS_Store
+Thumbs.db
+
+# Secrets et données
+.env
+secrets.json
+data/raw/  # Pour datasets volumineux en data science (OC_P5)
+notebooks/*.ipynb_checkpoints/
