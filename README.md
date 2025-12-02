@@ -1,17 +1,36 @@
 # ML Deployment Project
-Déploiement d'un modèle ML pour Futurisys avec FastAPI et PostgreSQL.
+Déploiement d'un modèle ML pour Futurisys : API FastAPI, PostgreSQL, tests Pytest, CI/CD.
+
+## Aperçu
+POC pour exposer un modèle ML via API performante, avec traçabilité DB et bonnes pratiques DevOps.
 
 ## Installation
-1. Clone: `git clone https://github.com/ton-username/ml-deployment-project.git`
-2. Active venv: `source venv/bin/activate`
-3. Installe: `pip install -r requirements.txt`
+1. Clone le repo : `git clone https://github.com/ton-username/ml-deployment-project.git`
+2. Installe Poetry (si pas fait) : `curl -sSL https://install.python-poetry.org | python3 -`
+3. Dépendances : `poetry install` (crée/lock .venv avec deps)
+4. Active env : `poetry shell`
 
 ## Utilisation
-À venir (Étape 3 pour API).
+- Dev : `poetry run uvicorn src.main:app --reload` (Étape 3 pour API).
+- BDD : `poetry run python scripts/create_db.py` (Étape 4).
+- Tests : `poetry run pytest` (Étape 5).
 
-## Branches
-- main: Stable
-- feature/*: Nouvelles fonctionnalités
+## Structure du Projet
+- `src/` : Code core (API, modèle ML).
+- `tests/` : Tests unitaires/fonctionnels (Pytest).
+- `docs/` : Schémas UML, docs API.
+- `scripts/` : Utils init (BDD, data load).
+- `data/` : Datasets (ignorés pour privacy).
 
-## Versions
-Tags: vX.Y.Z
+## Branches & Conventions
+- `main` : Stable (merges via PR).
+- `feature/etapeX` : Fonctionnalités (kebab-case, ex. `feature/etape3-api`).
+- Commits : Conventional (ex. `feat: Add endpoint`).
+
+## Déploiement & Sécurité
+- CI/CD : GitHub Actions (Étape 2) pour tests/deploy Hugging Face.
+- Auth/Sec : À venir (JWT pour API, secrets en .env ignoré).
+- Versions : Tags semver (ex. v1.0.0 pour Étape 1).
+
+## Licence
+MIT (ou adapte pour Futurisys).
