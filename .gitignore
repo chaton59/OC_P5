@@ -10,7 +10,6 @@ ENV/
 
 # Poetry
 .venv/
-poetry.lock  # Optionnel : commitez-le pour reproductibilité ; sinon, ignorez-le pour les environnements locaux
 
 # Logs et caches
 *.log
