@@ -1,0 +1,54 @@
+name: CI/CD Pipeline  # Nom lisible dans tab Actions GitHub
+
+on:  # Triggers du plan : push/PR pour isolation envs
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:  # Job CI : Qualité code/ML (étapes 1-5 plan, séquentiel)
+    runs-on: ubuntu-latest  # Env gratuit/rapide (<10min cible)
+    steps:
+    - uses: actions/checkout@v4  # Étape 1 : Récup repo
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'  # Fixe pour reproductibilité (ML P3/P4)
+    - name: Cache pip  # Accélère deps futures (perf reco)
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: $$ {{ runner.os }}-pip- $${{ hashFiles('requirements.txt') }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # Tes deps (FastAPI, SQLAlchemy, etc.)
+        pip install pytest pytest-cov black flake8  # Outils lint/tests (plan)
+    - name: Lint code  # Étape 4 : Standards (black pour format auto, flake8 erreurs)
+      run: black --check . && flake8 .  # Fail si style KO
+    - name: Run tests  # Étape 5 : Couverture >80% (cas critiques Pydantic/ML)
+      run: pytest --cov=src --cov-report=xml tests/  # Assume tests/ ; XML pour badges
+    - name: Upload coverage  # Optionnel : Rapport GitHub (monitoring plan)
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+
+  deploy:  # Job CD : Déploiement (après test OK, conditionnel)
+    needs: test  # Dépend CI (séquentiel plan)
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'  # Branches seulement
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Deploy to HF Spaces  # Étape 7 : Push vers oc_p5 (dev/main)
+      uses: huggingface/huggingface-hub@v4  # Action HF pour auth/push facile (simule git push hf)
+      env:
+        HUGGINGFACE_TOKEN: ${{ secrets.HF_TOKEN }}  # Secret (2.4)
+      with:
+        huggingface_repo: ASI-Engineer/oc_p5  # Ton Space dev (crée oc_p5-prod pour main si besoin)
+        repo_type: space  # Type Space (pas model)
+    - name: Fallback git push to HF  # Si hub fail (ton remote hf backup)
+      run: |
+        git remote add hf https://huggingface.co/spaces/ASI-Engineer/oc_p5 || true
+        git config --global url."https://${{ secrets.HF_TOKEN }}@huggingface.co".insteadOf "https://huggingface.co"
+        git push hf HEAD:${{ github.ref_name }}  # Push branche courante
