@@ -1,34 +1,29 @@
-[project]
+[tool.poetry]
 name = "oc-p5"
 version = "0.1.0"
 description = "Projet OpenClassRoom mise en API d'un modèle ML"
-authors = [
-    {name = "chaton59",email = "v.trouillez@gmail.com"}
-]
+authors = ["chaton59 <v.trouillez@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "fastapi (>=0.123.4,<0.124.0)",
-    "uvicorn[standard] (>=0.38.0,<0.39.0)",
-    "pytest (>=9.0.1,<10.0.0)",
-    "pytest-cov (>=7.0.0,<8.0.0)",
-    "black (>=25.11.0,<26.0.0)",
-    "flake8 (>=7.3.0,<8.0.0)",
-    "sqlalchemy (>=2.0.44,<3.0.0)",
-    "pydantic (>=2.12.5,<3.0.0)"
-]
-
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
 packages = [{include = "src"}]
 
-[dependency-groups]
-dev = [
-    "pytest (>=9.0.1,<10.0.0)",
-    "black (>=25.11.0,<26.0.0)",
-    "flake8 (>=7.3.0,<8.0.0)"
-]
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.123.0"
+uvicorn = { extras = ["standard"], version = "^0.38.0" }
+pytest = "^9.0.0"
+pytest-cov = "^7.0.0"
+black = "^25.0.0"
+flake8 = "^7.0.0"
+sqlalchemy = "^2.0.0"
+pydantic = "^2.0.0"
+psycopg = "^3.2.0"  # Driver pour PostgreSQL, requis pour étape 4
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.0"
+black = "^25.0.0"
+flake8 = "^7.0.0"
+pytest-cov = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"

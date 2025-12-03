@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4  # Mise à jour pour v4, plus récente
       - name: Set up Python
+        id: setup-python
         uses: actions/setup-python@v5  # v5 pour compatibilité
         with:
           python-version: '3.10'  # Adapte à ton projet (ex. pour FastAPI)
