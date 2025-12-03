@@ -1,0 +1,13 @@
+[flake8]
+exclude =
+    .venv,
+    .git,
+    __pycache__,
+    *.pyc,
+    *.egg-info,
+    .cache,
+    .eggs,
+    build,
+    dist
+max-line-length = 88  # Pour compat Black (default 88, vs PEP8 79)
+ignore = E501  # Optionnel : Ignore line too long si trop strict, mais fixe d'abord manuellement
