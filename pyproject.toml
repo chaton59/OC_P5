@@ -28,5 +28,7 @@ packages = [{include = "src"}]
 
 [dependency-groups]
 dev = [
-    "pytest (>=9.0.1,<10.0.0)"
+    "pytest (>=9.0.1,<10.0.0)",
+    "black (>=25.11.0,<26.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)"
 ]
