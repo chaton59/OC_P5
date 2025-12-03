@@ -1,11 +1,11 @@
 ---
-title: OC P5 - API ML Déployée  # Titre descriptif pour démo Aurélien
-emoji: 🚀  # Icône visuelle (optionnel, fun pour UI Space)
-colorFrom: blue  # Gradient couleur (bleu → violet pour thématique IA)
+title: OC P5 - API ML Déployée
+emoji: 🚀
+colorFrom: blue
 colorTo: purple
-sdk: static  # Ton SDK choisi (pour FastAPI pur, vs gradio pour UI)
-app_file: app.py  # Pointe vers fichier API (créé étape 3 ; placeholder pour POC)
-pinned: false  # Pas épinglé dashboard (évolutif)
+sdk: static
+app_file: app.py
+pinned: false
 ---
 
 # ML Deployment Project

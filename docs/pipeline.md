@@ -26,7 +26,7 @@ Automatiser tests (qualité code/ML) et déploiement vers Hugging Face Spaces po
    *Choix : Conditionnel par branche ; utilise secrets pour HF_TOKEN (sécurité).*
 
 ## Gestion Envs et Secrets
-- **Devs** : Branche `dev` → Space `ton-username/espace-dev` (tests rapides).
+- **Devs** : Branche `dev` → Space `ASI-Engineer/oc_p5` (tests rapides).
 - **Test/Prod** : PR → `main` → Space `espace-prod` (review requise).
 - **Secrets** : HF_TOKEN (GitHub Secrets) ; jamais en code.  
 *Choix : Sépare envs pour traçabilité (inputs/outputs ML en DB PostgreSQL plus tard).*
