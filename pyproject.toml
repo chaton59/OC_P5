@@ -1,7 +1,7 @@
 [project]
 name = "oc-p5"
 version = "0.1.0"
-description = ""
+description = "Projet OpenClassRoom mise en API d'un modèle ML"
 authors = [
     {name = "chaton59",email = "v.trouillez@gmail.com"}
 ]
