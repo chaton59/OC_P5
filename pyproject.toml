@@ -10,19 +10,15 @@ packages = [{include = "src"}]
 python = "^3.10"
 fastapi = "^0.123.0"
 uvicorn = { extras = ["standard"], version = "^0.38.0" }
-pytest = "^9.0.0"
-pytest-cov = "^7.0.0"
-black = "^25.0.0"
-flake8 = "^7.0.0"
 sqlalchemy = "^2.0.0"
 pydantic = "^2.0.0"
-psycopg = "^3.2.0"  # Driver pour PostgreSQL, requis pour étape 4
+psycopg = "^3.2.0"  # Pour PostgreSQL (étape 4)
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.0"
+pytest-cov = "^7.0.0"
 black = "^25.0.0"
 flake8 = "^7.0.0"
-pytest-cov = "^7.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.9.0"]
