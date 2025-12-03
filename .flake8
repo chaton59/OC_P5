@@ -1,4 +1,5 @@
 [flake8]
+# Exclude dirs pour ignorer libs tierces et noise (venv, git, etc.)
 exclude =
     .venv,
     .git,
@@ -9,5 +10,7 @@ exclude =
     .eggs,
     build,
     dist
-max-line-length = 88  # Pour compat Black (default 88, vs PEP8 79)
-ignore = E501  # Optionnel : Ignore line too long si trop strict, mais fixe d'abord manuellement
+# Max line pour compat Black (default 88 vs PEP8 79)
+max-line-length = 88
+# Ignore E501 si trop strict (optionnel, retire si tu veux fixer lines)
+ignore = E501
