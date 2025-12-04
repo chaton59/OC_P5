@@ -51,5 +51,5 @@ jobs:
         if [ -z "$HF_TOKEN" ]; then
           echo "Deploy step ready - configure HF_TOKEN secret in GitHub settings"
         else
-          python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); repo_id = 'ASI-Engineer/oc_p5' if '${{ github.ref_name }}' == 'main' else 'ASI-Engineer/oc_p5'; api.upload_folder(repo_id=repo_id, folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"
+          python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); api.upload_folder(repo_id='ASI-Engineer/oc_p5', folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"
         fi
