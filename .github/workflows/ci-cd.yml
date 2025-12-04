@@ -38,21 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Configure git credentials
-      run: |
-        git config --global user.email "ci@github.com"
-        git config --global user.name "GitHub Actions"
-    - name: Deploy to HF Spaces  # Étape 7 : Push vers oc_p5 (dev/main)
-      # Note: Créez le secret HF_TOKEN dans les paramètres GitHub si vous souhaitez activer le déploiement
+    - name: Set up Python for deploy
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - name: Install huggingface_hub
+      run: pip install huggingface_hub
+    - name: Deploy to HF Spaces
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-      run: |
-        if [ -z "$HF_TOKEN" ]; then
-          echo "Deploy step ready - configure HF_TOKEN secret in GitHub settings to enable pushing to Hugging Face"
-        else
-          if [[ "${{ github.ref_name }}" == "dev" ]]; then
-            git push https://ASI-Engineer:$HF_TOKEN@huggingface.co/spaces/ASI-Engineer/oc_p5 ${{ github.ref_name }} --force
-          elif [[ "${{ github.ref_name }}" == "main" ]]; then
-            git push https://ASI-Engineer:$HF_TOKEN@huggingface.co/spaces/ASI-Engineer/oc_p5-prod ${{ github.ref_name }} --force
-          fi
-        fi
+        REF_NAME: ${{ github.ref_name }}
+      run: python .github/scripts/deploy.py
