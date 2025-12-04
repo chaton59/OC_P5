@@ -42,5 +42,10 @@ POC pour exposer un modèle ML via API performante, avec traçabilité DB et bon
 - Auth/Sec : À venir (JWT pour API, secrets en .env ignoré).
 - Versions : Tags semver (ex. v1.0.0 pour Étape 1).
 
+## HF Spaces
+- Dev : https://huggingface.co/spaces/ASI-Engineer/oc_p5 (branch dev, pour tests itératifs).
+- Prod : https://huggingface.co/spaces/ASI-Engineer/oc_p5-prod (branch main, version stable).
+Sync auto via GitHub Actions (push déclenche rebuild ~2min, avec HF_TOKEN sécurisé).
+
 ## Licence
 MIT (ou adapte pour Futurisys).
