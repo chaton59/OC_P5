@@ -47,5 +47,9 @@ jobs:
     - name: Deploy to HF Spaces
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        REF_NAME: ${{ github.ref_name }}
-      run: python .github/scripts/deploy.py
+      run: |
+        if [ -z "$HF_TOKEN" ]; then
+          echo "Deploy step ready - configure HF_TOKEN secret in GitHub settings"
+        else
+          python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); repo_id = 'ASI-Engineer/oc_p5-prod' if '${{ github.ref_name }}' == 'main' else 'ASI-Engineer/oc_p5'; api.upload_folder(repo_id=repo_id, folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"
+        fi
