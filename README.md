@@ -35,6 +35,12 @@ POC pour exposer un modèle ML via API performante, avec traçabilité DB et bon
 ## CI/CD Optimization
 - Pipelines configurés pour exécution <10 min (ex. : lint ~1 min, tests ~3 min, deploy ~2 min). Si >10 min, optimiser via cache Poetry ou jobs parallèles. Temps observés basés sur runs GitHub Actions.
 
+## CI/CD Détails
+- Pipeline : GitHub Actions pour lint (Flake8/Black), tests (Pytest), deploy HF.
+- Environnements : Dev (branch dev/local tests), Prod (branch main/HF oc_p5).
+- Secrets : HF_TOKEN sécurisé via GitHub Secrets.
+- Standards : Voir [docs/standards.md](./docs/standards.md).
+
 ## Branches & Conventions
 - `main` : Stable (merges via PR).
 - `main` : pour développement et tests
