@@ -34,6 +34,7 @@ POC pour exposer un modèle ML via API performante, avec traçabilité DB et bon
 
 ## Branches & Conventions
 - `main` : Stable (merges via PR).
+- `main` : pour développement et tests
 - `feature/etapeX` : Fonctionnalités (kebab-case, ex. `feature/etape3-api`).
 - Commits : Conventional (ex. `feat: Add endpoint`).
 
