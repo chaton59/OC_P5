@@ -32,6 +32,9 @@ POC pour exposer un modèle ML via API performante, avec traçabilité DB et bon
 - `scripts/` : Utils init (BDD, data load).
 - `data/` : Datasets (ignorés pour privacy).
 
+## CI/CD Optimization
+- Pipelines configurés pour exécution <10 min (ex. : lint ~1 min, tests ~3 min, deploy ~2 min). Si >10 min, optimiser via cache Poetry ou jobs parallèles. Temps observés basés sur runs GitHub Actions.
+
 ## Branches & Conventions
 - `main` : Stable (merges via PR).
 - `main` : pour développement et tests
@@ -44,9 +47,11 @@ POC pour exposer un modèle ML via API performante, avec traçabilité DB et bon
 - Versions : Tags semver (ex. v1.0.0 pour Étape 1).
 
 ## HF Spaces
-- Dev : https://huggingface.co/spaces/ASI-Engineer/oc_p5 (branch dev, pour tests itératifs).
-- Prod : https://huggingface.co/spaces/ASI-Engineer/oc_p5-prod (branch main, version stable).
-Sync auto via GitHub Actions (push déclenche rebuild ~2min, avec HF_TOKEN sécurisé).
+- Prod : https://huggingface.co/spaces/ASI-Engineer/oc_p5 (branch dev, pour tests itératifs).
+- Sync auto via GitHub Actions (push déclenche rebuild ~2min, avec HF_TOKEN sécurisé).
+
+## Documentation 
+- Standards Code/ML
 
 ## Licence
 MIT (ou adapte pour Futurisys).
