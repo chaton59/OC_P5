@@ -2,55 +2,71 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, dev ]  # Trigger sur main/dev (simplifié, mais branches recommandées Étape 1 pour environnements)
-  pull_request:
-    branches: [ main ]  # Validation PR vers main (qualité avant merge)
+    branches: [ main, dev ]  # Trigger sur dev/main
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4  # Mise à jour pour v4, plus récente et stable
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@v5  # v5 pour compatibilité Python/ML (ex. FastAPI, Pydantic)
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'  # Adapte à ton projet (vérifie pyproject.toml ; 3.10 pour équilibre perf/stabilité)
+          python-version: '3.10'
       - name: Cache pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}  # Cache basé sur requirements/poetry.lock pour temps <10 min (vigilance Étape 2)
+          key: $$ {{ runner.os }}-pip- $${{ hashFiles('**/requirements.txt') }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Ou 'poetry install' si full Poetry (choix mixé pour flexibilité)
-          pip install pytest pytest-cov black flake8  # Outils standards : tests/cov/lint (lien Étape 5)
+          pip install -r requirements.txt
+          pip install pytest pytest-cov black flake8
       - name: Lint code
         run: |
-          black --check .  # Formatage auto (standards code)
-          flake8 .  # Lint statique (exclut venv via .flake8 si configuré)
+          black --check .
+          flake8 .
       - name: Run tests
-        run: pytest --cov=src --cov-report=xml tests/  # Tests unitaires/fonctionnels avec couverture >80% (rapport xml pour CI, lien Étape 5)
+        run: pytest --cov=src --cov-report=xml tests/
 
-  deploy:  # Job CD : Déploiement (après test OK, conditionnel pour environnements)
-    needs: test  # Dépend CI (séquentiel pour qualité, évite deploy cassé)
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'  # Dev: deploy test/local-like ; Main: prod (vigilance environnements Étape 2)
+  deploy-dev:  # Job Dev : Test itératifs
+    needs: test
+    if: github.ref == 'refs/heads/dev'  # Seulement dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python for deploy
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - name: Install huggingface_hub
-        run: pip install huggingface_hub  # Lib pour upload HF (simplifié, sans full deps)
-      - name: Deploy to HF Spaces
+        run: pip install huggingface_hub
+      - name: Deploy to HF Dev Space
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}  # Secret sécurisé (vigilance Étape 2 : pas de hardcode)
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           if [ -z "$HF_TOKEN" ]; then
-            echo "Deploy step ready - configure HF_TOKEN secret in GitHub settings"  # Fallback pédagogique si secret manquant
+            echo "Configure HF_TOKEN in GitHub secrets"
           else
-            python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); api.upload_folder(repo_id='ASI-Engineer/oc_p5', folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"  # Upload repo vers HF space (exclut git/workflows pour propreté)
+            python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); api.upload_folder(repo_id='ASI-Engineer/oc_p5-dev', folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"
+          fi
+
+  deploy-prod:  # Job Prod : Stable après merge
+    needs: test
+    if: github.ref == 'refs/heads/main'  # Seulement main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+      - name: Deploy to HF Prod Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "Configure HF_TOKEN in GitHub secrets"
+          else
+            python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); api.upload_folder(repo_id='ASI-Engineer/oc_p5', folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"
           fi
