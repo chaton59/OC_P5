@@ -41,6 +41,11 @@ POC pour exposer un modèle ML via API performante, avec traçabilité DB et bon
 - Secrets : HF_TOKEN sécurisé via GitHub Secrets.
 - Standards : Voir [docs/standards.md](./docs/standards.md).
 
+## Environnements CI/CD
+- Dev : Branch "dev" -> HF space oc_p5-dev pour tests itératifs et validation.
+- Prod : Branch "main" -> HF space oc_p5 pour déploiement stable.
+- Secrets : HF_TOKEN partagé (sécurisé via GitHub Secrets) pour dev/prod.
+
 ## Branches & Conventions
 - `main` : Stable (merges via PR).
 - `main` : pour développement et tests
@@ -48,7 +53,6 @@ POC pour exposer un modèle ML via API performante, avec traçabilité DB et bon
 - Commits : Conventional (ex. `feat: Add endpoint`).
 
 ## Déploiement & Sécurité
-- CI/CD : GitHub Actions (Étape 2) pour tests/deploy Hugging Face.
 - Auth/Sec : À venir (JWT pour API, secrets en .env ignoré).
 - Versions : Tags semver (ex. v1.0.0 pour Étape 1).
 
