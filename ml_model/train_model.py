@@ -1,4 +1,3 @@
-import pandas as pd
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
 from imblearn.over_sampling import SMOTE
