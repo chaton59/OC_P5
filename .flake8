@@ -1,5 +1,6 @@
 [flake8]
 # Exclude dirs pour ignorer libs tierces et noise (venv, git, etc.)
+ignore = W503  # Line break before binary operator (conflicts with black)
 exclude =
     .venv,
     .git,
