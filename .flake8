@@ -1,6 +1,6 @@
 [flake8]
 # Exclude dirs pour ignorer libs tierces et noise (venv, git, etc.)
-ignore = W503  # Line break before binary operator (conflicts with black)
+ignore = W503, E501
 exclude =
     .venv,
     .git,
@@ -13,5 +13,3 @@ exclude =
     dist
 # Max line pour compat Black (default 88 vs PEP8 79)
 max-line-length = 88
-# Ignore E501 si trop strict (optionnel, retire si tu veux fixer lines)
-ignore = E501
