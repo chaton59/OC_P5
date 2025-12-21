@@ -64,13 +64,11 @@ def preprocess_data(raw_data_paths=None):
             central_df[col] = winsorize(central_df[col], limits=[0.01, 0.01])
 
     # Engineering (comme improvement.py : ratios, moyennes ; +1 évite div0)
-    central_df["revenu_par_anciennete"] = (
-        central_df["revenu_mensuel"]
-        / (central_df["annees_dans_l_entreprise"] + 1)
+    central_df["revenu_par_anciennete"] = central_df["revenu_mensuel"] / (
+        central_df["annees_dans_l_entreprise"] + 1
     )
-    central_df["experience_par_anciennete"] = (
-        central_df["annee_experience_totale"]
-        / (central_df["annees_dans_l_entreprise"] + 1)
+    central_df["experience_par_anciennete"] = central_df["annee_experience_totale"] / (
+        central_df["annees_dans_l_entreprise"] + 1
     )
     central_df["satisfaction_moyenne"] = central_df[
         [
@@ -81,10 +79,9 @@ def preprocess_data(raw_data_paths=None):
         ]
     ].mean(axis=1)
     # Autres (ajoute si pertinents via SHAP : e.g., 'promo_par_anciennete')
-    central_df["promo_par_anciennete"] = (
-        central_df["annees_depuis_la_derniere_promotion"]
-        / (central_df["annees_dans_l_entreprise"] + 1)
-    )
+    central_df["promo_par_anciennete"] = central_df[
+        "annees_depuis_la_derniere_promotion"
+    ] / (central_df["annees_dans_l_entreprise"] + 1)
 
     # Encoding (catégorielles : OneHot non-ord., Ordinal ord.)
     cat_non_ord = ["genre", "statut_marital", "departement", "poste", "domaine_etude"]
