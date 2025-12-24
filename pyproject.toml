@@ -7,21 +7,21 @@ readme = "README.md"
 packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 fastapi = "^0.123.0"
 uvicorn = { extras = ["standard"], version = "^0.38.0" }
 sqlalchemy = "^2.0.0"
 pydantic = "^2.0.0"
-psycopg = "^3.2.0"  # Pour PostgreSQL (étape 4)
+psycopg = "^3.2.0"
 black = "^25.12.0"
-scikit-learn = "^1.3.0"
-xgboost = "^2.0.0"
-imbalanced-learn = "^0.11.0"
-scipy = "^1.11.0"
-numpy = "^1.24.0"
-pandas = "^2.0.0"
-joblib = "^1.3.0"
-huggingface-hub = "^0.23.0"
+scikit-learn = "1.6.1"
+imbalanced-learn = "0.13.0"
+xgboost = "^2.1.0"
+scipy = "^1.14.0"
+numpy = "^2.0.0"
+pandas = "^2.2.0"
+joblib = "^1.4.0"
+huggingface-hub = "^0.26.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.0"
