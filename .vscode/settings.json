@@ -4,15 +4,14 @@
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
   "python.linting.flake8Args": ["--config=${workspaceFolder}/.flake8"],
-  "python.formatting.provider": "black",
-  "python.formatting.blackArgs": ["--line-length=88"],
   "[python]": {
-    "editor.defaultFormatter": "ms-python.python",
+    "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
     }
   },
+  "black-formatter.args": ["--line-length=88"],
   "python.analysis.extraPaths": ["${workspaceFolder}/src"],
   "python.analysis.typeCheckingMode": "basic",
   "files.exclude": {
