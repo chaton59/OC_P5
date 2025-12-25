@@ -43,45 +43,7 @@ jobs:
       - name: Deploy to HF Dev Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          if [ -z "$HF_TOKEN" ]; then
-            echo "⚠️  HF_TOKEN not configured in GitHub secrets"
-            exit 1
-          else
-            echo "📦 Deploying to HF Space: ASI-Engineer/OC_P5_DEV"
-            python3 << 'PYEOF'
-from huggingface_hub import login, HfApi
-import os
-login(os.environ['HF_TOKEN'])
-api = HfApi()
-api.upload_folder(
-    repo_id='ASI-Engineer/OC_P5_DEV',
-    folder_path='.',
-    repo_type='space',
-    ignore_patterns=[
-        '.git/**',
-        '.github/**',
-        '.venv/**',
-        '.pytest_cache/**',
-        '.vscode/**',
-        'mlruns/**',
-        'mlflow.db*',
-        'mlflow_ui.log',
-        'ml_model/**',
-        'tests/**',
-        'scripts/**',
-        'docs/**',
-        'examples/**',
-        'data/**',
-        '*.pyc',
-        '__pycache__/**',
-        'poetry.lock',
-        'pyproject.toml'
-    ]
-)
-print('✅ Deployment successful')
-PYEOF
-          fi
+        run: python .github/scripts/deploy_to_hf.py ASI-Engineer/OC_P5_DEV
 
   deploy-prod:  # Job Prod : Stable et testé
     needs: test
@@ -97,42 +59,4 @@ PYEOF
       - name: Deploy to HF Prod Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          if [ -z "$HF_TOKEN" ]; then
-            echo "⚠️  HF_TOKEN not configured in GitHub secrets"
-            exit 1
-          else
-            echo "📦 Deploying to HF Space: ASI-Engineer/OC_P5"
-            python3 << 'PYEOF'
-from huggingface_hub import login, HfApi
-import os
-login(os.environ['HF_TOKEN'])
-api = HfApi()
-api.upload_folder(
-    repo_id='ASI-Engineer/OC_P5',
-    folder_path='.',
-    repo_type='space',
-    ignore_patterns=[
-        '.git/**',
-        '.github/**',
-        '.venv/**',
-        '.pytest_cache/**',
-        '.vscode/**',
-        'mlruns/**',
-        'mlflow.db*',
-        'mlflow_ui.log',
-        'ml_model/**',
-        'tests/**',
-        'scripts/**',
-        'docs/**',
-        'examples/**',
-        'data/**',
-        '*.pyc',
-        '__pycache__/**',
-        'poetry.lock',
-        'pyproject.toml'
-    ]
-)
-print('✅ Deployment successful')
-PYEOF
-          fi
+        run: python .github/scripts/deploy_to_hf.py ASI-Engineer/OC_P5
