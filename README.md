@@ -39,6 +39,52 @@ model_path = hf_hub_download(
 model = mlflow.sklearn.load_model(str(Path(model_path).parent))
 ```
 
+## 🛠️ Installation & Développement
+
+### Prérequis
+- Python 3.12+
+- Poetry (gestionnaire de dépendances)
+
+### Installation avec Poetry
+
+```bash
+# Installer Poetry (si pas déjà fait)
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Installer les dépendances
+poetry install
+
+# Activer l'environnement virtuel
+poetry shell
+
+# Lancer le pipeline d'entraînement
+poetry run python main.py
+
+# Lancer l'interface Gradio
+poetry run python app.py
+```
+
+### Export pour HF Spaces
+
+HuggingFace Spaces nécessite un `requirements.txt`. Pour le générer depuis Poetry :
+
+```bash
+./scripts/export_requirements.sh
+```
+
+### Tests et Linting
+
+```bash
+# Formater le code
+poetry run black .
+
+# Linter
+poetry run flake8 .
+
+# Tests
+poetry run pytest --cov=ml_model tests/
+```
+
 ## 📈 Métriques
 
 - **F1-Score**: 0.5136
