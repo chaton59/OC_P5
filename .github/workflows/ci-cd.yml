@@ -49,17 +49,18 @@ jobs:
             exit 1
           else
             echo "📦 Deploying to HF Space: ASI-Engineer/OC_P5_DEV"
-            python -c "
+            python3 << 'PYEOF'
 from huggingface_hub import login, HfApi
-login('$HF_TOKEN')
+import os
+login(os.environ['HF_TOKEN'])
 api = HfApi()
 api.upload_folder(
     repo_id='ASI-Engineer/OC_P5_DEV',
     folder_path='.',
     repo_type='space',
     ignore_patterns=[
-        '.git/**', 
-        '.github/**', 
+        '.git/**',
+        '.github/**',
         '.venv/**',
         '.pytest_cache/**',
         '.vscode/**',
@@ -74,13 +75,12 @@ api.upload_folder(
         'data/**',
         '*.pyc',
         '__pycache__/**',
-        'README_PROJECT.md',
         'poetry.lock',
         'pyproject.toml'
     ]
 )
 print('✅ Deployment successful')
-"
+PYEOF
           fi
 
   deploy-prod:  # Job Prod : Stable et testé
@@ -99,7 +99,40 @@ print('✅ Deployment successful')
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           if [ -z "$HF_TOKEN" ]; then
-            echo "Configure HF_TOKEN in GitHub secrets"
+            echo "⚠️  HF_TOKEN not configured in GitHub secrets"
+            exit 1
           else
-            python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); api.upload_folder(repo_id='ASI-Engineer/oc_p5', folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"
+            echo "📦 Deploying to HF Space: ASI-Engineer/OC_P5"
+            python3 << 'PYEOF'
+from huggingface_hub import login, HfApi
+import os
+login(os.environ['HF_TOKEN'])
+api = HfApi()
+api.upload_folder(
+    repo_id='ASI-Engineer/OC_P5',
+    folder_path='.',
+    repo_type='space',
+    ignore_patterns=[
+        '.git/**',
+        '.github/**',
+        '.venv/**',
+        '.pytest_cache/**',
+        '.vscode/**',
+        'mlruns/**',
+        'mlflow.db*',
+        'mlflow_ui.log',
+        'ml_model/**',
+        'tests/**',
+        'scripts/**',
+        'docs/**',
+        'examples/**',
+        'data/**',
+        '*.pyc',
+        '__pycache__/**',
+        'poetry.lock',
+        'pyproject.toml'
+    ]
+)
+print('✅ Deployment successful')
+PYEOF
           fi
