@@ -43,7 +43,7 @@ jobs:
       - name: Deploy to HF Dev Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: python .github/scripts/deploy_to_hf.py ASI-Engineer/OC_P5_DEV
+        run: python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5-dev
 
   deploy-prod:  # Job Prod : Stable et testé
     needs: test

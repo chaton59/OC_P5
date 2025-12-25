@@ -20,6 +20,19 @@ def main():
     login(hf_token)
     api = HfApi()
 
+    # Create space if it doesn't exist
+    try:
+        api.repo_info(repo_id=repo_id, repo_type="space")
+        print(f"Space {repo_id} already exists")
+    except Exception:
+        print(f"Creating new space: {repo_id}")
+        api.create_repo(
+            repo_id=repo_id,
+            repo_type="space",
+            space_sdk="gradio",
+            private=False,
+        )
+
     api.upload_folder(
         repo_id=repo_id,
         folder_path=".",
