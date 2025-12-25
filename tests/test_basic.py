@@ -18,7 +18,7 @@ def test_data_files_exist():
 
 def test_preprocess_imports():
     """Vérifie que les imports ML fonctionnent."""
-    from ml_model.preprocess import preprocess_data, load_raw_data
+    from ml_model.preprocess import load_raw_data, preprocess_data
 
     assert preprocess_data is not None
     assert load_raw_data is not None
