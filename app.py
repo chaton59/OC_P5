@@ -6,24 +6,19 @@ Déploiement sur Hugging Face Spaces pour tests rapides.
 Version de démonstration - Interface complète en développement.
 """
 import gradio as gr
-import mlflow
-import mlflow.pyfunc
 from huggingface_hub import hf_hub_download
 
 # Configuration
 HF_MODEL_REPO = "ASI-Engineer/employee-turnover-model"
-FALLBACK_RUN_ID = "40e43c8e425345bab3d19f27eb8fe5d8"
 
 
 def load_model():
     """
-    Charge le modèle depuis Hugging Face Hub (prod) ou MLflow local (dev).
+    Charge le modèle depuis Hugging Face Hub.
 
-    Ordre de priorité:
-    1. HF Hub avec pickle direct (modèle déployé en production)
-    2. MLflow local (développement local)
+    En production (HF Spaces), charge uniquement depuis HF Hub.
+    Le fallback MLflow local n'est disponible qu'en développement local.
     """
-    # Essayer HF Hub en premier (production) - charger directement le pickle
     try:
         import joblib
 
@@ -35,24 +30,8 @@ def load_model():
         print(f"✅ Modèle chargé depuis HF Hub: {HF_MODEL_REPO}")
         return model, "HF Hub"
     except Exception as e:
-        print(f"⚠️ HF Hub non disponible: {e}")
-
-    # Fallback: MLflow local (développement uniquement)
-    try:
-        mlflow.set_tracking_uri("sqlite:///mlflow.db")
-        # Essayer Model Registry d'abord
-        model = mlflow.pyfunc.load_model("models:/XGBoost_Employee_Turnover/latest")  # type: ignore[attr-defined]
-        print("✅ Modèle chargé depuis MLflow Model Registry")
-        return model, "MLflow Registry"
-    except Exception:
-        try:
-            # Fallback sur run ID
-            model = mlflow.pyfunc.load_model(f"runs:/{FALLBACK_RUN_ID}/model")  # type: ignore[attr-defined]
-            print(f"✅ Modèle chargé depuis MLflow run: {FALLBACK_RUN_ID}")
-            return model, "MLflow Local"
-        except Exception as e2:
-            print(f"❌ Erreur chargement MLflow: {e2}")
-            return None, "Error"
+        print(f"❌ Erreur chargement depuis HF Hub: {e}")
+        return None, "Error"
 
 
 # Charger le modèle au démarrage
@@ -82,26 +61,8 @@ def get_model_info():
             "model_type": type(model).__name__,
             "features": "~50 features (après preprocessing)",
             "algorithme": "XGBoost + SMOTE",
-            "hf_hub_repo": HF_MODEL_REPO if model_source == "HF Hub" else "N/A",
+            "hf_hub_repo": HF_MODEL_REPO,
         }
-
-        # Si MLflow local, ajouter les métriques
-        if model_source == "MLflow Local":
-            mlflow.set_tracking_uri("sqlite:///mlflow.db")
-            client = mlflow.MlflowClient()
-            runs = client.search_runs(
-                experiment_ids=["1"], order_by=["start_time DESC"], max_results=1
-            )
-            if runs:
-                run = runs[0]
-                metrics = run.data.metrics
-                info.update(
-                    {
-                        "run_id": run.info.run_id[:8],
-                        "f1_score": f"{metrics.get('f1_score', 0):.4f}",
-                        "accuracy": f"{metrics.get('accuracy', 0):.4f}",
-                    }
-                )
 
         info["info"] = "Interface de prédiction en développement - API FastAPI à venir"
         return info
