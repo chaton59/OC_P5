@@ -1,9 +1,9 @@
-from sklearn.model_selection import train_test_split, RandomizedSearchCV
-from sklearn.metrics import classification_report, confusion_matrix
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
+from scipy.stats import randint, uniform
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from xgboost import XGBClassifier
-from scipy.stats import uniform, randint
 
 
 def train_model(X, y):
