@@ -7,7 +7,7 @@ Version de démonstration - Interface complète en développement.
 """
 from pathlib import Path
 
-import gradio as gr  # type: ignore[import]
+import gradio as gr
 import mlflow
 import mlflow.pyfunc
 from huggingface_hub import hf_hub_download
@@ -111,13 +111,13 @@ def get_model_info():
 
 
 # Interface Gradio
-with gr.Blocks(
-    title="Employee Turnover Prediction - DEV", theme=gr.themes.Soft()
+with gr.Blocks(  # type: ignore[attr-defined]
+    title="Employee Turnover Prediction - DEV", theme=gr.themes.Soft()  # type: ignore[attr-defined]
 ) as demo:
-    gr.Markdown("# 🎯 Prédiction du Turnover - Employee Attrition")
-    gr.Markdown("## Environment DEV - Test de déploiement CI/CD")
+    gr.Markdown("# 🎯 Prédiction du Turnover - Employee Attrition")  # type: ignore[attr-defined]
+    gr.Markdown("## Environment DEV - Test de déploiement CI/CD")  # type: ignore[attr-defined]
 
-    gr.Markdown(
+    gr.Markdown(  # type: ignore[attr-defined]
         """
     ### 📊 Statut du projet
 
@@ -135,19 +135,19 @@ with gr.Blocks(
     """
     )
 
-    with gr.Row():
-        with gr.Column():
-            gr.Markdown("### 🔍 Informations sur le modèle")
-            check_btn = gr.Button("📊 Vérifier le statut du modèle", variant="primary")
+    with gr.Row():  # type: ignore[attr-defined]
+        with gr.Column():  # type: ignore[attr-defined]
+            gr.Markdown("### 🔍 Informations sur le modèle")  # type: ignore[attr-defined]
+            check_btn = gr.Button("📊 Vérifier le statut du modèle", variant="primary")  # type: ignore[attr-defined]
 
-        with gr.Column():
-            model_output = gr.JSON(label="Statut")
+        with gr.Column():  # type: ignore[attr-defined]
+            model_output = gr.JSON(label="Statut")  # type: ignore[attr-defined]
 
     check_btn.click(fn=get_model_info, inputs=[], outputs=model_output)
 
-    gr.Markdown("---")
+    gr.Markdown("---")  # type: ignore[attr-defined]
 
-    gr.Markdown(
+    gr.Markdown(  # type: ignore[attr-defined]
         """
     ### 🛠️ Prochaines étapes (selon etapes.txt)
 
