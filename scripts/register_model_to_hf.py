@@ -60,7 +60,7 @@ def register_model_to_hf(
     try:
         model = mlflow.sklearn.load_model(f"models:/{model_name}/latest")
         print(f"   ✅ Modèle chargé depuis Model Registry: {model_name}")
-    except:
+    except Exception:
         # Fallback: charger depuis le run
         model = mlflow.sklearn.load_model(model_uri)
         print(f"   ✅ Modèle chargé depuis run: {run_id[:8]}")
