@@ -5,8 +5,6 @@ Interface Gradio pour tester le modèle Employee Turnover en production.
 Déploiement sur Hugging Face Spaces pour tests rapides.
 Version de démonstration - Interface complète en développement.
 """
-from pathlib import Path
-
 import gradio as gr
 import mlflow
 import mlflow.pyfunc
@@ -28,6 +26,7 @@ def load_model():
     # Essayer HF Hub en premier (production) - charger directement le pickle
     try:
         import joblib
+
         # Download model pickle from HF Hub
         model_path = hf_hub_download(
             repo_id=HF_MODEL_REPO, filename="model/model.pkl", repo_type="model"
