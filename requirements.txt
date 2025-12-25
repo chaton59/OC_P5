@@ -13,4 +13,4 @@ numpy==2.0.2
 pandas==2.2.3
 joblib==1.4.2
 mlflow==3.8.0
-gradio==5.9.1
+gradio==5.31.0
