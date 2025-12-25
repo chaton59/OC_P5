@@ -1,4 +1,5 @@
 """Configuration pytest pour ajouter le dossier racine au PYTHONPATH."""
+
 import sys
 from pathlib import Path
 
