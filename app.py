@@ -22,24 +22,25 @@ def load_model():
     Charge le modèle depuis Hugging Face Hub (prod) ou MLflow local (dev).
 
     Ordre de priorité:
-    1. HF Hub (modèle déployé en production)
+    1. HF Hub avec pickle direct (modèle déployé en production)
     2. MLflow local (développement local)
     """
-    # Essayer HF Hub en premier (production)
+    # Essayer HF Hub en premier (production) - charger directement le pickle
     try:
-        # Download model from HF Hub
+        import joblib
+        # Download model pickle from HF Hub
         model_path = hf_hub_download(
             repo_id=HF_MODEL_REPO, filename="model/model.pkl", repo_type="model"
         )
-        model = mlflow.pyfunc.load_model(str(Path(model_path).parent))  # type: ignore[attr-defined]
+        model = joblib.load(model_path)
         print(f"✅ Modèle chargé depuis HF Hub: {HF_MODEL_REPO}")
         return model, "HF Hub"
     except Exception as e:
         print(f"⚠️ HF Hub non disponible: {e}")
 
-    # Fallback: MLflow local (développement)
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    # Fallback: MLflow local (développement uniquement)
     try:
+        mlflow.set_tracking_uri("sqlite:///mlflow.db")
         # Essayer Model Registry d'abord
         model = mlflow.pyfunc.load_model("models:/XGBoost_Employee_Turnover/latest")  # type: ignore[attr-defined]
         print("✅ Modèle chargé depuis MLflow Model Registry")
