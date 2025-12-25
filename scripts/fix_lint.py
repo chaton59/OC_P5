@@ -10,9 +10,9 @@ from pathlib import Path
 
 def run_command(cmd, description):
     """Exécute une commande et affiche le résultat."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"🔧 {description}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
@@ -54,12 +54,12 @@ def main():
         "Exécution des tests",
     )
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     if returncode == 0:
         print("✅ Tous les checks passent !")
     else:
         print("⚠️  Certains problèmes subsistent. Vérifiez les logs ci-dessus.")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     return returncode
 
