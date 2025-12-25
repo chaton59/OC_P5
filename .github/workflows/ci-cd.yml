@@ -42,6 +42,8 @@ jobs:
           python-version: '3.12'
       - name: Install Poetry
         uses: snok/install-poetry@v1
+      - name: Install Poetry export plugin
+        run: poetry self add poetry-plugin-export
       - name: Generate requirements.txt from Poetry
         run: |
           poetry export -f requirements.txt --output requirements.txt --without-hashes
@@ -64,6 +66,8 @@ jobs:
           python-version: '3.12'
       - name: Install Poetry
         uses: snok/install-poetry@v1
+      - name: Install Poetry export plugin
+        run: poetry self add poetry-plugin-export
       - name: Generate requirements.txt from Poetry
         run: |
           poetry export -f requirements.txt --output requirements.txt --without-hashes
