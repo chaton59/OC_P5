@@ -14,6 +14,7 @@ import shutil
 from pathlib import Path
 
 import mlflow
+import mlflow.pyfunc
 import mlflow.sklearn
 from huggingface_hub import HfApi, login
 
@@ -58,11 +59,11 @@ def register_model_to_hf(
     print("📥 Étape 2: Chargement du modèle depuis MLflow...")
     # Essayer depuis le Model Registry d'abord
     try:
-        model = mlflow.sklearn.load_model(f"models:/{model_name}/latest")
+        model = mlflow.pyfunc.load_model(f"models:/{model_name}/latest")  # type: ignore[attr-defined]
         print(f"   ✅ Modèle chargé depuis Model Registry: {model_name}")
     except Exception:
         # Fallback: charger depuis le run
-        model = mlflow.sklearn.load_model(model_uri)
+        model = mlflow.pyfunc.load_model(model_uri)  # type: ignore[attr-defined]
         print(f"   ✅ Modèle chargé depuis run: {run_id[:8]}")
     print(f"   📦 Type: {type(model).__name__}")
     print()
@@ -73,7 +74,7 @@ def register_model_to_hf(
     export_dir.mkdir(exist_ok=True)
 
     # Sauvegarder le modèle au format MLflow
-    mlflow.sklearn.save_model(model, str(export_dir / "model"))
+    mlflow.sklearn.save_model(model, str(export_dir / "model"))  # type: ignore[attr-defined]
 
     # Créer un README pour HF
     readme_content = f"""---
@@ -100,7 +101,7 @@ Modèle XGBoost pour prédire le turnover des employés.
 import mlflow
 
 # Charger depuis Hugging Face Hub
-model = mlflow.sklearn.load_model("hf://{hf_repo_id}")
+model = mlflow.pyfunc.load_model("hf://{hf_repo_id}")
 
 # Prédiction
 predictions = model.predict(X)
@@ -169,7 +170,7 @@ Les artifacts de preprocessing (scaler, encoders) sont disponibles dans MLflow.
         print()
         print(f"🔗 Modèle disponible sur: https://huggingface.co/{hf_repo_id}")
         print("📝 Pour utiliser dans app.py:")
-        print(f'   model = mlflow.sklearn.load_model("hf://{hf_repo_id}")')
+        print(f'   model = mlflow.pyfunc.load_model("hf://{hf_repo_id}")')
 
 
 if __name__ == "__main__":

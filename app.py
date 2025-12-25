@@ -5,11 +5,12 @@ Interface Gradio pour tester le modèle Employee Turnover en production.
 Déploiement sur Hugging Face Spaces pour tests rapides.
 Version de démonstration - Interface complète en développement.
 """
-import gradio as gr
-import mlflow
-import mlflow.sklearn
-from huggingface_hub import hf_hub_download
 from pathlib import Path
+
+import gradio as gr  # type: ignore[import]
+import mlflow
+import mlflow.pyfunc
+from huggingface_hub import hf_hub_download
 
 # Configuration
 HF_MODEL_REPO = "ASI-Engineer/employee-turnover-model"
@@ -30,7 +31,7 @@ def load_model():
         model_path = hf_hub_download(
             repo_id=HF_MODEL_REPO, filename="model/model.pkl", repo_type="model"
         )
-        model = mlflow.sklearn.load_model(str(Path(model_path).parent))
+        model = mlflow.pyfunc.load_model(str(Path(model_path).parent))  # type: ignore[attr-defined]
         print(f"✅ Modèle chargé depuis HF Hub: {HF_MODEL_REPO}")
         return model, "HF Hub"
     except Exception as e:
@@ -40,13 +41,13 @@ def load_model():
     mlflow.set_tracking_uri("sqlite:///mlflow.db")
     try:
         # Essayer Model Registry d'abord
-        model = mlflow.sklearn.load_model("models:/XGBoost_Employee_Turnover/latest")
+        model = mlflow.pyfunc.load_model("models:/XGBoost_Employee_Turnover/latest")  # type: ignore[attr-defined]
         print("✅ Modèle chargé depuis MLflow Model Registry")
         return model, "MLflow Registry"
     except Exception:
         try:
             # Fallback sur run ID
-            model = mlflow.sklearn.load_model(f"runs:/{FALLBACK_RUN_ID}/model")
+            model = mlflow.pyfunc.load_model(f"runs:/{FALLBACK_RUN_ID}/model")  # type: ignore[attr-defined]
             print(f"✅ Modèle chargé depuis MLflow run: {FALLBACK_RUN_ID}")
             return model, "MLflow Local"
         except Exception as e2:
@@ -104,9 +105,6 @@ def get_model_info():
 
         info["info"] = "Interface de prédiction en développement - API FastAPI à venir"
         return info
-
-    except Exception as e:
-        return {"status": "✅ Modèle chargé (info limitées)", "error": str(e)}
 
     except Exception as e:
         return {"status": "✅ Modèle chargé (info limitées)", "error": str(e)}
