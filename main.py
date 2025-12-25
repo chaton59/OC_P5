@@ -14,9 +14,8 @@ Usage:
 Le modèle et les artifacts sont enregistrés dans MLflow pour:
 - Suivi des expérimentations
 - Reproductibilité
-- Déploiement via Model Registry
+    Déploiement via Model Registry
 """
-import os
 from pathlib import Path
 
 import joblib
@@ -39,7 +38,7 @@ def main():
 
     print("📊 Configuration MLflow:")
     print(f"   Tracking URI: {mlflow.get_tracking_uri()}")
-    print(f"   Experiment: Employee_Turnover_Training")
+    print("   Experiment: Employee_Turnover_Training")
     print()
 
     # Chemins des données
@@ -80,7 +79,7 @@ def main():
     # Entraînement (déjà avec MLflow tracking dans train_model.py)
     model, best_params, cv_f1 = train_model(X, y)
 
-    print(f"   ✅ Modèle entraîné")
+    print("   ✅ Modèle entraîné")
     print(f"   🏆 Meilleur F1 CV: {cv_f1:.4f}")
     print()
 
@@ -114,7 +113,7 @@ def main():
     scaler_path = artifacts_dir / "scaler.joblib"
     joblib.dump(scaler, scaler_path)
     mlflow.log_artifact(str(scaler_path), artifact_path="preprocessing")
-    print(f"   ✅ Scaler sauvegardé")
+    print("   ✅ Scaler sauvegardé")
 
     # Sauvegarder encoders (onehot et ordinal)
     onehot_path = artifacts_dir / "onehot_encoder.joblib"
@@ -124,7 +123,7 @@ def main():
     ordinal_path = artifacts_dir / "ordinal_encoder.joblib"
     joblib.dump(ordinal_encoder, ordinal_path)
     mlflow.log_artifact(str(ordinal_path), artifact_path="preprocessing")
-    print(f"   ✅ Encoders sauvegardés (OneHot + Ordinal)")
+    print("   ✅ Encoders sauvegardés (OneHot + Ordinal)")
 
     # Log git commit si disponible
     try:
@@ -161,7 +160,7 @@ def main():
     print()
     print(f"📊 Run ID: {run_id}")
     print(f"🎯 F1 Score (CV): {cv_f1:.4f}")
-    print(f"📦 Artifacts sauvegardés dans MLflow")
+    print("📦 Artifacts sauvegardés dans MLflow")
     print()
     print("🌐 Pour visualiser les résultats:")
     print("   ./scripts/start_mlflow.sh")
