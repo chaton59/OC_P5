@@ -8,10 +8,12 @@ Version de démonstration - Interface complète en développement.
 import gradio as gr
 import mlflow
 import mlflow.sklearn
+from huggingface_hub import hf_hub_download
+from pathlib import Path
 
-# Configuration MLflow - Prioriser HF Hub si disponible
+# Configuration
 HF_MODEL_REPO = "ASI-Engineer/employee-turnover-model"
-FALLBACK_RUN_ID = "2dd66b2b125646e19cf123c6944c9185"
+FALLBACK_RUN_ID = "40e43c8e425345bab3d19f27eb8fe5d8"
 
 
 def load_model():
@@ -24,7 +26,11 @@ def load_model():
     """
     # Essayer HF Hub en premier (production)
     try:
-        model = mlflow.sklearn.load_model(f"hf://{HF_MODEL_REPO}")
+        # Download model from HF Hub
+        model_path = hf_hub_download(
+            repo_id=HF_MODEL_REPO, filename="model/model.pkl", repo_type="model"
+        )
+        model = mlflow.sklearn.load_model(str(Path(model_path).parent))
         print(f"✅ Modèle chargé depuis HF Hub: {HF_MODEL_REPO}")
         return model, "HF Hub"
     except Exception as e:
@@ -33,12 +39,19 @@ def load_model():
     # Fallback: MLflow local (développement)
     mlflow.set_tracking_uri("sqlite:///mlflow.db")
     try:
-        model = mlflow.sklearn.load_model(f"runs:/{FALLBACK_RUN_ID}/model")
-        print(f"✅ Modèle chargé depuis MLflow local: {FALLBACK_RUN_ID}")
-        return model, "MLflow Local"
-    except Exception as e2:
-        print(f"❌ Erreur chargement MLflow: {e2}")
-        return None, "Error"
+        # Essayer Model Registry d'abord
+        model = mlflow.sklearn.load_model("models:/XGBoost_Employee_Turnover/latest")
+        print("✅ Modèle chargé depuis MLflow Model Registry")
+        return model, "MLflow Registry"
+    except Exception:
+        try:
+            # Fallback sur run ID
+            model = mlflow.sklearn.load_model(f"runs:/{FALLBACK_RUN_ID}/model")
+            print(f"✅ Modèle chargé depuis MLflow run: {FALLBACK_RUN_ID}")
+            return model, "MLflow Local"
+        except Exception as e2:
+            print(f"❌ Erreur chargement MLflow: {e2}")
+            return None, "Error"
 
 
 # Charger le modèle au démarrage

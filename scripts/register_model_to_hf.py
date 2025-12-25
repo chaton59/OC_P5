@@ -10,11 +10,12 @@ Prérequis:
     - Modèle entraîné dans MLflow
 """
 import os
+import shutil
+from pathlib import Path
+
 import mlflow
 import mlflow.sklearn
 from huggingface_hub import HfApi, login
-from pathlib import Path
-import shutil
 
 
 def register_model_to_hf(
@@ -55,8 +56,15 @@ def register_model_to_hf(
 
     # 2. Charger le modèle
     print("📥 Étape 2: Chargement du modèle depuis MLflow...")
-    model = mlflow.sklearn.load_model(model_uri)
-    print(f"   ✅ Modèle chargé: {type(model).__name__}")
+    # Essayer depuis le Model Registry d'abord
+    try:
+        model = mlflow.sklearn.load_model(f"models:/{model_name}/latest")
+        print(f"   ✅ Modèle chargé depuis Model Registry: {model_name}")
+    except:
+        # Fallback: charger depuis le run
+        model = mlflow.sklearn.load_model(model_uri)
+        print(f"   ✅ Modèle chargé depuis run: {run_id[:8]}")
+    print(f"   📦 Type: {type(model).__name__}")
     print()
 
     # 3. Exporter vers dossier temporaire
@@ -165,8 +173,8 @@ Les artifacts de preprocessing (scaler, encoders) sont disponibles dans MLflow.
 
 
 if __name__ == "__main__":
-    # Utiliser le meilleur run (le plus récent)
-    RUN_ID = "2dd66b2b125646e19cf123c6944c9185"
+    # Utiliser le meilleur run (le plus récent avec modèle)
+    RUN_ID = "40e43c8e425345bab3d19f27eb8fe5d8"
 
     success = register_model_to_hf(
         run_id=RUN_ID, hf_repo_id="ASI-Engineer/employee-turnover-model"
