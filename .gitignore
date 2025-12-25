@@ -35,3 +35,12 @@ Thumbs.db
 secrets.json
 data/raw/  # Pour datasets volumineux en data science (OC_P5)
 notebooks/*.ipynb_checkpoints/
+
+# MLflow
+mlflow.db
+mlflow.db-shm
+mlflow.db-wal
+mlruns/
+mlflow_ui.log
+mlflow_comparison.png
+nohup.out

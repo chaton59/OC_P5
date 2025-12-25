@@ -1,8 +1,8 @@
-import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
-from scipy.stats.mstats import winsorize
+import pandas as pd
 from scipy import stats
+from scipy.stats.mstats import winsorize
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
 
 def load_raw_data(
@@ -97,9 +97,16 @@ def preprocess_data(raw_data_paths=None):
     )
 
     # Assemblage
+    engineered_cols = [
+        "revenu_par_anciennete",
+        "experience_par_anciennete",
+        "satisfaction_moyenne",
+        "promo_par_anciennete",
+    ]
     df_engineered = pd.concat(
         [
             central_df[quantitative_cols],
+            central_df[engineered_cols],
             encoded_non_ord,
             encoded_ord,
             central_df["a_quitte_l_entreprise"],
@@ -107,17 +114,8 @@ def preprocess_data(raw_data_paths=None):
         axis=1,
     )  # Inclut cible
 
-    # Scaling (quantitatives + ordinal)
-    cols_to_scale = (
-        quantitative_cols.tolist()
-        + cat_ord
-        + [
-            "revenu_par_anciennete",
-            "experience_par_anciennete",
-            "satisfaction_moyenne",
-            "promo_par_anciennete",
-        ]
-    )
+    # Scaling (quantitatives + ordinal + engineered)
+    cols_to_scale = quantitative_cols.tolist() + engineered_cols + cat_ord
     scaler = StandardScaler()
     df_engineered[cols_to_scale] = scaler.fit_transform(df_engineered[cols_to_scale])
 

@@ -68,7 +68,13 @@ def train_model(X, y):
         mlflow.log_metric("test_recall", float(report["1"]["recall"]))  # type: ignore[index]
         mlflow.log_metric("test_f1", float(report["1"]["f1-score"]))  # type: ignore[index]
 
-        mlflow.sklearn.log_model(best_model, "model")  # type: ignore[attr-defined]
+        # Log model et récupère URI pour l'enregistrement
+        model_info = mlflow.sklearn.log_model(best_model, "model")  # type: ignore[attr-defined]
+
+        # Enregistre dans Model Registry pour apparaître dans la page "Models"
+        mlflow.register_model(
+            model_uri=model_info.model_uri, name="XGBoost_Employee_Turnover"
+        )
 
         # Éval test (pédagogique)
         print("Meilleurs params:", best_params)
