@@ -40,6 +40,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Generate requirements.txt from Poetry
+        run: |
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+          echo "# Auto-generated from pyproject.toml by CI/CD" | cat - requirements.txt > temp && mv temp requirements.txt
       - name: Install huggingface_hub
         run: pip install huggingface_hub
       - name: Deploy to HF Dev Space
@@ -56,6 +62,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Generate requirements.txt from Poetry
+        run: |
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+          echo "# Auto-generated from pyproject.toml by CI/CD" | cat - requirements.txt > temp && mv temp requirements.txt
       - name: Install huggingface_hub
         run: pip install huggingface_hub
       - name: Deploy to HF Prod Space

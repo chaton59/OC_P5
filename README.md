@@ -64,12 +64,15 @@ poetry run python main.py
 poetry run python app.py
 ```
 
-### Export pour HF Spaces
+### Requirements.txt (automatique)
 
-HuggingFace Spaces nécessite un `requirements.txt`. Pour le générer depuis Poetry :
+Le fichier `requirements.txt` est **généré automatiquement** par le CI/CD lors des déploiements sur HF Spaces.
 
+**Vous n'avez rien à faire !** Modifiez juste `pyproject.toml` et le CI/CD s'occupe du reste.
+
+Si vous voulez le générer manuellement :
 ```bash
-./scripts/export_requirements.sh
+poetry export -f requirements.txt --output requirements.txt --without-hashes
 ```
 
 ### Tests et Linting
