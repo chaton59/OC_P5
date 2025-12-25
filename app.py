@@ -95,14 +95,14 @@ with gr.Blocks(
     gr.Markdown(
         """
     ### 📊 Statut du projet
-    
+
     Ce Space est synchronisé automatiquement depuis GitHub (branche `dev`).
-    
+
     **Actuellement disponible :**
     - ✅ Pipeline d'entraînement MLflow complet (`main.py`)
     - ✅ Déploiement automatique CI/CD (GitHub Actions → HF Spaces)
     - ✅ Tests unitaires et linting automatisés
-    
+
     **En développement :**
     - 🚧 Interface de prédiction interactive
     - 🚧 API FastAPI avec endpoints de prédiction
@@ -125,21 +125,21 @@ with gr.Blocks(
     gr.Markdown(
         """
     ### 🛠️ Prochaines étapes (selon etapes.txt)
-    
+
     1. **Étape 3** : Développement API FastAPI
        - Endpoints de prédiction avec validation Pydantic
        - Chargement dynamique des preprocessing artifacts (scaler, encoders)
        - Documentation Swagger/OpenAPI automatique
-    
+
     2. **Étape 4** : Intégration PostgreSQL
        - Stockage des inputs/outputs des prédictions
        - Traçabilité complète des requêtes
-    
+
     3. **Étape 5** : Tests unitaires et fonctionnels
        - Tests des endpoints API
        - Tests de charge et performance
        - Couverture de code avec pytest-cov
-    
+
     ### 📚 Documentation
     - **Repository GitHub** : [chaton59/OC_P5](https://github.com/chaton59/OC_P5)
     - **MLflow Tracking** : Disponible en local (`./scripts/start_mlflow.sh`)
