@@ -52,18 +52,16 @@ def get_model_info():
         return {
             "status": "❌ Modèle non disponible",
             "error": "Le modèle n'a pas pu être chargé depuis MLflow",
-            "solution": "Vérifiez que main.py a bien été exécuté pour entraîner le modèle"
+            "solution": "Vérifiez que main.py a bien été exécuté pour entraîner le modèle",
         }
-    
+
     try:
         # Obtenir des informations sur le modèle
         client = mlflow.MlflowClient()
         runs = client.search_runs(
-            experiment_ids=["1"],
-            order_by=["start_time DESC"],
-            max_results=1
+            experiment_ids=["1"], order_by=["start_time DESC"], max_results=1
         )
-        
+
         if runs:
             run = runs[0]
             metrics = run.data.metrics
@@ -72,30 +70,30 @@ def get_model_info():
                 "run_id": run.info.run_id[:8],
                 "f1_score": f"{metrics.get('f1_score', 0):.4f}",
                 "accuracy": f"{metrics.get('accuracy', 0):.4f}",
-                "features": f"~50 features (après preprocessing)",
+                "features": "~50 features (après preprocessing)",
                 "algorithme": "XGBoost + SMOTE",
-                "info": "Interface de prédiction en développement - API FastAPI à venir"
+                "info": "Interface de prédiction en développement - API FastAPI à venir",
             }
         else:
             return {
                 "status": "✅ Modèle chargé",
                 "info": "Pas de métriques disponibles",
-                "run_id": FALLBACK_RUN_ID[:8]
+                "run_id": FALLBACK_RUN_ID[:8],
             }
-            
+
     except Exception as e:
-        return {
-            "status": "✅ Modèle chargé (info limitées)",
-            "error": str(e)
-        }
+        return {"status": "✅ Modèle chargé (info limitées)", "error": str(e)}
 
 
 # Interface Gradio
-with gr.Blocks(title="Employee Turnover Prediction - DEV", theme=gr.themes.Soft()) as demo:
+with gr.Blocks(
+    title="Employee Turnover Prediction - DEV", theme=gr.themes.Soft()
+) as demo:
     gr.Markdown("# 🎯 Prédiction du Turnover - Employee Attrition")
     gr.Markdown("## Environment DEV - Test de déploiement CI/CD")
-    
-    gr.Markdown("""
+
+    gr.Markdown(
+        """
     ### 📊 Statut du projet
     
     Ce Space est synchronisé automatiquement depuis GitHub (branche `dev`).
@@ -109,25 +107,23 @@ with gr.Blocks(title="Employee Turnover Prediction - DEV", theme=gr.themes.Soft(
     - 🚧 Interface de prédiction interactive
     - 🚧 API FastAPI avec endpoints de prédiction
     - 🚧 Intégration PostgreSQL pour tracking des prédictions
-    """)
-    
+    """
+    )
+
     with gr.Row():
         with gr.Column():
             gr.Markdown("### 🔍 Informations sur le modèle")
             check_btn = gr.Button("📊 Vérifier le statut du modèle", variant="primary")
-            
+
         with gr.Column():
             model_output = gr.JSON(label="Statut")
-    
-    check_btn.click(
-        fn=get_model_info,
-        inputs=[],
-        outputs=model_output
-    )
-    
+
+    check_btn.click(fn=get_model_info, inputs=[], outputs=model_output)
+
     gr.Markdown("---")
-    
-    gr.Markdown("""
+
+    gr.Markdown(
+        """
     ### 🛠️ Prochaines étapes (selon etapes.txt)
     
     1. **Étape 3** : Développement API FastAPI
@@ -148,7 +144,8 @@ with gr.Blocks(title="Employee Turnover Prediction - DEV", theme=gr.themes.Soft(
     - **Repository GitHub** : [chaton59/OC_P5](https://github.com/chaton59/OC_P5)
     - **MLflow Tracking** : Disponible en local (`./scripts/start_mlflow.sh`)
     - **Métriques** : F1-Score optimisé, gestion classes déséquilibrées (SMOTE)
-    """)
+    """
+    )
 
 
 if __name__ == "__main__":
