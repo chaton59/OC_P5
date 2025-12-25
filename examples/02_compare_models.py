@@ -109,7 +109,7 @@ def plot_metrics_comparison(experiment_name="Default"):
         )
 
         # Extraire les données
-        run_names = [f"Run {i+1}" for i in range(len(runs))]
+        run_names = [f"Run {i + 1}" for i in range(len(runs))]
         cv_f1_scores = [run.data.metrics.get("cv_f1", 0) for run in runs]
         test_f1_scores = [run.data.metrics.get("test_f1", 0) for run in runs]
 
