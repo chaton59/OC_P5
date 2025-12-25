@@ -64,15 +64,15 @@ poetry run python main.py
 poetry run python app.py
 ```
 
-### Requirements.txt (automatique)
+### Requirements.txt pour HF Spaces
 
-Le fichier `requirements.txt` est **généré automatiquement** par le CI/CD lors des déploiements sur HF Spaces.
+Le fichier `requirements.txt` est **minimal et optimisé** pour HF Spaces (seulement gradio, huggingface-hub, joblib).
 
-**Vous n'avez rien à faire !** Modifiez juste `pyproject.toml` et le CI/CD s'occupe du reste.
+Il est **généré automatiquement** par le CI/CD lors des déploiements.
 
-Si vous voulez le générer manuellement :
+Pour le générer manuellement :
 ```bash
-poetry export -f requirements.txt --output requirements.txt --without-hashes
+./scripts/export_requirements.sh
 ```
 
 ### Tests et Linting
