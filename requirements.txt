@@ -1,5 +1,9 @@
 # Minimal requirements for HF Spaces deployment
-# Only the dependencies needed for app.py
+# Only the dependencies needed for app.py and model loading
 gradio>=5.9.0
 huggingface-hub>=0.27.0
 joblib>=1.4.0
+scikit-learn>=1.6.0
+imbalanced-learn>=0.13.0
+xgboost>=2.1.0
+numpy>=2.0.0
