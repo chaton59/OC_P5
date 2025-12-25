@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
 from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline
+from imblearn.pipeline import Pipeline as ImbPipeline
 from xgboost import XGBClassifier
 from scipy.stats import uniform, randint
 
@@ -17,7 +17,7 @@ def train_model(X, y):
     )
     ratio = sum(y == 0) / sum(y == 1)
 
-    pipeline = Pipeline(
+    pipeline = ImbPipeline(
         [("sampler", SMOTE(random_state=42)), ("clf", XGBClassifier(random_state=42))]
     )
     param_dist = {
@@ -44,12 +44,12 @@ def train_model(X, y):
     )
     random.fit(X_train, y_train)
 
-    best_model = random.best_estimator_
+    best_model = random.best_estimator_  # type: ignore[assignment]
     best_params = random.best_params_
     cv_f1 = random.best_score_
 
     # Éval test (pédagogique)
-    y_pred = best_model.predict(X_test)
+    y_pred = best_model.predict(X_test)  # type: ignore[attr-defined]
     print("Meilleurs params:", best_params)
     print("Meilleur CV F1:", cv_f1)
     print(classification_report(y_test, y_pred))
