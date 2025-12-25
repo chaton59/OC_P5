@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, dev ]  # Trigger sur dev/main
+    branches: [main, dev]
 
 jobs:
   test:
@@ -11,12 +11,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Cache pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: $$ {{ runner.os }}-pip- $${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -37,20 +37,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Install huggingface_hub
         run: pip install huggingface_hub
       - name: Deploy to HF Dev Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          if [ -z "$HF_TOKEN" ]; then
-            echo "Configure HF_TOKEN in GitHub secrets"
-          else
-            python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); api.upload_folder(repo_id='ASI-Engineer/oc_p5-dev', folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"
-          fi
+        run: python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5-dev
 
-  deploy-prod:  # Job Prod : Stable après merge
+  deploy-prod:  # Job Prod : Stable et testé
     needs: test
     if: github.ref == 'refs/heads/main'  # Seulement main
     runs-on: ubuntu-latest
@@ -58,15 +53,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Install huggingface_hub
         run: pip install huggingface_hub
       - name: Deploy to HF Prod Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          if [ -z "$HF_TOKEN" ]; then
-            echo "Configure HF_TOKEN in GitHub secrets"
-          else
-            python -c "from huggingface_hub import login, HfApi; login('$HF_TOKEN'); api = HfApi(); api.upload_folder(repo_id='ASI-Engineer/oc_p5', folder_path='.', repo_type='space', ignore_patterns=['.git/**', '.github/**'])"
-          fi
+        run: python .github/scripts/deploy_to_hf.py ASI-Engineer/OC_P5

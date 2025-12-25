@@ -1,67 +1,57 @@
 ---
 title: OC P5 - API ML Déployée
-emoji: 🚀
+emoji: 🎯
 colorFrom: blue
-colorTo: purple
-sdk: static
+colorTo: green
+sdk: gradio
+sdk_version: 5.9.1
 app_file: app.py
 pinned: false
+license: mit
 ---
 
-# ML Deployment Project
-Déploiement d'un modèle ML pour Futurisys : API FastAPI, PostgreSQL, tests Pytest, CI/CD.
+# 🎯 Employee Turnover Prediction - DEV Environment
 
-## Aperçu
-POC pour exposer un modèle ML via API performante, avec traçabilité DB et bonnes pratiques DevOps.
+Interface Gradio pour tester le modèle de prédiction de départ des employés (turnover).
 
-## Installation
-1. Clone le repo : `git clone https://github.com/ton-username/ml-deployment-project.git`
-2. Installe Poetry (si pas fait) : `curl -sSL https://install.python-poetry.org | python3 -`
-3. Dépendances : `poetry install` (crée/lock .venv avec deps)
-4. Active env : `poetry shell`
+## 🚀 Modèle ML
 
-## Utilisation
-- Dev : `poetry run uvicorn src.main:app --reload` (Étape 3 pour API).
-- BDD : `poetry run python scripts/create_db.py` (Étape 4).
-- Tests : `poetry run pytest` (Étape 5).
+- **Algorithme**: XGBoost optimisé avec RandomizedSearchCV
+- **Équilibrage**: SMOTE pour gérer le déséquilibre de classes (ratio 5:1)
+- **Tracking**: MLflow pour versioning et reproductibilité
+- **Métriques**: F1-Score optimisé (0.51), Accuracy 79%
+- **Stockage**: [Hugging Face Hub](https://huggingface.co/ASI-Engineer/employee-turnover-model)
 
-## Structure du Projet
-- `src/` : Code core (API, modèle ML).
-- `tests/` : Tests unitaires/fonctionnels (Pytest).
-- `docs/` : Schémas UML, docs API.
-- `scripts/` : Utils init (BDD, data load).
-- `data/` : Datasets (ignorés pour privacy).
+## 📊 Fonctionnalités
 
-## CI/CD Optimization
-- Pipelines configurés pour exécution <10 min (ex. : lint ~1 min, tests ~3 min, deploy ~2 min). Si >10 min, optimiser via cache Poetry ou jobs parallèles. Temps observés basés sur runs GitHub Actions.
+- **Status Checker**: Vérifier l'état du modèle et les métriques
+- **API Simple**: Interface Gradio pour tests rapides
+- **Chargement automatique**: Modèle téléchargé depuis HF Hub au démarrage
 
-## CI/CD Détails
-- Pipeline : GitHub Actions pour lint (Flake8/Black), tests (Pytest), deploy HF.
-- Environnements : Dev (branch dev/local tests), Prod (branch main/HF oc_p5).
-- Secrets : HF_TOKEN sécurisé via GitHub Secrets.
-- Standards : Voir [docs/standards.md](./docs/standards.md).
+## 🔧 Architecture
 
-## Environnements CI/CD
-- Dev : Branch "dev" -> HF space oc_p5-dev pour tests itératifs et validation.
-- Prod : Branch "main" -> HF space oc_p5 pour déploiement stable.
-- Secrets : HF_TOKEN partagé (sécurisé via GitHub Secrets) pour dev/prod.
+```python
+# Chargement du modèle depuis HF Hub
+model_path = hf_hub_download(
+    repo_id="ASI-Engineer/employee-turnover-model",
+    filename="model/model.pkl"
+)
+model = mlflow.sklearn.load_model(str(Path(model_path).parent))
+```
 
-## Branches & Conventions
-- `main` : Stable (merges via PR).
-- `main` : pour développement et tests
-- `feature/etapeX` : Fonctionnalités (kebab-case, ex. `feature/etape3-api`).
-- Commits : Conventional (ex. `feat: Add endpoint`).
+## 📈 Métriques
 
-## Déploiement & Sécurité
-- Auth/Sec : À venir (JWT pour API, secrets en .env ignoré).
-- Versions : Tags semver (ex. v1.0.0 pour Étape 1).
+- **F1-Score**: 0.5136
+- **Accuracy**: 79%
+- **Données**: 1470 échantillons, 50 features
+- **Classes**: {0: 1233, 1: 237} - Ratio 5.20:1
 
-## HF Spaces
-- Prod : https://huggingface.co/spaces/ASI-Engineer/oc_p5 (branch dev, pour tests itératifs).
-- Sync auto via GitHub Actions (push déclenche rebuild ~2min, avec HF_TOKEN sécurisé).
+## 🔗 Liens
 
-## Documentation 
-- Standards Code/ML
+- **Modèle**: [employee-turnover-model](https://huggingface.co/ASI-Engineer/employee-turnover-model)
+- **GitHub**: [OC_P5](https://github.com/chaton59/OC_P5)
+- **CI/CD**: GitHub Actions avec déploiement automatique
 
-## Licence
-MIT (ou adapte pour Futurisys).
+Ce Space est synchronisé automatiquement via CI/CD depuis la branche `dev` du repository GitHub.
+
+**Repository**: [chaton59/OC_P5](https://github.com/chaton59/OC_P5)
