@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Projet OpenClassRoom mise en API d'un modèle ML"
 authors = ["chaton59 <v.trouillez@gmail.com>"]
 readme = "README.md"
-packages = [{include = "src"}]
+packages = [{include = "src"}, {include = "ml_model"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
