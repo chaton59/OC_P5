@@ -1,19 +1,13 @@
 [tool.poetry]
 name = "oc-p5"
 version = "0.1.0"
-description = "Projet OpenClassRoom mise en API d'un modèle ML"
+description = "Projet OpenClassRoom - Modèle ML de prédiction du turnover avec MLflow"
 authors = ["chaton59 <v.trouillez@gmail.com>"]
 readme = "README.md"
-packages = [{include = "src"}, {include = "ml_model"}]
+packages = [{include = "ml_model"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.123.0"
-uvicorn = { extras = ["standard"], version = "^0.38.0" }
-sqlalchemy = "^2.0.0"
-pydantic = "^2.0.0"
-psycopg = "^3.2.0"
-black = "^25.12.0"
 mlflow = "^3.8.0"
 scikit-learn = "1.6.1"
 imbalanced-learn = "0.13.0"
@@ -22,7 +16,6 @@ scipy = "^1.14.0"
 numpy = "^2.0.0"
 pandas = "^2.2.0"
 joblib = "^1.4.0"
-huggingface-hub = "^0.26.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.0"
