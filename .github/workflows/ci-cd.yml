@@ -46,7 +46,7 @@ jobs:
         run: poetry self add poetry-plugin-export
       - name: Generate requirements.txt from Poetry
         run: |
-          poetry export -f requirements.txt --output requirements.txt --without-hashes
+          poetry export -f requirements.txt --output requirements.txt --without-hashes --without-urls
           echo "# Auto-generated from pyproject.toml by CI/CD" | cat - requirements.txt > temp && mv temp requirements.txt
       - name: Install huggingface_hub
         run: pip install huggingface_hub
@@ -70,7 +70,7 @@ jobs:
         run: poetry self add poetry-plugin-export
       - name: Generate requirements.txt from Poetry
         run: |
-          poetry export -f requirements.txt --output requirements.txt --without-hashes
+          poetry export -f requirements.txt --output requirements.txt --without-hashes --without-urls
           echo "# Auto-generated from pyproject.toml by CI/CD" | cat - requirements.txt > temp && mv temp requirements.txt
       - name: Install huggingface_hub
         run: pip install huggingface_hub
