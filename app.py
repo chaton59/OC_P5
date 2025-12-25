@@ -9,41 +9,47 @@ import gradio as gr
 import mlflow
 import mlflow.sklearn
 
-
-# Configuration MLflow
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
-
-# Charger le modèle le plus récent
-MODEL_URI = "models:/Employee_Turnover_Model/latest"
-# Fallback: utiliser un run_id spécifique si le modèle n'est pas enregistré
+# Configuration MLflow - Prioriser HF Hub si disponible
+HF_MODEL_REPO = "ASI-Engineer/employee-turnover-model"
 FALLBACK_RUN_ID = "2dd66b2b125646e19cf123c6944c9185"
 
 
 def load_model():
-    """Charge le modèle depuis MLflow."""
+    """
+    Charge le modèle depuis Hugging Face Hub (prod) ou MLflow local (dev).
+
+    Ordre de priorité:
+    1. HF Hub (modèle déployé en production)
+    2. MLflow local (développement local)
+    """
+    # Essayer HF Hub en premier (production)
     try:
-        model = mlflow.sklearn.load_model(MODEL_URI)
-        print(f"✅ Modèle chargé depuis Model Registry: {MODEL_URI}")
-        return model
+        model = mlflow.sklearn.load_model(f"hf://{HF_MODEL_REPO}")
+        print(f"✅ Modèle chargé depuis HF Hub: {HF_MODEL_REPO}")
+        return model, "HF Hub"
     except Exception as e:
-        print(f"⚠️ Model Registry non disponible, utilisation du run_id: {e}")
-        try:
-            model = mlflow.sklearn.load_model(f"runs:/{FALLBACK_RUN_ID}/model")
-            print(f"✅ Modèle chargé depuis run_id: {FALLBACK_RUN_ID}")
-            return model
-        except Exception as e2:
-            print(f"❌ Erreur lors du chargement du modèle: {e2}")
-            return None
+        print(f"⚠️ HF Hub non disponible: {e}")
+
+    # Fallback: MLflow local (développement)
+    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    try:
+        model = mlflow.sklearn.load_model(f"runs:/{FALLBACK_RUN_ID}/model")
+        print(f"✅ Modèle chargé depuis MLflow local: {FALLBACK_RUN_ID}")
+        return model, "MLflow Local"
+    except Exception as e2:
+        print(f"❌ Erreur chargement MLflow: {e2}")
+        return None, "Error"
 
 
 # Charger le modèle au démarrage
 try:
-    model = load_model()
+    model, model_source = load_model()
     MODEL_LOADED = model is not None
 except Exception as e:
     print(f"❌ Erreur lors du chargement du modèle: {e}")
     MODEL_LOADED = False
     model = None
+    model_source = "Error"
 
 
 def get_model_info():
@@ -51,35 +57,43 @@ def get_model_info():
     if not MODEL_LOADED:
         return {
             "status": "❌ Modèle non disponible",
-            "error": "Le modèle n'a pas pu être chargé depuis MLflow",
-            "solution": "Vérifiez que main.py a bien été exécuté pour entraîner le modèle",
+            "error": "Le modèle n'a pas pu être chargé",
+            "solution": "Vérifiez que le modèle est bien enregistré sur HF Hub ou entraîné localement",
         }
 
     try:
-        # Obtenir des informations sur le modèle
-        client = mlflow.MlflowClient()
-        runs = client.search_runs(
-            experiment_ids=["1"], order_by=["start_time DESC"], max_results=1
-        )
+        info = {
+            "status": "✅ Modèle chargé avec succès",
+            "source": model_source,
+            "model_type": type(model).__name__,
+            "features": "~50 features (après preprocessing)",
+            "algorithme": "XGBoost + SMOTE",
+            "hf_hub_repo": HF_MODEL_REPO if model_source == "HF Hub" else "N/A",
+        }
 
-        if runs:
-            run = runs[0]
-            metrics = run.data.metrics
-            return {
-                "status": "✅ Modèle chargé avec succès",
-                "run_id": run.info.run_id[:8],
-                "f1_score": f"{metrics.get('f1_score', 0):.4f}",
-                "accuracy": f"{metrics.get('accuracy', 0):.4f}",
-                "features": "~50 features (après preprocessing)",
-                "algorithme": "XGBoost + SMOTE",
-                "info": "Interface de prédiction en développement - API FastAPI à venir",
-            }
-        else:
-            return {
-                "status": "✅ Modèle chargé",
-                "info": "Pas de métriques disponibles",
-                "run_id": FALLBACK_RUN_ID[:8],
-            }
+        # Si MLflow local, ajouter les métriques
+        if model_source == "MLflow Local":
+            mlflow.set_tracking_uri("sqlite:///mlflow.db")
+            client = mlflow.MlflowClient()
+            runs = client.search_runs(
+                experiment_ids=["1"], order_by=["start_time DESC"], max_results=1
+            )
+            if runs:
+                run = runs[0]
+                metrics = run.data.metrics
+                info.update(
+                    {
+                        "run_id": run.info.run_id[:8],
+                        "f1_score": f"{metrics.get('f1_score', 0):.4f}",
+                        "accuracy": f"{metrics.get('accuracy', 0):.4f}",
+                    }
+                )
+
+        info["info"] = "Interface de prédiction en développement - API FastAPI à venir"
+        return info
+
+    except Exception as e:
+        return {"status": "✅ Modèle chargé (info limitées)", "error": str(e)}
 
     except Exception as e:
         return {"status": "✅ Modèle chargé (info limitées)", "error": str(e)}
