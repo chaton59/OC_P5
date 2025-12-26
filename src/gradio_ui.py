@@ -305,7 +305,14 @@ def create_gradio_interface():
                             1, 5, value=3, step=1, label="Niveau éducation (1-5)"
                         )
                         domaine_etude = gr.Dropdown(
-                            ["Infra & Cloud", "Transformation Digitale", "Autre"],
+                            [
+                                "Infra & Cloud",
+                                "Transformation Digitale",
+                                "Marketing",
+                                "Entrepreunariat",
+                                "Ressources Humaines",
+                                "Autre",
+                            ],
                             value="Infra & Cloud",
                             label="Domaine d'études",
                         )
@@ -377,11 +384,25 @@ def create_gradio_interface():
                             label="Statut marital",
                         )
                         departement = gr.Dropdown(
-                            ["Commercial", "Consulting"],
+                            ["Commercial", "Consulting", "Ressources Humaines"],
                             value="Commercial",
                             label="Département",
                         )
-                        poste = gr.Textbox(value="Consultant", label="Poste")
+                        poste = gr.Dropdown(
+                            [
+                                "Cadre Commercial",
+                                "Assistant de Direction",
+                                "Consultant",
+                                "Tech Lead",
+                                "Manager",
+                                "Senior Manager",
+                                "Représentant Commercial",
+                                "Directeur Technique",
+                                "Ressources Humaines",
+                            ],
+                            value="Consultant",
+                            label="Poste",
+                        )
                         nombre_experiences_precedentes = gr.Slider(
                             0, 10, value=2, step=1, label="Expériences précédentes"
                         )

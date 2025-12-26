@@ -32,6 +32,7 @@ class DepartementEnum(str, Enum):
 
     COMMERCIAL = "Commercial"
     CONSULTING = "Consulting"
+    RESSOURCES_HUMAINES = "Ressources Humaines"
 
 
 class DomaineEtudeEnum(str, Enum):
@@ -39,7 +40,24 @@ class DomaineEtudeEnum(str, Enum):
 
     INFRA_CLOUD = "Infra & Cloud"
     TRANSFORMATION_DIGITALE = "Transformation Digitale"
+    MARKETING = "Marketing"
+    ENTREPREUNARIAT = "Entrepreunariat"
+    RESSOURCES_HUMAINES = "Ressources Humaines"
     AUTRE = "Autre"
+
+
+class PosteEnum(str, Enum):
+    """Poste de l'employé."""
+
+    CADRE_COMMERCIAL = "Cadre Commercial"
+    ASSISTANT_DIRECTION = "Assistant de Direction"
+    CONSULTANT = "Consultant"
+    TECH_LEAD = "Tech Lead"
+    MANAGER = "Manager"
+    SENIOR_MANAGER = "Senior Manager"
+    REPRESENTANT_COMMERCIAL = "Représentant Commercial"
+    DIRECTEUR_TECHNIQUE = "Directeur Technique"
+    RESSOURCES_HUMAINES = "Ressources Humaines"
 
 
 class FrequenceDeplacementEnum(str, Enum):
@@ -121,7 +139,7 @@ class EmployeeInput(BaseModel):
     revenu_mensuel: float = Field(..., ge=1000, description="Revenu mensuel (€)")
     statut_marital: StatutMaritalEnum = Field(..., description="Statut marital")
     departement: DepartementEnum = Field(..., description="Département")
-    poste: str = Field(..., min_length=3, description="Intitulé du poste")
+    poste: PosteEnum = Field(..., description="Intitulé du poste")
     nombre_experiences_precedentes: int = Field(
         ..., ge=0, description="Nombre d'expériences précédentes"
     )
