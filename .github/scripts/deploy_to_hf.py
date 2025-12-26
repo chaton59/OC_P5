@@ -29,7 +29,7 @@ def main():
         api.create_repo(
             repo_id=repo_id,
             repo_type="space",
-            space_sdk="gradio",
+            space_sdk="docker",
             private=False,
         )
 

@@ -3,8 +3,7 @@ title: OC P5 - API ML Déployée
 emoji: 🎯
 colorFrom: blue
 colorTo: green
-sdk: gradio
-sdk_version: 5.9.1
+sdk: docker
 app_file: app.py
 pinned: false
 license: mit
@@ -12,7 +11,7 @@ license: mit
 
 # 🎯 Employee Turnover Prediction - DEV Environment
 
-Interface Gradio pour tester le modèle de prédiction de départ des employés (turnover).
+API FastAPI pour le modèle de prédiction de départ des employés (turnover).
 
 ## 🚀 Modèle ML
 
@@ -22,21 +21,20 @@ Interface Gradio pour tester le modèle de prédiction de départ des employés 
 - **Métriques**: F1-Score optimisé (0.51), Accuracy 79%
 - **Stockage**: [Hugging Face Hub](https://huggingface.co/ASI-Engineer/employee-turnover-model)
 
-## 📊 Fonctionnalités
+## 📊 Fonctionnalités (En développement - Étape 3)
 
-- **Status Checker**: Vérifier l'état du modèle et les métriques
-- **API Simple**: Interface Gradio pour tests rapides
-- **Chargement automatique**: Modèle téléchargé depuis HF Hub au démarrage
+- **API REST**: Endpoints FastAPI pour les prédictions
+- **Validation**: Schémas Pydantic pour valider les données entrantes
+- **Documentation**: Swagger/OpenAPI automatique
+- **Chargement automatique**: Modèle et preprocessing artifacts depuis MLflow
 
 ## 🔧 Architecture
 
 ```python
-# Chargement du modèle depuis HF Hub
-model_path = hf_hub_download(
-    repo_id="ASI-Engineer/employee-turnover-model",
-    filename="model/model.pkl"
-)
-model = mlflow.sklearn.load_model(str(Path(model_path).parent))
+# À IMPLÉMENTER - Étape 3
+# Chargement du modèle depuis MLflow
+# + Preprocessing artifacts (scaler, encoders)
+# + Endpoints FastAPI avec validation Pydantic
 ```
 
 ## 🛠️ Installation & Développement
@@ -60,15 +58,13 @@ poetry shell
 # Lancer le pipeline d'entraînement
 poetry run python main.py
 
-# Lancer l'interface Gradio
-poetry run python app.py
+# Lancer l'API FastAPI (à implémenter)
+# poetry run uvicorn app:app --reload
 ```
 
-### Requirements.txt pour HF Spaces
+### Requirements.txt
 
-Le fichier `requirements.txt` est **minimal et optimisé** pour HF Spaces (seulement gradio, huggingface-hub, joblib).
-
-Il est **généré automatiquement** par le CI/CD lors des déploiements.
+Le fichier `requirements.txt` contient les dépendances pour FastAPI et le modèle ML.
 
 Pour le générer manuellement :
 ```bash
