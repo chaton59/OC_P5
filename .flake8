@@ -1,21 +1,4 @@
 [flake8]
-# Exclude dirs pour ignorer libs tierces et noise (venv, git, etc.)
-ignore = W503, E501
-exclude =
-    .venv,
-    .git,
-    __pycache__,
-    *.pyc,
-    *.egg-info,
-    .cache,
-    .eggs,
-    build,
-    dist,
-    mlruns
-# Max line pour compat Black (default 88 vs PEP8 79)
 max-line-length = 88
-
-# Ignorer certains warnings pour les scripts d'exemple (non-critique)
-per-file-ignores =
-    examples/*.py:F541,E722,F841
-    tests/test_mlflow_*.py:F401,E402,F811,F541
+ignore = W503, E501
+exclude = .venv, .git, __pycache__, build, dist, mlruns

@@ -5,8 +5,6 @@ Module de chargement et gestion du modèle MLflow.
 Ce module encapsule la logique de chargement du modèle depuis Hugging Face Hub
 via MLflow, avec gestion des erreurs et versioning.
 """
-import os
-from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import HTTPException
@@ -50,7 +48,6 @@ def load_model(force_reload: bool = False) -> Any:
 
     try:
         import joblib
-        import mlflow
 
         print(f"🔄 Chargement du modèle depuis HF Hub: {HF_MODEL_REPO}")
 

@@ -156,26 +156,36 @@ jobs:
           response=$(curl -s -X POST http://localhost:8000/predict \
             -H "Content-Type: application/json" \
             -d '{
-              "satisfaction_employee_environnement": 3,
-              "satisfaction_employee_nature_travail": 4,
-              "satisfaction_employee_equipe": 5,
-              "satisfaction_employee_equilibre_pro_perso": 3,
-              "note_evaluation_actuelle": 85,
+              "nombre_participation_pee": 0,
+              "nb_formations_suivies": 2,
+              "nombre_employee_sous_responsabilite": 1,
+              "distance_domicile_travail": 15,
+              "niveau_education": 3,
+              "domaine_etude": "Infra & Cloud",
+              "ayant_enfants": "Y",
+              "frequence_deplacement": "Occasionnel",
               "annees_depuis_la_derniere_promotion": 2,
-              "nombre_formations_realisees": 3,
+              "annes_sous_responsable_actuel": 5,
+              "satisfaction_employee_environnement": 3,
+              "note_evaluation_precedente": 4,
+              "niveau_hierarchique_poste": 2,
+              "satisfaction_employee_nature_travail": 3,
+              "satisfaction_employee_equipe": 3,
+              "satisfaction_employee_equilibre_pro_perso": 2,
+              "note_evaluation_actuelle": 4,
+              "heure_supplementaires": "Non",
+              "augementation_salaire_precedente": 5.5,
               "age": 35,
               "genre": "M",
-              "revenu_mensuel": 5500,
+              "revenu_mensuel": 4500.0,
               "statut_marital": "Marié(e)",
               "departement": "Commercial",
               "poste": "Manager",
-              "domaine_etude": "Marketing",
-              "frequence_deplacement": "Occasionnel",
-              "nombre_experiences_precedentes": 2,
+              "nombre_experiences_precedentes": 3,
               "nombre_heures_travailless": 45,
               "annee_experience_totale": 10,
               "annees_dans_l_entreprise": 5,
-              "annees_dans_le_poste_actuel": 3
+              "annees_dans_le_poste_actuel": 2
             }')
           
           echo "Predict response: $response"
@@ -215,7 +225,7 @@ jobs:
       
       - name: Deploy to HF Space (Dev)
         run: |
-          python .github/scripts/deploy_to_hf.py ASI-Engineer/employee-turnover-dev
+          python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5-dev
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
@@ -239,6 +249,6 @@ jobs:
       
       - name: Deploy to HF Space (Prod)
         run: |
-          python .github/scripts/deploy_to_hf.py ASI-Engineer/employee-turnover-api
+          python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

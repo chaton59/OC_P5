@@ -16,7 +16,6 @@ def test_auth_system_exists(client):
         client: Fixture TestClient FastAPI.
     """
     # En mode DEBUG, l'auth est bypassée mais le système existe
-    from src.auth import verify_api_key
     from src.config import get_settings
 
     settings = get_settings()

@@ -5,7 +5,6 @@ Tests pour l'endpoint /health de l'API.
 Ces tests vérifient que l'endpoint de monitoring fonctionne correctement
 et retourne les informations attendues sur l'état de l'API.
 """
-import pytest
 
 
 def test_health_endpoint_status_code(client):

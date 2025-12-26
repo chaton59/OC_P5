@@ -5,7 +5,6 @@ Tests pour l'endpoint /predict de l'API.
 Ces tests vérifient que les prédictions fonctionnent correctement
 avec des données valides et retournent le format attendu.
 """
-import pytest
 
 
 def test_predict_endpoint_with_valid_data(client, valid_employee_data):
@@ -95,7 +94,9 @@ def test_predict_risk_level_values(client, valid_employee_data):
     data = response.json()
 
     valid_levels = ["Low", "Medium", "High"]
-    assert data["risk_level"] in valid_levels, f"risk_level doit être dans {valid_levels}"
+    assert (
+        data["risk_level"] in valid_levels
+    ), f"risk_level doit être dans {valid_levels}"
 
 
 def test_predict_high_risk_employee(client, high_risk_employee_data):
@@ -141,6 +142,8 @@ def test_predict_consistency(client, valid_employee_data):
     data1 = response1.json()
     data2 = response2.json()
 
-    assert data1["prediction"] == data2["prediction"], "Prédictions doivent être identiques"
+    assert (
+        data1["prediction"] == data2["prediction"]
+    ), "Prédictions doivent être identiques"
     assert abs(data1["probability_0"] - data2["probability_0"]) < 0.001
     assert abs(data1["probability_1"] - data2["probability_1"]) < 0.001

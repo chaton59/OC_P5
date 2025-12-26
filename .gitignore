@@ -1,44 +1,79 @@
-# Environnements virtuels
+# =====================
+# Python
+# =====================
 __pycache__/
 *.py[cod]
-*.class
-*.so
+*.pyo
+*.pyd
 .Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+
+# =====================
+# Environnements virtuels
+# =====================
 .venv/
 env/
+venv/
 ENV/
 
-# Poetry
-.venv/
-
-# Logs et caches
-*.log
-local/
+# =====================
+# Tests & Coverage
+# =====================
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
-.cache
+coverage.xml
 
-# IDE et éditeurs
-.vscode/settings.json  # Optionnel : ignorez les paramètres sensibles VSCode
+# =====================
+# IDE & Editeurs
+# =====================
+.vscode/settings.json
 .idea/
 *.swp
 *~
+*.sublime-*
 
-# Système d'exploitation
+# =====================
+# OS
+# =====================
 .DS_Store
 Thumbs.db
+*.tmp
 
-# Secrets et données
+# =====================
+# Secrets & Données
+# =====================
 .env
+.env.*
+!.env.example
 secrets.json
-data/raw/  # Pour datasets volumineux en data science (OC_P5)
-notebooks/*.ipynb_checkpoints/
+*.key
+*.pem
 
-# MLflow (logs seulement, garder DB et runs pour déploiement HF)
+# =====================
+# Logs & Cache
+# =====================
+*.log
+.cache/
+local/
+nohup.out
+
+# =====================
+# MLflow
+# =====================
+mlflow.db
 mlflow.db-shm
 mlflow.db-wal
-mlflow_ui.log
-mlflow_comparison.png
-nohup.out
+mlruns/
+
+# =====================
+# Jupyter
+# =====================
+.ipynb_checkpoints/
+*.ipynb_checkpoints/

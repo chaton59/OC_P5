@@ -7,10 +7,12 @@ Cette API expose le modèle de prédiction de départ des employés avec :
 - Preprocessing automatique
 - Health check pour monitoring
 - Documentation OpenAPI/Swagger automatique
+- Interface Gradio pour utilisation interactive
 """
 import time
 from contextlib import asynccontextmanager
 
+import gradio as gr
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -18,7 +20,8 @@ from slowapi.errors import RateLimitExceeded
 
 from src.auth import verify_api_key
 from src.config import get_settings
-from src.logger import logger, log_model_load, log_prediction, log_request
+from src.gradio_ui import create_gradio_interface
+from src.logger import logger, log_model_load, log_request
 from src.models import get_model_info, load_model
 from src.preprocessing import preprocess_for_prediction
 from src.rate_limit import limiter
@@ -36,21 +39,23 @@ async def lifespan(app: FastAPI):
 
     Charge le modèle au démarrage et le garde en cache.
     """
-    logger.info("🚀 Démarrage de l'API Employee Turnover...", extra={"version": API_VERSION})
-    
+    logger.info(
+        "🚀 Démarrage de l'API Employee Turnover...", extra={"version": API_VERSION}
+    )
+
     start_time = time.time()
     try:
         # Pré-charger le modèle au démarrage
         model = load_model()
         duration_ms = (time.time() - start_time) * 1000
-        
+
         model_type = type(model).__name__
         log_model_load(model_type, duration_ms, True)
         logger.info("✅ Modèle chargé avec succès")
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
         log_model_load("Unknown", duration_ms, False)
-        logger.error(f"⚠️ Le modèle n'a pas pu être chargé", extra={"error": str(e)})
+        logger.error("Le modèle n'a pas pu être chargé", extra={"error": str(e)})
 
     yield  # L'application tourne
 
@@ -88,13 +93,13 @@ async def log_requests(request: Request, call_next):
     Middleware pour logger toutes les requêtes HTTP.
     """
     start_time = time.time()
-    
+
     # Traiter la requête
     response = await call_next(request)
-    
+
     # Calculer la durée
     duration_ms = (time.time() - start_time) * 1000
-    
+
     # Logger
     log_request(
         method=request.method,
@@ -103,7 +108,7 @@ async def log_requests(request: Request, call_next):
         duration_ms=duration_ms,
         client_host=request.client.host if request.client else None,
     )
-    
+
     return response
 
 
@@ -191,7 +196,6 @@ async def predict(request: Request, employee: EmployeeInput):
     """
     try:
         # 1. Charger le modèle
-        start_time = time.time()
         model = load_model()
 
         # 2. Préprocessing
@@ -225,7 +229,7 @@ async def predict(request: Request, employee: EmployeeInput):
             risk_level=risk_level,
         )
 
-    except Exception as e:
+    except Exception:
         logger.exception("Unexpected error during prediction")
         raise HTTPException(
             status_code=500,
@@ -236,11 +240,17 @@ async def predict(request: Request, employee: EmployeeInput):
         )
 
 
+# Monter l'interface Gradio sur /ui
+gradio_app = create_gradio_interface()
+app = gr.mount_gradio_app(app, gradio_app, path="/ui")
+
+
 if __name__ == "__main__":
     import uvicorn
 
     print("🚀 Lancement de l'API en mode développement...")
     print("📖 Documentation : http://localhost:8000/docs")
+    print("🎨 Interface Gradio : http://localhost:8000/ui")
 
     uvicorn.run(
         "app:app",
