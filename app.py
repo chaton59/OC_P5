@@ -7,10 +7,12 @@ Cette API expose le modèle de prédiction de départ des employés avec :
 - Preprocessing automatique
 - Health check pour monitoring
 - Documentation OpenAPI/Swagger automatique
+- Interface Gradio pour utilisation interactive
 """
 import time
 from contextlib import asynccontextmanager
 
+import gradio as gr
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -18,6 +20,7 @@ from slowapi.errors import RateLimitExceeded
 
 from src.auth import verify_api_key
 from src.config import get_settings
+from src.gradio_ui import create_gradio_interface
 from src.logger import logger, log_model_load, log_request
 from src.models import get_model_info, load_model
 from src.preprocessing import preprocess_for_prediction
@@ -237,11 +240,17 @@ async def predict(request: Request, employee: EmployeeInput):
         )
 
 
+# Monter l'interface Gradio sur /ui
+gradio_app = create_gradio_interface()
+app = gr.mount_gradio_app(app, gradio_app, path="/ui")
+
+
 if __name__ == "__main__":
     import uvicorn
 
     print("🚀 Lancement de l'API en mode développement...")
     print("📖 Documentation : http://localhost:8000/docs")
+    print("🎨 Interface Gradio : http://localhost:8000/ui")
 
     uvicorn.run(
         "app:app",
