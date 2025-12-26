@@ -79,9 +79,6 @@ poetry run black .
 
 # Linter
 poetry run flake8 .
-
-# Tests
-poetry run pytest --cov=ml_model tests/
 ```
 
 ## 📈 Métriques
@@ -93,10 +90,5 @@ poetry run pytest --cov=ml_model tests/
 
 ## 🔗 Liens
 
-- **Modèle**: [employee-turnover-model](https://huggingface.co/ASI-Engineer/employee-turnover-model)
 - **GitHub**: [OC_P5](https://github.com/chaton59/OC_P5)
-- **CI/CD**: GitHub Actions avec déploiement automatique
-
-Ce Space est synchronisé automatiquement via CI/CD depuis la branche `dev` du repository GitHub.
-
-**Repository**: [chaton59/OC_P5](https://github.com/chaton59/OC_P5)
+- **CI/CD**: GitHub Actions avec linting automatique

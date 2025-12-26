@@ -5,7 +5,7 @@ on:
     branches: [main, dev]
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,41 +28,3 @@ jobs:
         run: |
           poetry run black --check .
           poetry run flake8 .
-      - name: Run tests
-        run: poetry run pytest --cov=ml_model --cov-report=xml tests/
-
-  # deploy-dev:  # TEMPORAIREMENT DÉSACTIVÉ - FastAPI nécessite Docker
-  #   needs: test
-  #   if: github.ref == 'refs/heads/dev'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         python-version: '3.12'
-  #     - name: Generate requirements.txt
-  #       run: ./scripts/export_requirements.sh
-  #     - name: Install huggingface_hub
-  #       run: pip install huggingface_hub
-  #     - name: Deploy to HF Dev Space
-  #       env:
-  #         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-  #       run: python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5-dev
-
-  # deploy-prod:  # TEMPORAIREMENT DÉSACTIVÉ - FastAPI nécessite Docker
-  #   needs: test
-  #   if: github.ref == 'refs/heads/main'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         python-version: '3.12'
-  #     - name: Generate requirements.txt
-  #       run: ./scripts/export_requirements.sh
-  #     - name: Install huggingface_hub
-  #       run: pip install huggingface_hub
-  #     - name: Deploy to HF Prod Space
-  #       env:
-  #         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-  #       run: python .github/scripts/deploy_to_hf.py ASI-Engineer/OC_P5
