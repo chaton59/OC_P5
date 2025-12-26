@@ -1,30 +1,244 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline - Employee Turnover API
 
 on:
   push:
     branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: '3.12'
 
 jobs:
   lint:
+    name: 🔍 Lint Code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+      
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
+      
       - name: Cache Poetry dependencies
         uses: actions/cache@v4
         with:
           path: .venv
           key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+      
       - name: Install dependencies
         run: poetry install --with dev
-      - name: Lint code
+      
+      - name: Lint with Black
+        run: poetry run black --check .
+      
+      - name: Lint with Flake8
+        run: poetry run flake8 .
+
+  test:
+    name: 🧪 Run Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+      
+      - name: Install dependencies
+        run: poetry install --with dev
+      
+      - name: Run pytest with coverage
         run: |
-          poetry run black --check .
-          poetry run flake8 .
+          poetry run pytest tests/ -v --cov --cov-report=xml --cov-report=term
+        env:
+          DEBUG: true
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true
+
+  test-api:
+    name: 🚀 Test API Server
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+      
+      - name: Install dependencies
+        run: poetry install
+      
+      - name: Create .env file
+        run: |
+          echo "DEBUG=true" > .env
+          echo "API_KEY=test-key-ci-cd" >> .env
+          echo "LOG_LEVEL=INFO" >> .env
+      
+      - name: Start API server in background
+        run: |
+          poetry run uvicorn app:app --host 0.0.0.0 --port 8000 &
+          echo $! > uvicorn.pid
+          sleep 10
+        env:
+          DEBUG: true
+      
+      - name: Wait for API to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8000/health > /dev/null; then
+              echo "✅ API is ready"
+              break
+            fi
+            echo "⏳ Waiting for API... ($i/30)"
+            sleep 2
+          done
+      
+      - name: Test health endpoint
+        run: |
+          response=$(curl -s http://localhost:8000/health)
+          echo "Health response: $response"
+          
+          # Check status
+          status=$(echo $response | jq -r '.status')
+          if [ "$status" != "healthy" ]; then
+            echo "❌ Health check failed"
+            exit 1
+          fi
+          echo "✅ Health check passed"
+      
+      - name: Test predict endpoint
+        run: |
+          response=$(curl -s -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            -d '{
+              "satisfaction_employee_environnement": 3,
+              "satisfaction_employee_nature_travail": 4,
+              "satisfaction_employee_equipe": 5,
+              "satisfaction_employee_equilibre_pro_perso": 3,
+              "note_evaluation_actuelle": 85,
+              "annees_depuis_la_derniere_promotion": 2,
+              "nombre_formations_realisees": 3,
+              "age": 35,
+              "genre": "M",
+              "revenu_mensuel": 5500,
+              "statut_marital": "Marié(e)",
+              "departement": "Commercial",
+              "poste": "Manager",
+              "domaine_etude": "Marketing",
+              "frequence_deplacement": "Occasionnel",
+              "nombre_experiences_precedentes": 2,
+              "nombre_heures_travailless": 45,
+              "annee_experience_totale": 10,
+              "annees_dans_l_entreprise": 5,
+              "annees_dans_le_poste_actuel": 3
+            }')
+          
+          echo "Predict response: $response"
+          
+          # Check prediction field exists
+          prediction=$(echo $response | jq -r '.prediction')
+          if [ "$prediction" = "null" ] || [ -z "$prediction" ]; then
+            echo "❌ Prediction failed"
+            exit 1
+          fi
+          echo "✅ Prediction successful: $prediction"
+      
+      - name: Stop API server
+        if: always()
+        run: |
+          if [ -f uvicorn.pid ]; then
+            kill $(cat uvicorn.pid) || true
+          fi
+
+  deploy-hf-dev:
+    name: 🚀 Deploy to HF Spaces (Dev)
+    runs-on: ubuntu-latest
+    needs: [test, test-api]
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          pip install huggingface-hub
+      
+      - name: Deploy to HF Space (Dev)
+        run: |
+          python .github/scripts/deploy_to_hf.py ASI-Engineer/employee-turnover-dev
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+  deploy-hf-prod:
+    name: 🚀 Deploy to HF Spaces (Prod)
+    runs-on: ubuntu-latest
+    needs: [test, test-api]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          pip install huggingface-hub
+      
+      - name: Deploy to HF Space (Prod)
+        run: |
+          python .github/scripts/deploy_to_hf.py ASI-Engineer/employee-turnover-api
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
