@@ -188,8 +188,6 @@ def encode_and_scale(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-    return df
-
 
 def preprocess_for_prediction(employee: EmployeeInput) -> np.ndarray:
     """
