@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
         log_model_load("Unknown", duration_ms, False)
-        logger.error(f"⚠️ Le modèle n'a pas pu être chargé", extra={"error": str(e)})
+        logger.error("Le modèle n'a pas pu être chargé", extra={"error": str(e)})
 
     yield  # L'application tourne
 
@@ -193,7 +193,6 @@ async def predict(request: Request, employee: EmployeeInput):
     """
     try:
         # 1. Charger le modèle
-        start_time = time.time()
         model = load_model()
 
         # 2. Préprocessing
@@ -227,7 +226,7 @@ async def predict(request: Request, employee: EmployeeInput):
             risk_level=risk_level,
         )
 
-    except Exception as e:
+    except Exception:
         logger.exception("Unexpected error during prediction")
         raise HTTPException(
             status_code=500,

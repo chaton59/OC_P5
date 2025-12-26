@@ -5,7 +5,6 @@ Tests pour la validation des données d'entrée de l'API.
 Ces tests vérifient que Pydantic valide correctement les données
 et retourne des erreurs 422 avec des messages clairs.
 """
-import pytest
 
 
 def test_predict_missing_required_fields(client):

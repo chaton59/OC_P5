@@ -9,7 +9,6 @@ Ce module applique les mêmes transformations que le pipeline d'entraînement :
 """
 import numpy as np
 import pandas as pd
-from scipy.stats.mstats import winsorize
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
 from src.schemas import EmployeeInput

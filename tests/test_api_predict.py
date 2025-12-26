@@ -5,7 +5,6 @@ Tests pour l'endpoint /predict de l'API.
 Ces tests vérifient que les prédictions fonctionnent correctement
 avec des données valides et retournent le format attendu.
 """
-import pytest
 
 
 def test_predict_endpoint_with_valid_data(client, valid_employee_data):
