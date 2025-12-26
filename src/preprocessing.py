@@ -168,7 +168,7 @@ def encode_and_scale(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def preprocess_for_prediction(employee: EmployeeInput) -> pd.DataFrame:
+def preprocess_for_prediction(employee: EmployeeInput) -> np.ndarray:
     """
     Pipeline complet de preprocessing pour une prédiction.
 
@@ -176,7 +176,7 @@ def preprocess_for_prediction(employee: EmployeeInput) -> pd.DataFrame:
         employee: Données validées d'un employé.
 
     Returns:
-        DataFrame transformé prêt pour model.predict().
+        Array numpy transformé prêt pour model.predict().
 
     Examples:
         >>> from src.schemas import EmployeeInput
@@ -193,10 +193,8 @@ def preprocess_for_prediction(employee: EmployeeInput) -> pd.DataFrame:
     # 3. Encoding et scaling
     df = encode_and_scale(df)
 
-    # Note: En production, il faudrait gérer l'ordre des colonnes
-    # pour correspondre exactement à l'entraînement
-
-    return df
+    # 4. Convertir en numpy array (le modèle attend un array)
+    return df.values
 
 
 # TODO: Implémenter le chargement des artifacts sauvegardés
