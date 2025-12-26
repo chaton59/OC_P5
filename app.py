@@ -8,15 +8,20 @@ Cette API expose le modèle de prédiction de départ des employés avec :
 - Health check pour monitoring
 - Documentation OpenAPI/Swagger automatique
 """
+import time
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from src.auth import verify_api_key
 from src.config import get_settings
+from src.logger import logger, log_model_load, log_prediction, log_request
 from src.models import get_model_info, load_model
 from src.preprocessing import preprocess_for_prediction
+from src.rate_limit import limiter
 from src.schemas import EmployeeInput, HealthCheck, PredictionOutput
 
 # Charger la configuration
@@ -31,17 +36,25 @@ async def lifespan(app: FastAPI):
 
     Charge le modèle au démarrage et le garde en cache.
     """
-    print("🚀 Démarrage de l'API Employee Turnover...")
+    logger.info("🚀 Démarrage de l'API Employee Turnover...", extra={"version": API_VERSION})
+    
+    start_time = time.time()
     try:
         # Pré-charger le modèle au démarrage
-        load_model()
-        print("✅ Modèle chargé avec succès")
+        model = load_model()
+        duration_ms = (time.time() - start_time) * 1000
+        
+        model_type = type(model).__name__
+        log_model_load(model_type, duration_ms, True)
+        logger.info("✅ Modèle chargé avec succès")
     except Exception as e:
-        print(f"⚠️ Avertissement : Le modèle n'a pas pu être chargé : {e}")
+        duration_ms = (time.time() - start_time) * 1000
+        log_model_load("Unknown", duration_ms, False)
+        logger.error(f"⚠️ Le modèle n'a pas pu être chargé", extra={"error": str(e)})
 
     yield  # L'application tourne
 
-    print("🛑 Arrêt de l'API")
+    logger.info("🛑 Arrêt de l'API")
 
 
 # Créer l'application FastAPI
@@ -54,6 +67,10 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# Ajouter rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # Configurer CORS (autoriser tous les domaines en dev)
 app.add_middleware(
     CORSMiddleware,
@@ -62,6 +79,32 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Middleware de logging des requêtes
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """
+    Middleware pour logger toutes les requêtes HTTP.
+    """
+    start_time = time.time()
+    
+    # Traiter la requête
+    response = await call_next(request)
+    
+    # Calculer la durée
+    duration_ms = (time.time() - start_time) * 1000
+    
+    # Logger
+    log_request(
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        duration_ms=duration_ms,
+        client_host=request.client.host if request.client else None,
+    )
+    
+    return response
 
 
 @app.get("/", tags=["Root"])
@@ -117,7 +160,8 @@ async def health_check():
     tags=["Prediction"],
     dependencies=[Depends(verify_api_key)] if settings.is_api_key_required else [],
 )
-async def predict(employee: EmployeeInput):
+@limiter.limit("20/minute")
+async def predict(request: Request, employee: EmployeeInput):
     """
     Endpoint de prédiction du turnover d'un employé.
 
@@ -147,6 +191,7 @@ async def predict(employee: EmployeeInput):
     """
     try:
         # 1. Charger le modèle
+        start_time = time.time()
         model = load_model()
 
         # 2. Préprocessing
@@ -181,12 +226,12 @@ async def predict(employee: EmployeeInput):
         )
 
     except Exception as e:
+        logger.exception("Unexpected error during prediction")
         raise HTTPException(
             status_code=500,
             detail={
                 "error": "Prediction failed",
-                "message": str(e),
-                "solution": "Vérifiez que les données sont correctes et que le modèle est disponible",
+                "message": "An unexpected error occurred. Please contact support.",
             },
         )
 

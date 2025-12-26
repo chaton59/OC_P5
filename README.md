@@ -1,241 +1,239 @@
----
-title: OC P5 - API ML Déployée
-emoji: 🎯
-colorFrom: blue
-colorTo: green
-sdk: docker
-app_file: app.py
-pinned: false
-license: mit
----
+# 🚀 Employee Turnover Prediction API - v2.1.0
 
-# 🎯 Employee Turnover Prediction - API FastAPI
+## 📊 Vue d'ensemble
 
-API REST production-ready pour prédire le risque de départ des employés (turnover).
+API REST de prédiction du turnover des employés basée sur un modèle XGBoost avec SMOTE.
 
-## 🚀 Quick Start
-
-```bash
-# 1. Cloner et installer
-git clone https://github.com/chaton59/OC_P5.git
-cd OC_P5
-poetry install
-
-# 2. Configurer l'API key (optionnel en dev)
-cp .env.example .env
-# Éditer .env et mettre votre API_KEY
-
-# 3. Lancer l'API
-poetry run uvicorn app:app --reload
-
-# 4. Tester
-curl http://localhost:8000/health
-# Ouvrir http://localhost:8000/docs
-```
-
-## 📡 Utilisation de l'API
-
-### Endpoints disponibles
-
-| Endpoint | Méthode | Description | Auth |
-|----------|---------|-------------|------|
-| `/` | GET | Informations API | ❌ |
-| `/health` | GET | Health check | ❌ |
-| `/predict` | POST | Prédiction turnover | ✅ API Key |
-| `/docs` | GET | Documentation Swagger | ❌ |
-
-### Exemple de prédiction
-
-```bash
-# Avec API Key (production)
-curl -X POST http://localhost:8000/predict \
-  -H "X-API-Key: your-secret-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "age": 35,
-    "genre": "M",
-    "revenu_mensuel": 3500.0,
-    "satisfaction_employee_environnement": 2,
-    "annees_dans_l_entreprise": 5,
-    ...
-  }'
-
-# Réponse
-{
-  "prediction": 1,
-  "probability_0": 0.35,
-  "probability_1": 0.65,
-  "risk_level": "High"
-}
-```
-
-### 🔒 Authentification
-
-L'API utilise une **API Key** simple via header HTTP :
-
-```bash
-# Header requis en production
-X-API-Key: your-secret-api-key
-```
-
-**Configuration :**
-1. Copiez `.env.example` vers `.env`
-2. Générez une clé : `python -c "import secrets; print(secrets.token_urlsafe(32))"`
-3. Mettez `API_KEY=votre-cle-generee` dans `.env`
-4. En dev, mettez `DEBUG=True` pour désactiver l'auth
-
-**Pourquoi une API Key ?**
-- ✅ Protège l'endpoint `/predict` contre les abus
-- ✅ Permet de tracker qui utilise l'API
-- ✅ Facile à révoquer/changer
-- ✅ Compatible avec tous les clients HTTP
-
-**Limitations (à améliorer) :**
-- ⚠️ Pas de rate limiting (à venir)
-- ⚠️ Pas de gestion des quotas
-- ⚠️ Pas d'authentification OAuth2 (simplicité volontaire)
-
-## 🏗️ Architecture
-
-## 🚀 Modèle ML
-
-- **Algorithme**: XGBoost optimisé avec RandomizedSearchCV
-- **Équilibrage**: SMOTE pour gérer le déséquilibre de classes (ratio 5:1)
-- **Tracking**: MLflow pour versioning et reproductibilité
-- **Métriques**: F1-Score optimisé (0.51), Accuracy 79%
-- **Stockage**: [Hugging Face Hub](https://huggingface.co/ASI-Engineer/employee-turnover-model)
-
-## 📊 Fonctionnalités
-
-### ✅ Implémenté (Étape 3 complète)
-
-- **API REST complète** : 3 endpoints opérationnels
-- **Validation Pydantic** : 30+ champs avec types, ranges, enums
-- **Authentification** : API Key via header HTTP (`.env`)
-- **Preprocessing automatique** : Feature engineering + encoding + scaling
-- **Documentation interactive** : Swagger UI (`/docs`) + ReDoc (`/redoc`)
-- **Health check** : Monitoring du statut API + modèle
-- **CORS configuré** : Prêt pour frontend
-- **Chargement lazy** : Modèle chargé au démarrage (cache)
-
-### 🚧 À venir (Étapes suivantes)
-
-- **PostgreSQL** : Logging des prédictions (étape 4)
-- **Tests unitaires** : Couverture endpoints + preprocessing
-- **Rate limiting** : Protection contre abus
-- **Dockerfile** : Déploiement containerisé
+**✨ Nouveautés v2.1.0** :
+- 📝 Logging structuré JSON
+- 🛡️ Rate limiting (20 req/min par IP)
+- ⚡ Gestion d'erreurs améliorée
+- 📊 Monitoring des performances
+- 🔐 Authentification API Key
 
 ## 🏗️ Architecture
 
 ```
-app.py                   # API FastAPI principale
+OC_P5/
+├── app.py                    # Point d'entrée FastAPI
 ├── src/
-│   ├── models.py       # Chargement modèle depuis HF Hub ✅
-│   ├── schemas.py      # Validation Pydantic (30+ features) ✅
-│   ├── preprocessing.py# Pipeline preprocessing ✅
-│   ├── auth.py         # Authentification API Key ✅
-│   └── config.py       # Configuration (.env) ✅
-├── ml_model/           # Code d'entraînement MLflow
-│   ├── preprocess.py
-│   └── train_model.py
-└── data/               # Datasets
+│   ├── auth.py              # Authentification API Key
+│   ├── config.py            # Configuration centralisée
+│   ├── logger.py            # Logging structuré (NOUVEAU)
+│   ├── models.py            # Chargement modèle HF Hub
+│   ├── preprocessing.py     # Pipeline preprocessing
+│   ├── rate_limit.py        # Rate limiting (NOUVEAU)
+│   └── schemas.py           # Validation Pydantic
+├── tests/                   # Suite pytest (33 tests, 88% couverture)
+├── logs/                    # Logs JSON (NOUVEAU)
+│   ├── api.log              # Tous les logs
+│   └── error.log            # Erreurs uniquement
+├── docs/                    # Documentation
+├── ml_model/                # Scripts training
+└── data/                    # Données sources
 ```
 
-**Pipeline de prédiction :**
-```
-Données employé (JSON)
-  ↓ Validation Pydantic
-  ↓ Vérification API Key
-  ↓ Feature Engineering
-  ↓ Encoding + Scaling
-  ↓ Modèle XGBoost + SMOTE
-  ↓ Prédiction + Probabilités
-Réponse JSON
-```
-
-## 🛠️ Installation & Développement
+## 🚀 Installation
 
 ### Prérequis
 - Python 3.12+
-- Poetry (gestionnaire de dépendances)
+- Poetry 1.7+
+- Git
 
-### Installation avec Poetry
+### Setup rapide
 
 ```bash
-# Installer Poetry (si pas déjà fait)
-curl -sSL https://install.python-poetry.org | python3 -
+# 1. Cloner le repo
+git clone https://github.com/chaton59/OC_P5.git
+cd OC_P5
 
-# Installer les dépendances
+# 2. Installer les dépendances
 poetry install
 
-# Activer l'environnement virtuel
-poetry shell
-
-# Lancer le pipeline d'entraînement
-poetry run python main.py
-
-# Lancer l'API FastAPI
-poetry run uvicorn app:app --reload --host 0.0.0.0 --port 8000
-```
-
-### Configuration
-
-```bash
-# Copier le template de configuration
+# 3. Configurer l'environnement
 cp .env.example .env
+# Éditer .env avec vos valeurs
 
-# Générer une API key forte
-python -c "import secrets; print(secrets.token_urlsafe(32))"
+# 4. Lancer l'API
+poetry run uvicorn app:app --reload
 
-# Éditer .env et configurer
-nano .env
+# 5. Accéder à la documentation
+# http://localhost:8000/docs
 ```
 
-**Variables importantes :**
-- `API_KEY` : Clé secrète pour `/predict`
-- `DEBUG=True` : Désactive l'auth en dev
-- `HF_MODEL_REPO` : Repository du modèle HF Hub
-
-### Tests et Linting
+## 📝 Configuration (.env)
 
 ```bash
-# Formater le code
-poetry run black .
+# Mode développement (désactive auth + active logs détaillés)
+DEBUG=true
 
-# Linter
-poetry run flake8 .
+# API Key (requis en production)
+API_KEY=your-secret-key-here
+
+# Logging (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+LOG_LEVEL=INFO
+
+# HuggingFace Model
+HF_MODEL_REPO=ASI-Engineer/employee-turnover-model
+MODEL_FILENAME=model/model.pkl
 ```
 
-## 📈 Métriques
+## 🔒 Authentification
 
-- **F1-Score**: 0.5136
-- **Accuracy**: 79%
-- **Données**: 1470 échantillons, 50 features
-- **Classes**: {0: 1233, 1: 237} - Ratio 5.20:1
+### Mode DEBUG (développement)
+```bash
+# L'API Key n'est PAS requise
+curl http://localhost:8000/predict -H "Content-Type: application/json" -d '{...}'
+```
 
-## 🔗 Liens
+### Mode PRODUCTION
+```bash
+# L'API Key est REQUISE
+curl http://localhost:8000/predict \
+  -H "X-API-Key: your-secret-key" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
 
-- **Documentation API complète** : [`docs/API_GUIDE.md`](docs/API_GUIDE.md)
-- **GitHub** : [chaton59/OC_P5](https://github.com/chaton59/OC_P5)
-- **Modèle HF Hub** : [ASI-Engineer/employee-turnover-model](https://huggingface.co/ASI-Engineer/employee-turnover-model)
-- **CI/CD** : GitHub Actions (linting automatique)
+## 📡 Endpoints
 
-## 📝 Notes techniques
+### 🏥 Health Check
+```bash
+GET /health
 
-### Modèle ML
-- Pipeline : SMOTE + XGBClassifier
-- Features : 50+ après preprocessing
-- Optimisation : RandomizedSearchCV
-- Tracking : MLflow local (`mlruns/`)
+# Réponse
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "model_type": "Pipeline",
+  "version": "2.1.0"
+}
+```
 
-### API
-- Framework : FastAPI 0.115+
-- Validation : Pydantic v2
-- Auth : API Key simple (header HTTP)
-- ASGI Server : Uvicorn
+### 🔮 Prédiction
+```bash
+POST /predict
+Content-Type: application/json
+X-API-Key: your-key (en production)
 
-### Développement
-- Package manager : Poetry
-- Python : 3.12+
-- Linting : Black + Flake8
-- Git workflow : `dev` → `main`
+# Exemple payload (voir docs/API_GUIDE.md pour tous les champs)
+{
+  "satisfaction_employee_environnement": 3,
+  "satisfaction_employee_nature_travail": 4,
+  "satisfaction_employee_equipe": 5,
+  "satisfaction_employee_equilibre_pro_perso": 3,
+  "note_evaluation_actuelle": 85,
+  "annees_depuis_la_derniere_promotion": 2,
+  "nombre_formations_realisees": 3,
+  ...
+}
+
+# Réponse
+{
+  "prediction": 0,                    # 0 = reste, 1 = part
+  "probability_0": 0.85,              # Probabilité de rester
+  "probability_1": 0.15,              # Probabilité de partir
+  "risk_level": "Low"                 # Low, Medium, High
+}
+```
+
+## 📊 Logging
+
+### Logs structurés JSON
+
+**Fichiers** :
+- `logs/api.log` : Tous les logs
+- `logs/error.log` : Erreurs uniquement
+
+**Format** :
+```json
+{
+  "timestamp": "2025-12-26T10:30:45",
+  "level": "INFO",
+  "logger": "employee_turnover_api",
+  "message": "Request POST /predict",
+  "method": "POST",
+  "path": "/predict",
+  "status_code": 200,
+  "duration_ms": 23.45,
+  "client_host": "127.0.0.1"
+}
+```
+
+## 🛡️ Rate Limiting
+
+**Configuration** :
+- **Développement** : Désactivé (DEBUG=true)
+- **Production** : 20 requêtes/minute par IP ou API Key
+
+**En cas de dépassement** :
+```json
+{
+  "error": "Rate limit exceeded",
+  "message": "20 per 1 minute"
+}
+```
+
+## ✅ Tests
+
+```bash
+# Tous les tests
+poetry run pytest tests/ -v
+
+# Avec couverture
+poetry run pytest tests/ --cov --cov-report=html
+
+# Voir rapport HTML
+open htmlcov/index.html
+```
+
+**Résultats** :
+- ✅ 33 tests passés
+- 📊 88% de couverture globale
+
+## 🚀 Déploiement
+
+### Variables d'environnement requises
+```bash
+DEBUG=false
+API_KEY=<votre-clé-sécurisée>
+LOG_LEVEL=INFO
+```
+
+### HuggingFace Spaces
+Prêt pour déploiement avec `app.py` et `requirements.txt`
+
+## 📚 Documentation
+
+- **API Interactive** : http://localhost:8000/docs
+- **ReDoc** : http://localhost:8000/redoc
+- **Guide complet** : [docs/API_GUIDE.md](docs/API_GUIDE.md)
+- **Standards** : [docs/standards.md](docs/standards.md)
+- **Couverture tests** : [docs/TEST_COVERAGE.md](docs/TEST_COVERAGE.md)
+
+## 📦 Dépendances principales
+
+- **FastAPI** 0.115.14 : Framework web
+- **Pydantic** 2.12.5 : Validation données
+- **XGBoost** 2.1.3 : Modèle ML
+- **SlowAPI** 0.1.9 : Rate limiting
+- **python-json-logger** 4.0.0 : Logs structurés
+- **pytest** 9.0.2 : Tests
+
+## 🔄 Changelog
+
+### v2.1.0 (26 décembre 2025)
+- ✨ Système de logging structuré JSON
+- 🛡️ Rate limiting avec SlowAPI
+- ⚡ Amélioration gestion d'erreurs
+- 📊 Monitoring des performances
+
+### v2.0.0 (26 décembre 2025)
+- ✅ Suite de tests complète (33 tests)
+- 🔐 Authentification API Key
+- 📊 88% de couverture de code
+
+## 👥 Auteurs
+
+- **Projet** : OpenClassrooms P5
+- **Repo** : [github.com/chaton59/OC_P5](https://github.com/chaton59/OC_P5)
