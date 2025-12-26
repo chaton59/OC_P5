@@ -10,15 +10,18 @@ Cette API expose le modèle de prédiction de départ des employés avec :
 """
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.auth import verify_api_key
+from src.config import get_settings
 from src.models import get_model_info, load_model
 from src.preprocessing import preprocess_for_prediction
 from src.schemas import EmployeeInput, HealthCheck, PredictionOutput
 
-# Version de l'API
-API_VERSION = "1.0.0"
+# Charger la configuration
+settings = get_settings()
+API_VERSION = settings.API_VERSION
 
 
 @asynccontextmanager
@@ -108,10 +111,17 @@ async def health_check():
         )
 
 
-@app.post("/predict", response_model=PredictionOutput, tags=["Prediction"])
+@app.post(
+    "/predict",
+    response_model=PredictionOutput,
+    tags=["Prediction"],
+    dependencies=[Depends(verify_api_key)] if settings.is_api_key_required else [],
+)
 async def predict(employee: EmployeeInput):
     """
     Endpoint de prédiction du turnover d'un employé.
+
+    **PROTÉGÉ PAR API KEY** : Requiert le header `X-API-Key` en production.
 
     Prend en entrée les données d'un employé, applique le preprocessing
     et retourne la prédiction avec les probabilités.
@@ -123,21 +133,16 @@ async def predict(employee: EmployeeInput):
         PredictionOutput: Prédiction et probabilités.
 
     Raises:
+        HTTPException: 401 si API key invalide ou manquante.
         HTTPException: 500 si erreur lors de la prédiction.
 
     Examples:
-        ```python
-        import requests
-        response = requests.post(
-            "http://localhost:8000/predict",
-            json={
-                "nombre_participation_pee": 0,
-                "nb_formations_suivies": 3,
-                # ... autres champs
-            }
-        )
-        print(response.json())
-        # {"prediction": 1, "probability_0": 0.35, "probability_1": 0.65, "risk_level": "High"}
+        ```bash
+        # Avec authentification
+        curl -X POST http://localhost:8000/predict \\
+          -H "X-API-Key: your-secret-key" \\
+          -H "Content-Type: application/json" \\
+          -d '{...}'
         ```
     """
     try:
