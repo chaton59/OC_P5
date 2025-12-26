@@ -14,7 +14,7 @@ from huggingface_hub import HfApi, login
 def main():
     """Deploy to HF Space."""
     # Get repo ID from command line or use default
-    repo_id = sys.argv[1] if len(sys.argv) > 1 else "ASI-Engineer/employee-turnover-dev"
+    repo_id = sys.argv[1] if len(sys.argv) > 1 else "ASI-Engineer/oc_p5-dev"
     hf_token = os.environ.get("HF_TOKEN")
 
     if not hf_token:

@@ -225,7 +225,7 @@ jobs:
       
       - name: Deploy to HF Space (Dev)
         run: |
-          python .github/scripts/deploy_to_hf.py ASI-Engineer/employee-turnover-dev
+          python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5-dev
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
@@ -249,6 +249,6 @@ jobs:
       
       - name: Deploy to HF Space (Prod)
         run: |
-          python .github/scripts/deploy_to_hf.py ASI-Engineer/employee-turnover-api
+          python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
