@@ -113,26 +113,45 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 def encode_and_scale(df: pd.DataFrame) -> pd.DataFrame:
     """
     Encode les variables catégorielles et scale les numériques.
-
-    Note: Cette fonction utilise des encoders/scalers créés à la volée.
-    En production, il faudrait charger les artifacts sauvegardés lors de l'entraînement.
+    IMPORTANT: Doit correspondre EXACTEMENT au pipeline d'entraînement.
 
     Args:
         df: DataFrame avec features engineered.
 
     Returns:
-        DataFrame transformé prêt pour le modèle.
+        DataFrame transformé avec 50 colonnes (comme training).
     """
     df = df.copy()
 
     # === ENCODING ===
 
-    # OneHot pour variables catégorielles non-ordonnées
-    cat_non_ord = ["genre", "statut_marital", "departement", "poste", "domaine_etude"]
-    onehot = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
+    # NOTE: ayant_enfants et heure_supplementaires sont SUPPRIMÉS
+    # (ne font pas partie des features du modèle d'entraînement)
+    cols_to_drop = ["ayant_enfants", "heure_supplementaires"]
+    df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
 
-    # Pour une seule prédiction, on doit fitter sur les catégories connues
-    # En production, charger l'encoder entraîné
+    # OneHot pour variables catégorielles non-ordonnées
+    # IMPORTANT: Utiliser les mêmes catégories que lors de l'entraînement
+    cat_non_ord = ["genre", "statut_marital", "departement", "poste", "domaine_etude"]
+    
+    # Définir toutes les catégories possibles (depuis training data)
+    categories_dict = {
+        "genre": ["F", "M"],
+        "statut_marital": ["Célibataire", "Divorcé(e)", "Marié(e)"],
+        "departement": ["Commercial", "Consulting", "Ressources Humaines"],
+        "poste": ["Assistant de Direction", "Cadre Commercial", "Consultant", 
+                  "Directeur Technique", "Manager", "Représentant Commercial",
+                  "Ressources Humaines", "Senior Manager", "Tech Lead"],
+        "domaine_etude": ["Autre", "Entrepreunariat", "Infra & Cloud", "Marketing",
+                          "Ressources Humaines", "Transformation Digitale"]
+    }
+    
+    onehot = OneHotEncoder(
+        sparse_output=False, 
+        handle_unknown="ignore",
+        categories=[categories_dict[col] for col in cat_non_ord]
+    )
+    
     encoded_non_ord = pd.DataFrame(
         onehot.fit_transform(df[cat_non_ord]),
         columns=onehot.get_feature_names_out(cat_non_ord),
@@ -153,17 +172,21 @@ def encode_and_scale(df: pd.DataFrame) -> pd.DataFrame:
 
     # === SCALING ===
 
-    # Colonnes numériques à scaler (exclure les encodages binaires)
-    numeric_cols = df.select_dtypes(include=[np.number]).columns
-    # Exclure les colonnes OneHot (valeurs 0 ou 1)
+    # Colonnes numériques à scaler
+    quantitative_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+    
+    # Retirer les colonnes OneHot du scaling (elles sont déjà 0/1)
     cols_to_scale = [
-        col
-        for col in numeric_cols
-        if not col.startswith(tuple(cat_non_ord)) and df[col].nunique() > 2
+        col for col in quantitative_cols 
+        if df[col].nunique() > 2  # Exclut colonnes binaires (0/1)
     ]
 
-    scaler = StandardScaler()
-    df[cols_to_scale] = scaler.fit_transform(df[cols_to_scale])
+    # Appliquer le scaling uniquement s'il y a des colonnes
+    if cols_to_scale:
+        scaler = StandardScaler()
+        df[cols_to_scale] = scaler.fit_transform(df[cols_to_scale])
+
+    return df
 
     return df
 
