@@ -1,106 +1,239 @@
----
-title: OC P5 - API ML Déployée
-emoji: 🎯
-colorFrom: blue
-colorTo: green
-sdk: gradio
-sdk_version: 5.9.1
-app_file: app.py
-pinned: false
-license: mit
----
+# 🚀 Employee Turnover Prediction API - v2.1.0
 
-# 🎯 Employee Turnover Prediction - DEV Environment
+## 📊 Vue d'ensemble
 
-Interface Gradio pour tester le modèle de prédiction de départ des employés (turnover).
+API REST de prédiction du turnover des employés basée sur un modèle XGBoost avec SMOTE.
 
-## 🚀 Modèle ML
+**✨ Nouveautés v2.1.0** :
+- 📝 Logging structuré JSON
+- 🛡️ Rate limiting (20 req/min par IP)
+- ⚡ Gestion d'erreurs améliorée
+- 📊 Monitoring des performances
+- 🔐 Authentification API Key
 
-- **Algorithme**: XGBoost optimisé avec RandomizedSearchCV
-- **Équilibrage**: SMOTE pour gérer le déséquilibre de classes (ratio 5:1)
-- **Tracking**: MLflow pour versioning et reproductibilité
-- **Métriques**: F1-Score optimisé (0.51), Accuracy 79%
-- **Stockage**: [Hugging Face Hub](https://huggingface.co/ASI-Engineer/employee-turnover-model)
+## 🏗️ Architecture
 
-## 📊 Fonctionnalités
-
-- **Status Checker**: Vérifier l'état du modèle et les métriques
-- **API Simple**: Interface Gradio pour tests rapides
-- **Chargement automatique**: Modèle téléchargé depuis HF Hub au démarrage
-
-## 🔧 Architecture
-
-```python
-# Chargement du modèle depuis HF Hub
-model_path = hf_hub_download(
-    repo_id="ASI-Engineer/employee-turnover-model",
-    filename="model/model.pkl"
-)
-model = mlflow.sklearn.load_model(str(Path(model_path).parent))
+```
+OC_P5/
+├── app.py                    # Point d'entrée FastAPI
+├── src/
+│   ├── auth.py              # Authentification API Key
+│   ├── config.py            # Configuration centralisée
+│   ├── logger.py            # Logging structuré (NOUVEAU)
+│   ├── models.py            # Chargement modèle HF Hub
+│   ├── preprocessing.py     # Pipeline preprocessing
+│   ├── rate_limit.py        # Rate limiting (NOUVEAU)
+│   └── schemas.py           # Validation Pydantic
+├── tests/                   # Suite pytest (33 tests, 88% couverture)
+├── logs/                    # Logs JSON (NOUVEAU)
+│   ├── api.log              # Tous les logs
+│   └── error.log            # Erreurs uniquement
+├── docs/                    # Documentation
+├── ml_model/                # Scripts training
+└── data/                    # Données sources
 ```
 
-## 🛠️ Installation & Développement
+## 🚀 Installation
 
 ### Prérequis
 - Python 3.12+
-- Poetry (gestionnaire de dépendances)
+- Poetry 1.7+
+- Git
 
-### Installation avec Poetry
+### Setup rapide
 
 ```bash
-# Installer Poetry (si pas déjà fait)
-curl -sSL https://install.python-poetry.org | python3 -
+# 1. Cloner le repo
+git clone https://github.com/chaton59/OC_P5.git
+cd OC_P5
 
-# Installer les dépendances
+# 2. Installer les dépendances
 poetry install
 
-# Activer l'environnement virtuel
-poetry shell
+# 3. Configurer l'environnement
+cp .env.example .env
+# Éditer .env avec vos valeurs
 
-# Lancer le pipeline d'entraînement
-poetry run python main.py
+# 4. Lancer l'API
+poetry run uvicorn app:app --reload
 
-# Lancer l'interface Gradio
-poetry run python app.py
+# 5. Accéder à la documentation
+# http://localhost:8000/docs
 ```
 
-### Requirements.txt pour HF Spaces
-
-Le fichier `requirements.txt` est **minimal et optimisé** pour HF Spaces (seulement gradio, huggingface-hub, joblib).
-
-Il est **généré automatiquement** par le CI/CD lors des déploiements.
-
-Pour le générer manuellement :
-```bash
-./scripts/export_requirements.sh
-```
-
-### Tests et Linting
+## 📝 Configuration (.env)
 
 ```bash
-# Formater le code
-poetry run black .
+# Mode développement (désactive auth + active logs détaillés)
+DEBUG=true
 
-# Linter
-poetry run flake8 .
+# API Key (requis en production)
+API_KEY=your-secret-key-here
 
-# Tests
-poetry run pytest --cov=ml_model tests/
+# Logging (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+LOG_LEVEL=INFO
+
+# HuggingFace Model
+HF_MODEL_REPO=ASI-Engineer/employee-turnover-model
+MODEL_FILENAME=model/model.pkl
 ```
 
-## 📈 Métriques
+## 🔒 Authentification
 
-- **F1-Score**: 0.5136
-- **Accuracy**: 79%
-- **Données**: 1470 échantillons, 50 features
-- **Classes**: {0: 1233, 1: 237} - Ratio 5.20:1
+### Mode DEBUG (développement)
+```bash
+# L'API Key n'est PAS requise
+curl http://localhost:8000/predict -H "Content-Type: application/json" -d '{...}'
+```
 
-## 🔗 Liens
+### Mode PRODUCTION
+```bash
+# L'API Key est REQUISE
+curl http://localhost:8000/predict \
+  -H "X-API-Key: your-secret-key" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
 
-- **Modèle**: [employee-turnover-model](https://huggingface.co/ASI-Engineer/employee-turnover-model)
-- **GitHub**: [OC_P5](https://github.com/chaton59/OC_P5)
-- **CI/CD**: GitHub Actions avec déploiement automatique
+## 📡 Endpoints
 
-Ce Space est synchronisé automatiquement via CI/CD depuis la branche `dev` du repository GitHub.
+### 🏥 Health Check
+```bash
+GET /health
 
-**Repository**: [chaton59/OC_P5](https://github.com/chaton59/OC_P5)
+# Réponse
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "model_type": "Pipeline",
+  "version": "2.1.0"
+}
+```
+
+### 🔮 Prédiction
+```bash
+POST /predict
+Content-Type: application/json
+X-API-Key: your-key (en production)
+
+# Exemple payload (voir docs/API_GUIDE.md pour tous les champs)
+{
+  "satisfaction_employee_environnement": 3,
+  "satisfaction_employee_nature_travail": 4,
+  "satisfaction_employee_equipe": 5,
+  "satisfaction_employee_equilibre_pro_perso": 3,
+  "note_evaluation_actuelle": 85,
+  "annees_depuis_la_derniere_promotion": 2,
+  "nombre_formations_realisees": 3,
+  ...
+}
+
+# Réponse
+{
+  "prediction": 0,                    # 0 = reste, 1 = part
+  "probability_0": 0.85,              # Probabilité de rester
+  "probability_1": 0.15,              # Probabilité de partir
+  "risk_level": "Low"                 # Low, Medium, High
+}
+```
+
+## 📊 Logging
+
+### Logs structurés JSON
+
+**Fichiers** :
+- `logs/api.log` : Tous les logs
+- `logs/error.log` : Erreurs uniquement
+
+**Format** :
+```json
+{
+  "timestamp": "2025-12-26T10:30:45",
+  "level": "INFO",
+  "logger": "employee_turnover_api",
+  "message": "Request POST /predict",
+  "method": "POST",
+  "path": "/predict",
+  "status_code": 200,
+  "duration_ms": 23.45,
+  "client_host": "127.0.0.1"
+}
+```
+
+## 🛡️ Rate Limiting
+
+**Configuration** :
+- **Développement** : Désactivé (DEBUG=true)
+- **Production** : 20 requêtes/minute par IP ou API Key
+
+**En cas de dépassement** :
+```json
+{
+  "error": "Rate limit exceeded",
+  "message": "20 per 1 minute"
+}
+```
+
+## ✅ Tests
+
+```bash
+# Tous les tests
+poetry run pytest tests/ -v
+
+# Avec couverture
+poetry run pytest tests/ --cov --cov-report=html
+
+# Voir rapport HTML
+open htmlcov/index.html
+```
+
+**Résultats** :
+- ✅ 33 tests passés
+- 📊 88% de couverture globale
+
+## 🚀 Déploiement
+
+### Variables d'environnement requises
+```bash
+DEBUG=false
+API_KEY=<votre-clé-sécurisée>
+LOG_LEVEL=INFO
+```
+
+### HuggingFace Spaces
+Prêt pour déploiement avec `app.py` et `requirements.txt`
+
+## 📚 Documentation
+
+- **API Interactive** : http://localhost:8000/docs
+- **ReDoc** : http://localhost:8000/redoc
+- **Guide complet** : [docs/API_GUIDE.md](docs/API_GUIDE.md)
+- **Standards** : [docs/standards.md](docs/standards.md)
+- **Couverture tests** : [docs/TEST_COVERAGE.md](docs/TEST_COVERAGE.md)
+
+## 📦 Dépendances principales
+
+- **FastAPI** 0.115.14 : Framework web
+- **Pydantic** 2.12.5 : Validation données
+- **XGBoost** 2.1.3 : Modèle ML
+- **SlowAPI** 0.1.9 : Rate limiting
+- **python-json-logger** 4.0.0 : Logs structurés
+- **pytest** 9.0.2 : Tests
+
+## 🔄 Changelog
+
+### v2.1.0 (26 décembre 2025)
+- ✨ Système de logging structuré JSON
+- 🛡️ Rate limiting avec SlowAPI
+- ⚡ Amélioration gestion d'erreurs
+- 📊 Monitoring des performances
+
+### v2.0.0 (26 décembre 2025)
+- ✅ Suite de tests complète (33 tests)
+- 🔐 Authentification API Key
+- 📊 88% de couverture de code
+
+## 👥 Auteurs
+
+- **Projet** : OpenClassrooms P5
+- **Repo** : [github.com/chaton59/OC_P5](https://github.com/chaton59/OC_P5)
