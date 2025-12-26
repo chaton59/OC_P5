@@ -19,6 +19,7 @@ joblib = "^1.4.0"
 fastapi = "^0.115.0"
 uvicorn = {extras = ["standard"], version = "^0.32.0"}
 pydantic = "^2.10.0"
+huggingface-hub = "^1.2.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.0.0"
