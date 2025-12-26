@@ -133,25 +133,39 @@ def encode_and_scale(df: pd.DataFrame) -> pd.DataFrame:
     # OneHot pour variables catégorielles non-ordonnées
     # IMPORTANT: Utiliser les mêmes catégories que lors de l'entraînement
     cat_non_ord = ["genre", "statut_marital", "departement", "poste", "domaine_etude"]
-    
+
     # Définir toutes les catégories possibles (depuis training data)
     categories_dict = {
         "genre": ["F", "M"],
         "statut_marital": ["Célibataire", "Divorcé(e)", "Marié(e)"],
         "departement": ["Commercial", "Consulting", "Ressources Humaines"],
-        "poste": ["Assistant de Direction", "Cadre Commercial", "Consultant", 
-                  "Directeur Technique", "Manager", "Représentant Commercial",
-                  "Ressources Humaines", "Senior Manager", "Tech Lead"],
-        "domaine_etude": ["Autre", "Entrepreunariat", "Infra & Cloud", "Marketing",
-                          "Ressources Humaines", "Transformation Digitale"]
+        "poste": [
+            "Assistant de Direction",
+            "Cadre Commercial",
+            "Consultant",
+            "Directeur Technique",
+            "Manager",
+            "Représentant Commercial",
+            "Ressources Humaines",
+            "Senior Manager",
+            "Tech Lead",
+        ],
+        "domaine_etude": [
+            "Autre",
+            "Entrepreunariat",
+            "Infra & Cloud",
+            "Marketing",
+            "Ressources Humaines",
+            "Transformation Digitale",
+        ],
     }
-    
+
     onehot = OneHotEncoder(
-        sparse_output=False, 
+        sparse_output=False,
         handle_unknown="ignore",
-        categories=[categories_dict[col] for col in cat_non_ord]
+        categories=[categories_dict[col] for col in cat_non_ord],
     )
-    
+
     encoded_non_ord = pd.DataFrame(
         onehot.fit_transform(df[cat_non_ord]),
         columns=onehot.get_feature_names_out(cat_non_ord),
@@ -174,10 +188,11 @@ def encode_and_scale(df: pd.DataFrame) -> pd.DataFrame:
 
     # Colonnes numériques à scaler
     quantitative_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-    
+
     # Retirer les colonnes OneHot du scaling (elles sont déjà 0/1)
     cols_to_scale = [
-        col for col in quantitative_cols 
+        col
+        for col in quantitative_cols
         if df[col].nunique() > 2  # Exclut colonnes binaires (0/1)
     ]
 

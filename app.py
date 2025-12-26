@@ -18,7 +18,7 @@ from slowapi.errors import RateLimitExceeded
 
 from src.auth import verify_api_key
 from src.config import get_settings
-from src.logger import logger, log_model_load, log_prediction, log_request
+from src.logger import logger, log_model_load, log_request
 from src.models import get_model_info, load_model
 from src.preprocessing import preprocess_for_prediction
 from src.rate_limit import limiter
@@ -36,14 +36,16 @@ async def lifespan(app: FastAPI):
 
     Charge le modèle au démarrage et le garde en cache.
     """
-    logger.info("🚀 Démarrage de l'API Employee Turnover...", extra={"version": API_VERSION})
-    
+    logger.info(
+        "🚀 Démarrage de l'API Employee Turnover...", extra={"version": API_VERSION}
+    )
+
     start_time = time.time()
     try:
         # Pré-charger le modèle au démarrage
         model = load_model()
         duration_ms = (time.time() - start_time) * 1000
-        
+
         model_type = type(model).__name__
         log_model_load(model_type, duration_ms, True)
         logger.info("✅ Modèle chargé avec succès")
@@ -88,13 +90,13 @@ async def log_requests(request: Request, call_next):
     Middleware pour logger toutes les requêtes HTTP.
     """
     start_time = time.time()
-    
+
     # Traiter la requête
     response = await call_next(request)
-    
+
     # Calculer la durée
     duration_ms = (time.time() - start_time) * 1000
-    
+
     # Logger
     log_request(
         method=request.method,
@@ -103,7 +105,7 @@ async def log_requests(request: Request, call_next):
         duration_ms=duration_ms,
         client_host=request.client.host if request.client else None,
     )
-    
+
     return response
 
 

@@ -29,7 +29,7 @@ def main():
 
     # Check if space exists, create if not
     try:
-        space_info = api.repo_info(repo_id=repo_id, repo_type="space")
+        api.repo_info(repo_id=repo_id, repo_type="space")
         print(f"✅ Space {repo_id} already exists")
     except Exception:
         print(f"📦 Creating new space: {repo_id}")
@@ -42,7 +42,7 @@ def main():
 
     # Upload application files
     print("📤 Uploading files to HF Space...")
-    
+
     api.upload_folder(
         repo_id=repo_id,
         folder_path=".",
@@ -88,24 +88,8 @@ def main():
         repo_type="space",
     )
 
-    print(f"✅ Deployment successful!")
+    print("✅ Deployment successful!")
     print(f"🌐 Space URL: https://huggingface.co/spaces/{repo_id}")
-
-
-if __name__ == "__main__":
-    main()
-            "scripts/**",
-            "docs/**",
-            "examples/**",
-            "data/**",
-            "*.pyc",
-            "__pycache__/**",
-            "poetry.lock",
-            "pyproject.toml",
-        ],
-    )
-
-    print("Deployment successful")
 
 
 if __name__ == "__main__":

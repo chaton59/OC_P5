@@ -43,14 +43,14 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
         Ajoute des champs personnalisés aux logs JSON.
         """
         super().add_fields(log_record, record, message_dict)
-        
+
         # Ajouter des métadonnées
         log_record["level"] = record.levelname
         log_record["logger"] = record.name
         log_record["module"] = record.module
         log_record["function"] = record.funcName
         log_record["line"] = record.lineno
-        
+
         # Timestamp ISO 8601
         if not log_record.get("timestamp"):
             log_record["timestamp"] = self.formatTime(record, self.datefmt)
@@ -71,11 +71,11 @@ def setup_logger(name: str = "employee_turnover_api") -> logging.Logger:
         >>> logger.info("API démarrée", extra={"version": "2.0.0"})
     """
     logger = logging.getLogger(name)
-    
+
     # Éviter duplication si déjà configuré
     if logger.handlers:
         return logger
-    
+
     # Niveau de log depuis configuration
     log_level = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
     logger.setLevel(log_level)
@@ -83,7 +83,7 @@ def setup_logger(name: str = "employee_turnover_api") -> logging.Logger:
     # === HANDLER CONSOLE (stdout) ===
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(log_level)
-    
+
     # Format simple pour la console en dev, JSON en prod
     if settings.DEBUG:
         console_format = logging.Formatter(
@@ -94,7 +94,7 @@ def setup_logger(name: str = "employee_turnover_api") -> logging.Logger:
         console_format = CustomJsonFormatter(
             "%(timestamp)s %(level)s %(name)s %(message)s"
         )
-    
+
     console_handler.setFormatter(console_format)
     logger.addHandler(console_handler)
 
@@ -141,7 +141,7 @@ def log_request(
         >>> log_request("POST", "/predict", 200, 45.3, user_id="123")
     """
     logger = logging.getLogger("employee_turnover_api")
-    
+
     log_data = {
         "method": method,
         "path": path,
@@ -149,7 +149,7 @@ def log_request(
         "duration_ms": round(duration_ms, 2),
         **kwargs,
     }
-    
+
     # Niveau selon status code
     if status_code >= 500:
         logger.error(f"Request {method} {path}", extra=log_data)
@@ -180,7 +180,7 @@ def log_prediction(
         >>> log_prediction("EMP123", 1, 0.87, "high", 23.4)
     """
     logger = logging.getLogger("employee_turnover_api")
-    
+
     logger.info(
         "Prediction made",
         extra={
@@ -206,13 +206,13 @@ def log_model_load(model_type: str, duration_ms: float, success: bool) -> None:
         >>> log_model_load("XGBoost Pipeline", 1234.5, True)
     """
     logger = logging.getLogger("employee_turnover_api")
-    
+
     log_data = {
         "model_type": model_type,
         "duration_ms": round(duration_ms, 2),
         "success": success,
     }
-    
+
     if success:
         logger.info("Model loaded successfully", extra=log_data)
     else:
