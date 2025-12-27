@@ -9,18 +9,30 @@ Ce script montre toutes les fonctionnalités de l'API déployée sur HuggingFace
 - Gestion des erreurs de validation
 
 Usage:
+    # Avec API Key (mode production)
+    API_KEY=votre-cle python tests/test_api_demo.py
+
+    # Sans API Key (mode DEBUG sur HF)
     python tests/test_api_demo.py
 
 L'API est hébergée sur: https://asi-engineer-oc-p5-dev.hf.space
 """
 import json
+import os
 import sys
 from pathlib import Path
 
 import requests
 
 # Configuration de l'API
-API_BASE_URL = "https://asi-engineer-oc-p5-dev.hf.space"
+API_BASE_URL = os.getenv("API_URL", "https://asi-engineer-oc-p5-dev.hf.space")
+API_KEY = os.getenv("API_KEY", "")
+
+# Headers avec API Key si définie
+HEADERS = {"Content-Type": "application/json"}
+if API_KEY:
+    HEADERS["X-API-Key"] = API_KEY
+    print(f"🔑 API Key configurée: {API_KEY[:10]}...")
 
 # Chemin vers les fichiers CSV de données
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -37,14 +49,25 @@ def print_section(title: str) -> None:
 
 
 def test_root_endpoint() -> bool:
-    """Test de l'endpoint racine (GET /)."""
-    print_section("1. TEST ENDPOINT RACINE (GET /)")
+    """Test de l'endpoint racine (GET /) - Interface Gradio."""
+    print_section("1. TEST INTERFACE GRADIO (GET /)")
 
     try:
         response = requests.get(f"{API_BASE_URL}/", timeout=30)
         print(f"Status: {response.status_code}")
-        print(f"Response: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
-        return response.status_code == 200
+
+        # L'endpoint racine retourne l'interface Gradio (HTML, pas JSON)
+        if response.status_code == 200:
+            if (
+                "gradio" in response.text.lower()
+                or "<!doctype html>" in response.text.lower()
+            ):
+                print("✅ Interface Gradio accessible")
+                return True
+            else:
+                print("⚠️ Réponse inattendue (pas Gradio)")
+                return False
+        return False
     except Exception as e:
         print(f"❌ Erreur: {e}")
         return False
@@ -120,7 +143,7 @@ def test_predict_single() -> bool:
         response = requests.post(
             f"{API_BASE_URL}/predict",
             json=employee_data,
-            headers={"Content-Type": "application/json"},
+            headers=HEADERS,
             timeout=60,
         )
 
@@ -200,7 +223,7 @@ def test_predict_high_risk() -> bool:
         response = requests.post(
             f"{API_BASE_URL}/predict",
             json=high_risk_employee,
-            headers={"Content-Type": "application/json"},
+            headers=HEADERS,
             timeout=60,
         )
 
@@ -255,9 +278,12 @@ def test_predict_batch() -> bool:
         }
 
         print("\n📤 Envoi des 3 fichiers CSV à l'API...")
+        # Pour les uploads de fichiers, on utilise seulement X-API-Key (pas Content-Type)
+        file_headers = {"X-API-Key": API_KEY} if API_KEY else {}
         response = requests.post(
             f"{API_BASE_URL}/predict/batch",
             files=files,
+            headers=file_headers,
             timeout=120,
         )
 
@@ -345,7 +371,7 @@ def test_validation_errors() -> bool:
             response = requests.post(
                 f"{API_BASE_URL}/predict",
                 json=test["data"],
-                headers={"Content-Type": "application/json"},
+                headers=HEADERS,
                 timeout=30,
             )
 
@@ -424,7 +450,7 @@ def test_all_postes() -> bool:
             response = requests.post(
                 f"{API_BASE_URL}/predict",
                 json=employee,
-                headers={"Content-Type": "application/json"},
+                headers=HEADERS,
                 timeout=30,
             )
 
