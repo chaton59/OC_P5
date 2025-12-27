@@ -21,17 +21,18 @@ COPY .env.example .env
 # Créer le dossier logs
 RUN mkdir -p logs
 
-# Exposer le port
-EXPOSE 8000
+# Exposer le port (7860 = Gradio par défaut sur HuggingFace Spaces)
+EXPOSE 7860
 
 # Variables d'environnement par défaut
 ENV DEBUG=false
 ENV LOG_LEVEL=INFO
 ENV API_KEY=change-me-in-production
+ENV GRADIO_SERVER_PORT=7860
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+  CMD curl -f http://localhost:7860/ || exit 1
 
-# Commande de démarrage
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Commande de démarrage - Gradio standalone (fonctionne mieux sur HF Spaces)
+CMD ["python", "-m", "src.gradio_ui"]

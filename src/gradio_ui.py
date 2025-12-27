@@ -531,13 +531,21 @@ def create_gradio_interface():
                 """
                 )
 
-    # Note: Pas de queue() car monté dans FastAPI via mount_gradio_app
-    # La queue SSE v3 ne fonctionne pas correctement avec le montage FastAPI
-
     return demo
+
+
+def launch_standalone():
+    """Lance Gradio en mode standalone (pour HuggingFace Spaces)."""
+    demo = create_gradio_interface()
+    # Activer la queue pour le mode standalone
+    demo.queue()
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        show_error=True,
+    )
 
 
 # Pour lancer en standalone
 if __name__ == "__main__":
-    demo = create_gradio_interface()
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    launch_standalone()
