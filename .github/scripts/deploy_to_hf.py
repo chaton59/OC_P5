@@ -66,7 +66,6 @@ def main():
             "docs/**",
             "scripts/**",
             ".env",
-            ".env.example",
             ".flake8",
             "poetry.lock",
             "pyproject.toml",
