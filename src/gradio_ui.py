@@ -460,6 +460,7 @@ def create_gradio_interface():
                         annees_dans_le_poste_actuel,
                     ],
                     outputs=result,
+                    api_name="predict",
                 )
 
             # Onglet Documentation
@@ -503,6 +504,9 @@ def create_gradio_interface():
                 Projet OpenClassrooms - Formation Data Scientist
                 """
                 )
+
+    # Configuration de la queue pour éviter les timeouts
+    demo.queue(max_size=10, default_concurrency_limit=1)
 
     return demo
 
