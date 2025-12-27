@@ -335,7 +335,7 @@ def create_gradio_interface():
                     with gr.Column():
                         gr.Markdown("#### 📊 Données Évaluation")
                         satisfaction_employee_environnement = gr.Slider(
-                            1, 5, value=3, step=1, label="Satisfaction environnement"
+                            1, 4, value=3, step=1, label="Satisfaction environnement"
                         )
                         note_evaluation_precedente = gr.Slider(
                             1, 5, value=3, step=1, label="Évaluation précédente"
@@ -344,13 +344,13 @@ def create_gradio_interface():
                             1, 5, value=2, step=1, label="Niveau hiérarchique"
                         )
                         satisfaction_employee_nature_travail = gr.Slider(
-                            1, 5, value=3, step=1, label="Satisfaction nature travail"
+                            1, 4, value=3, step=1, label="Satisfaction nature travail"
                         )
                         satisfaction_employee_equipe = gr.Slider(
-                            1, 5, value=3, step=1, label="Satisfaction équipe"
+                            1, 4, value=3, step=1, label="Satisfaction équipe"
                         )
                         satisfaction_employee_equilibre_pro_perso = gr.Slider(
-                            1, 5, value=3, step=1, label="Équilibre pro/perso"
+                            1, 4, value=3, step=1, label="Équilibre pro/perso"
                         )
                         note_evaluation_actuelle = gr.Slider(
                             1, 5, value=3, step=1, label="Évaluation actuelle"
