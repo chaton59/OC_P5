@@ -5,11 +5,12 @@ Module de preprocessing pour transformer les données d'entrée avant prédictio
 Ce module applique les mêmes transformations que le pipeline d'entraînement :
 - Feature engineering (ratios, moyennes)
 - Encoding (OneHot, Ordinal)
-- Scaling (StandardScaler)
+
+Note: Pas de scaling car XGBoost est insensible à l'échelle des features.
 """
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 
 from src.schemas import EmployeeInput
 
@@ -183,22 +184,10 @@ def encode_and_scale(df: pd.DataFrame) -> pd.DataFrame:
     # Concaténer les encodages OneHot
     df = pd.concat([df, encoded_non_ord], axis=1)
 
-    # === SCALING ===
-
-    # Colonnes numériques à scaler
-    quantitative_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-
-    # Retirer les colonnes OneHot du scaling (elles sont déjà 0/1)
-    cols_to_scale = [
-        col
-        for col in quantitative_cols
-        if df[col].nunique() > 2  # Exclut colonnes binaires (0/1)
-    ]
-
-    # Appliquer le scaling uniquement s'il y a des colonnes
-    if cols_to_scale:
-        scaler = StandardScaler()
-        df[cols_to_scale] = scaler.fit_transform(df[cols_to_scale])
+    # NOTE: PAS de scaling !
+    # XGBoost est un modèle basé sur des arbres, insensible à l'échelle.
+    # Le scaling sur une seule observation causait des valeurs constantes
+    # car StandardScaler.fit_transform() sur 1 ligne donne toujours 0.
 
     return df
 

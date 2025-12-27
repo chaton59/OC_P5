@@ -260,7 +260,7 @@ def create_gradio_interface():
     # Obtenir les infos du modèle
     try:
         model_info = get_model_info()
-        model_status = f"✅ Modèle chargé: {model_info.get('type', 'Unknown')}"
+        model_status = f"✅ Modèle chargé: {model_info.get('model_type', 'Unknown')}"
     except Exception:
         model_status = "⏳ Modèle en cours de chargement..."
 
