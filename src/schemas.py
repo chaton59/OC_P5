@@ -255,8 +255,12 @@ class EmployeePrediction(BaseModel):
 
     employee_id: int = Field(..., description="ID de l'employé")
     prediction: int = Field(..., description="Classe prédite (0=reste, 1=part)")
-    probability_stay: float = Field(..., ge=0, le=1, description="Probabilité de rester")
-    probability_leave: float = Field(..., ge=0, le=1, description="Probabilité de partir")
+    probability_stay: float = Field(
+        ..., ge=0, le=1, description="Probabilité de rester"
+    )
+    probability_leave: float = Field(
+        ..., ge=0, le=1, description="Probabilité de partir"
+    )
     risk_level: str = Field(..., description="Niveau de risque (Low/Medium/High)")
 
 
@@ -264,7 +268,9 @@ class BatchPredictionOutput(BaseModel):
     """Schéma de sortie pour les prédictions par lots (CSV)."""
 
     total_employees: int = Field(..., description="Nombre total d'employés traités")
-    predictions: list[EmployeePrediction] = Field(..., description="Liste des prédictions")
+    predictions: list[EmployeePrediction] = Field(
+        ..., description="Liste des prédictions"
+    )
     summary: dict = Field(..., description="Résumé des prédictions")
 
     class Config:

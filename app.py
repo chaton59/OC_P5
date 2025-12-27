@@ -371,7 +371,10 @@ async def predict_batch(
     except pd.errors.EmptyDataError:
         raise HTTPException(
             status_code=400,
-            detail={"error": "Empty CSV file", "message": "Un des fichiers CSV est vide."},
+            detail={
+                "error": "Empty CSV file",
+                "message": "Un des fichiers CSV est vide.",
+            },
         )
     except KeyError as e:
         raise HTTPException(
