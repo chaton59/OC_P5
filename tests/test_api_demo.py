@@ -26,13 +26,12 @@ import requests
 
 # Configuration de l'API
 API_BASE_URL = os.getenv("API_URL", "https://asi-engineer-oc-p5-dev.hf.space")
-API_KEY = os.getenv("API_KEY", "")
+# API Key par défaut (celle configurée dans le Dockerfile HuggingFace)
+API_KEY = os.getenv("API_KEY", "change-me-in-production")
 
-# Headers avec API Key si définie
-HEADERS = {"Content-Type": "application/json"}
-if API_KEY:
-    HEADERS["X-API-Key"] = API_KEY
-    print(f"🔑 API Key configurée: {API_KEY[:10]}...")
+# Headers avec API Key
+HEADERS = {"Content-Type": "application/json", "X-API-Key": API_KEY}
+print(f"🔑 API Key configurée: {API_KEY[:10]}...")
 
 # Chemin vers les fichiers CSV de données
 DATA_DIR = Path(__file__).parent.parent / "data"
