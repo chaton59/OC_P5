@@ -18,7 +18,6 @@ import gradio as gr
 import pandas as pd
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -124,14 +123,6 @@ async def log_requests(request: Request, call_next):
     )
 
     return response
-
-
-@app.get("/", tags=["Root"])
-async def root():
-    """
-    Endpoint racine - redirige vers l'interface Gradio.
-    """
-    return RedirectResponse(url="/ui")
 
 
 @app.get("/health", response_model=HealthCheck, tags=["Monitoring"])
@@ -390,17 +381,17 @@ async def predict_batch(
         )
 
 
-# Monter l'interface Gradio sur /ui
+# Monter l'interface Gradio sur / (racine pour HuggingFace Spaces)
 gradio_app = create_gradio_interface()
-app = gr.mount_gradio_app(app, gradio_app, path="/ui")
+app = gr.mount_gradio_app(app, gradio_app, path="/")
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    print("🚀 Lancement de l'API en mode développement...")
-    print("📖 Documentation : http://localhost:8000/docs")
-    print("🎨 Interface Gradio : http://localhost:8000/ui")
+    print("\U0001f680 Lancement de l'API en mode d\u00e9veloppement...")
+    print("\U0001f4d6 Documentation : http://localhost:8000/docs")
+    print("\U0001f3a8 Interface Gradio : http://localhost:8000/")
 
     uvicorn.run(
         "app:app",
