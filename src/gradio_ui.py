@@ -198,7 +198,7 @@ curl -X POST https://asi-engineer-oc-p5-dev.hf.space/predict \\
     "departement": "Commercial",
     "poste": "Manager",
     "nombre_experiences_precedentes": 3,
-    "nombre_heures_travailless": 45,
+    "nombre_heures_travailless": 80,
     "annee_experience_totale": 10,
     "annees_dans_l_entreprise": 5,
     "annees_dans_le_poste_actuel": 2
@@ -239,7 +239,7 @@ data = {
     "departement": "Commercial",
     "poste": "Manager",
     "nombre_experiences_precedentes": 3,
-    "nombre_heures_travailless": 45,
+    "nombre_heures_travailless": 80,
     "annee_experience_totale": 10,
     "annees_dans_l_entreprise": 5,
     "annees_dans_le_poste_actuel": 2

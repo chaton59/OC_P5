@@ -58,6 +58,46 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 ## 📊 Prédiction unitaire (POST /predict)
 
 ### Données d'entrée (format JSON)
+
+**Contraintes de validation** (basées sur les données d'entraînement) :
+
+| Champ | Type | Plage | Description |
+|-------|------|-------|-------------|
+| `nombre_participation_pee` | int | 0-3 | Participations au PEE |
+| `nb_formations_suivies` | int | 0-6 | Formations suivies |
+| `nombre_employee_sous_responsabilite` | int | 1 (fixe) | Employés sous responsabilité |
+| `distance_domicile_travail` | int | 1-30 | Distance en km |
+| `niveau_education` | int | 1-5 | Niveau d'éducation |
+| `domaine_etude` | enum | voir ci-dessous | Domaine d'études |
+| `ayant_enfants` | "Y"/"N" | | A des enfants |
+| `frequence_deplacement` | enum | Aucun/Occasionnel/Frequent | Fréquence déplacements |
+| `annees_depuis_la_derniere_promotion` | int | 0-15 | Années depuis promotion |
+| `annes_sous_responsable_actuel` | int | 0-17 | Années sous responsable |
+| `satisfaction_employee_environnement` | int | 1-4 | Satisfaction environnement |
+| `note_evaluation_precedente` | int | 1-4 | Note évaluation précédente |
+| `niveau_hierarchique_poste` | int | 1-5 | Niveau hiérarchique |
+| `satisfaction_employee_nature_travail` | int | 1-4 | Satisfaction nature travail |
+| `satisfaction_employee_equipe` | int | 1-4 | Satisfaction équipe |
+| `satisfaction_employee_equilibre_pro_perso` | int | 1-4 | Équilibre pro/perso |
+| `note_evaluation_actuelle` | int | 3-4 | Note évaluation actuelle |
+| `heure_supplementaires` | "Oui"/"Non" | | Heures supplémentaires |
+| `augementation_salaire_precedente` | float | 0-100 | Augmentation (%) |
+| `age` | int | 18-60 | Âge |
+| `genre` | "M"/"F" | | Genre |
+| `revenu_mensuel` | float | 1000-20000 | Revenu mensuel (€) |
+| `statut_marital` | enum | Célibataire/Marié(e)/Divorcé(e) | Statut marital |
+| `departement` | enum | Commercial/Consulting/Ressources Humaines | Département |
+| `poste` | enum | voir ci-dessous | Poste |
+| `nombre_experiences_precedentes` | int | 0-9 | Expériences précédentes |
+| `nombre_heures_travailless` | int | 80 (fixe) | Heures/semaine |
+| `annee_experience_totale` | int | 0-40 | Années expérience totale |
+| `annees_dans_l_entreprise` | int | 0-40 | Années dans l'entreprise |
+| `annees_dans_le_poste_actuel` | int | 0-18 | Années dans le poste |
+
+**Valeurs enum `domaine_etude`** : `Infra & Cloud`, `Transformation Digitale`, `Marketing`, `Entrepreunariat`, `Ressources Humaines`, `Autre`
+
+**Valeurs enum `poste`** : `Cadre Commercial`, `Assistant de Direction`, `Consultant`, `Tech Lead`, `Manager`, `Senior Manager`, `Représentant Commercial`, `Directeur Technique`, `Ressources Humaines`
+
 ```json
 {
   "nombre_participation_pee": 0,
@@ -86,7 +126,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
   "departement": "Commercial",
   "poste": "Manager",
   "nombre_experiences_precedentes": 3,
-  "nombre_heures_travailless": 45,
+  "nombre_heures_travailless": 80,
   "annee_experience_totale": 10,
   "annees_dans_l_entreprise": 5,
   "annees_dans_le_poste_actuel": 2
