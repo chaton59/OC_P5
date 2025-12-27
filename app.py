@@ -18,6 +18,7 @@ import gradio as gr
 import pandas as pd
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -128,15 +129,9 @@ async def log_requests(request: Request, call_next):
 @app.get("/", tags=["Root"])
 async def root():
     """
-    Endpoint racine avec informations sur l'API.
+    Endpoint racine - redirige vers l'interface Gradio.
     """
-    return {
-        "message": "Employee Turnover Prediction API",
-        "version": API_VERSION,
-        "docs": "/docs",
-        "health": "/health",
-        "predict": "/predict (POST)",
-    }
+    return RedirectResponse(url="/ui")
 
 
 @app.get("/health", response_model=HealthCheck, tags=["Monitoring"])
