@@ -107,10 +107,13 @@ def predict_turnover(
             "annees_dans_le_poste_actuel": int(annees_dans_le_poste_actuel),
         }
 
-        # Appeler l'API REST
+        # Appeler l'API REST avec la clé API
         api_url = get_api_base_url()
+        api_key = os.getenv("API_KEY", "")
+        headers = {"X-API-Key": api_key} if api_key else {}
+
         with httpx.Client(timeout=30.0) as client:
-            response = client.post(f"{api_url}/predict", json=payload)
+            response = client.post(f"{api_url}/predict", json=payload, headers=headers)
             response.raise_for_status()
             data = response.json()
 
