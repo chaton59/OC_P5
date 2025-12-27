@@ -30,9 +30,9 @@ ENV LOG_LEVEL=INFO
 ENV API_KEY=change-me-in-production
 ENV GRADIO_SERVER_PORT=7860
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:7860/ || exit 1
+# Healthcheck - vérifier que le port répond (Gradio répond avec 200 sur /config)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:7860/config || curl -f http://localhost:7860/ || exit 1
 
 # Commande de démarrage - Gradio standalone (fonctionne mieux sur HF Spaces)
 CMD ["python", "-c", "from src.gradio_ui import launch_standalone; launch_standalone()"]

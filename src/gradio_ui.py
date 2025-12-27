@@ -536,6 +536,7 @@ def create_gradio_interface():
 
 def launch_standalone():
     """Lance Gradio en mode standalone (pour HuggingFace Spaces)."""
+    import os
     import sys
 
     print("🚀 Démarrage de l'application Gradio...", flush=True)
@@ -554,13 +555,18 @@ def launch_standalone():
     print("🎨 Création de l'interface Gradio...", flush=True)
     demo = create_gradio_interface()
 
-    # Activer la queue pour le mode standalone
-    demo.queue()
+    # Configuration pour HuggingFace Spaces
+    # Ne pas utiliser queue() qui peut causer des problèmes sur HF Spaces
+    # car il nécessite un serveur websocket supplémentaire
 
     print("🌐 Lancement du serveur sur 0.0.0.0:7860...", flush=True)
+    sys.stdout.flush()
+    sys.stderr.flush()
+
     demo.launch(
         server_name="0.0.0.0",
         server_port=7860,
+        share=False,  # Pas de tunnel Gradio sur HF Spaces
         show_error=True,
     )
 
