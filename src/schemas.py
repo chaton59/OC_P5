@@ -78,16 +78,19 @@ class EmployeeInput(BaseModel):
 
     # === Données SONDAGE ===
     nombre_participation_pee: int = Field(
-        ..., ge=0, description="Nombre de participations au PEE"
+        ..., ge=0, le=3, description="Nombre de participations au PEE (0-3)"
     )
     nb_formations_suivies: int = Field(
-        ..., ge=0, le=10, description="Nombre de formations suivies"
+        ..., ge=0, le=6, description="Nombre de formations suivies (0-6)"
     )
     nombre_employee_sous_responsabilite: int = Field(
-        ..., ge=0, description="Nombre d'employés sous responsabilité"
+        default=1,
+        ge=1,
+        le=1,
+        description="Nombre d'employés sous responsabilité (fixe: 1)",
     )
     distance_domicile_travail: int = Field(
-        ..., ge=0, le=50, description="Distance domicile-travail en km"
+        ..., ge=1, le=30, description="Distance domicile-travail en km (1-30)"
     )
     niveau_education: int = Field(
         ..., ge=1, le=5, description="Niveau d'éducation (1-5)"
@@ -101,7 +104,7 @@ class EmployeeInput(BaseModel):
         ..., ge=0, description="Années depuis la dernière promotion"
     )
     annes_sous_responsable_actuel: int = Field(
-        ..., ge=0, description="Années sous le responsable actuel"
+        ..., ge=0, le=17, description="Années sous le responsable actuel (0-17)"
     )
 
     # === Données EVALUATION ===
@@ -109,7 +112,7 @@ class EmployeeInput(BaseModel):
         ..., ge=1, le=4, description="Satisfaction environnement (1-4)"
     )
     note_evaluation_precedente: int = Field(
-        ..., ge=1, le=5, description="Note évaluation précédente (1-5)"
+        ..., ge=1, le=4, description="Note évaluation précédente (1-4)"
     )
     niveau_hierarchique_poste: int = Field(
         ..., ge=1, le=5, description="Niveau hiérarchique (1-5)"
@@ -124,7 +127,7 @@ class EmployeeInput(BaseModel):
         ..., ge=1, le=4, description="Satisfaction équilibre pro/perso (1-4)"
     )
     note_evaluation_actuelle: int = Field(
-        ..., ge=1, le=5, description="Note évaluation actuelle (1-5)"
+        ..., ge=3, le=4, description="Note évaluation actuelle (3-4)"
     )
     heure_supplementaires: Literal["Oui", "Non"] = Field(
         ..., description="Fait des heures supplémentaires"
@@ -134,26 +137,31 @@ class EmployeeInput(BaseModel):
     )
 
     # === Données SIRH ===
-    age: int = Field(..., ge=18, le=70, description="Âge de l'employé")
+    age: int = Field(..., ge=18, le=60, description="Âge de l'employé (18-60)")
     genre: GenreEnum = Field(..., description="Genre")
-    revenu_mensuel: float = Field(..., ge=1000, description="Revenu mensuel (€)")
+    revenu_mensuel: float = Field(
+        ..., ge=1000, le=20000, description="Revenu mensuel (€) (1000-20000)"
+    )
     statut_marital: StatutMaritalEnum = Field(..., description="Statut marital")
     departement: DepartementEnum = Field(..., description="Département")
     poste: PosteEnum = Field(..., description="Intitulé du poste")
     nombre_experiences_precedentes: int = Field(
-        ..., ge=0, description="Nombre d'expériences précédentes"
+        ..., ge=0, le=9, description="Nombre d'expériences précédentes (0-9)"
     )
     nombre_heures_travailless: int = Field(
-        ..., ge=35, le=80, description="Nombre d'heures travaillées par semaine"
+        default=80,
+        ge=80,
+        le=80,
+        description="Nombre d'heures travaillées par semaine (fixe: 80)",
     )
     annee_experience_totale: int = Field(
         ..., ge=0, description="Années d'expérience totale"
     )
     annees_dans_l_entreprise: int = Field(
-        ..., ge=0, description="Années dans l'entreprise"
+        ..., ge=0, le=40, description="Années dans l'entreprise (0-40)"
     )
     annees_dans_le_poste_actuel: int = Field(
-        ..., ge=0, description="Années dans le poste actuel"
+        ..., ge=0, le=18, description="Années dans le poste actuel (0-18)"
     )
 
     @field_validator("augementation_salaire_precedente")

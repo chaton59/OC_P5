@@ -316,16 +316,18 @@ def create_gradio_interface():
                     with gr.Column():
                         gr.Markdown("#### 📋 Données Sondage")
                         nombre_participation_pee = gr.Slider(
-                            0, 10, value=0, step=1, label="Participations PEE"
+                            0, 3, value=0, step=1, label="Participations PEE"
                         )
                         nb_formations_suivies = gr.Slider(
-                            0, 10, value=2, step=1, label="Formations suivies"
+                            0, 6, value=2, step=1, label="Formations suivies"
                         )
-                        nombre_employee_sous_responsabilite = gr.Slider(
-                            0, 20, value=0, step=1, label="Employés sous responsabilité"
+                        nombre_employee_sous_responsabilite = gr.Number(
+                            value=1,
+                            label="Employés sous responsabilité",
+                            interactive=False,
                         )
                         distance_domicile_travail = gr.Slider(
-                            0, 50, value=15, step=1, label="Distance domicile (km)"
+                            1, 30, value=10, step=1, label="Distance domicile (km)"
                         )
                         niveau_education = gr.Slider(
                             1, 5, value=3, step=1, label="Niveau éducation (1-5)"
@@ -354,7 +356,7 @@ def create_gradio_interface():
                             0, 15, value=2, step=1, label="Années depuis promotion"
                         )
                         annes_sous_responsable_actuel = gr.Slider(
-                            0, 20, value=3, step=1, label="Années sous responsable"
+                            0, 17, value=3, step=1, label="Années sous responsable"
                         )
 
                     # Colonne EVALUATION
@@ -364,7 +366,7 @@ def create_gradio_interface():
                             1, 4, value=3, step=1, label="Satisfaction environnement"
                         )
                         note_evaluation_precedente = gr.Slider(
-                            1, 5, value=3, step=1, label="Évaluation précédente"
+                            1, 4, value=3, step=1, label="Évaluation précédente"
                         )
                         niveau_hierarchique_poste = gr.Slider(
                             1, 5, value=2, step=1, label="Niveau hiérarchique"
@@ -379,7 +381,7 @@ def create_gradio_interface():
                             1, 4, value=3, step=1, label="Équilibre pro/perso"
                         )
                         note_evaluation_actuelle = gr.Slider(
-                            1, 5, value=3, step=1, label="Évaluation actuelle"
+                            3, 4, value=3, step=1, label="Évaluation actuelle"
                         )
                         heure_supplementaires = gr.Radio(
                             ["Oui", "Non"], value="Non", label="Heures supplémentaires"
@@ -395,11 +397,11 @@ def create_gradio_interface():
                     # Colonne SIRH
                     with gr.Column():
                         gr.Markdown("#### 👤 Données SIRH")
-                        age = gr.Slider(18, 65, value=35, step=1, label="Âge")
+                        age = gr.Slider(18, 60, value=35, step=1, label="Âge")
                         genre = gr.Radio(["M", "F"], value="M", label="Genre")
                         revenu_mensuel = gr.Slider(
-                            1500,
-                            15000,
+                            1000,
+                            20000,
                             value=4500,
                             step=100,
                             label="Revenu mensuel (€)",
@@ -430,19 +432,19 @@ def create_gradio_interface():
                             label="Poste",
                         )
                         nombre_experiences_precedentes = gr.Slider(
-                            0, 10, value=2, step=1, label="Expériences précédentes"
+                            0, 9, value=2, step=1, label="Expériences précédentes"
                         )
-                        nombre_heures_travailless = gr.Slider(
-                            35, 80, value=40, step=1, label="Heures travaillées/sem"
+                        nombre_heures_travailless = gr.Number(
+                            value=80, label="Heures travaillées/sem", interactive=False
                         )
                         annee_experience_totale = gr.Slider(
                             0, 40, value=10, step=1, label="Années d'expérience totale"
                         )
                         annees_dans_l_entreprise = gr.Slider(
-                            0, 30, value=5, step=1, label="Années dans l'entreprise"
+                            0, 40, value=5, step=1, label="Années dans l'entreprise"
                         )
                         annees_dans_le_poste_actuel = gr.Slider(
-                            0, 20, value=2, step=1, label="Années dans le poste"
+                            0, 18, value=2, step=1, label="Années dans le poste"
                         )
 
                 # Bouton et résultat
