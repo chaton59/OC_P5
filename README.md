@@ -1,14 +1,18 @@
-# 🚀 Employee Turnover Prediction API - v2.1.0
+# 🚀 Employee Turnover Prediction API - v2.2.0
 
 ## 📊 Vue d'ensemble
 
 API REST de prédiction du turnover des employés basée sur un modèle XGBoost avec SMOTE.
 
-**✨ Nouveautés v2.1.0** :
+**✨ Nouveautés v2.2.0** :
+- 📦 **Endpoint batch CSV** : Envoyez directement vos 3 fichiers CSV bruts
+- 🔧 Correction du preprocessing (scaling + ordre des colonnes)
+- 📊 Prédictions plus précises (~90% accuracy)
+
+**✨ v2.1.0** :
 - 📝 Logging structuré JSON
 - 🛡️ Rate limiting (20 req/min par IP)
 - ⚡ Gestion d'erreurs améliorée
-- 📊 Monitoring des performances
 - 🔐 Authentification API Key
 
 ## 🏗️ Architecture
@@ -106,25 +110,21 @@ GET /health
   "status": "healthy",
   "model_loaded": true,
   "model_type": "Pipeline",
-  "version": "2.1.0"
+  "version": "2.2.0"
 }
 ```
 
-### 🔮 Prédiction
+### 🔮 Prédiction unitaire
 ```bash
 POST /predict
 Content-Type: application/json
 X-API-Key: your-key (en production)
 
-# Exemple payload (voir docs/API_GUIDE.md pour tous les champs)
+# Payload (tous les champs d'un employé)
 {
+  "nombre_participation_pee": 0,
+  "nb_formations_suivies": 2,
   "satisfaction_employee_environnement": 3,
-  "satisfaction_employee_nature_travail": 4,
-  "satisfaction_employee_equipe": 5,
-  "satisfaction_employee_equilibre_pro_perso": 3,
-  "note_evaluation_actuelle": 85,
-  "annees_depuis_la_derniere_promotion": 2,
-  "nombre_formations_realisees": 3,
   ...
 }
 
@@ -134,6 +134,35 @@ X-API-Key: your-key (en production)
   "probability_0": 0.85,              # Probabilité de rester
   "probability_1": 0.15,              # Probabilité de partir
   "risk_level": "Low"                 # Low, Medium, High
+}
+```
+
+### 📦 Prédiction batch (NOUVEAU)
+```bash
+POST /predict/batch
+X-API-Key: your-key (en production)
+
+# Envoi des 3 fichiers CSV bruts
+curl -X POST "http://localhost:8000/predict/batch" \
+  -H "X-API-Key: your-key" \
+  -F "sondage_file=@data/extrait_sondage.csv" \
+  -F "eval_file=@data/extrait_eval.csv" \
+  -F "sirh_file=@data/extrait_sirh.csv"
+
+# Réponse
+{
+  "total_employees": 1470,
+  "predictions": [
+    {"employee_id": 1, "prediction": 1, "probability_leave": 0.84, "risk_level": "High"},
+    {"employee_id": 2, "prediction": 0, "probability_leave": 0.11, "risk_level": "Low"}
+  ],
+  "summary": {
+    "total_stay": 1169,
+    "total_leave": 301,
+    "high_risk_count": 222,
+    "medium_risk_count": 233,
+    "low_risk_count": 1015
+  }
 }
 ```
 
@@ -222,6 +251,12 @@ Prêt pour déploiement avec `app.py` et `requirements.txt`
 
 ## 🔄 Changelog
 
+### v2.2.0 (27 décembre 2025)
+- 📦 Nouvel endpoint `/predict/batch` pour traitement CSV direct
+- 🔧 Fix preprocessing : ajout du scaling des features
+- 🔧 Fix preprocessing : correction de l'ordre des colonnes
+- 📊 Amélioration précision des prédictions (~90%)
+
 ### v2.1.0 (26 décembre 2025)
 - ✨ Système de logging structuré JSON
 - 🛡️ Rate limiting avec SlowAPI
@@ -229,7 +264,7 @@ Prêt pour déploiement avec `app.py` et `requirements.txt`
 - 📊 Monitoring des performances
 
 ### v2.0.0 (26 décembre 2025)
-- ✅ Suite de tests complète (33 tests)
+- ✅ Suite de tests complète (36 tests)
 - 🔐 Authentification API Key
 - 📊 88% de couverture de code
 

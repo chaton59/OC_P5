@@ -10,7 +10,8 @@ API REST FastAPI pour prédire le risque de départ d'un employé.
 | GET | `/health` | Health check |
 | GET | `/docs` | Documentation Swagger |
 | GET | `/ui` | Interface Gradio |
-| POST | `/predict` | Prédiction turnover |
+| POST | `/predict` | Prédiction unitaire (JSON) |
+| POST | `/predict/batch` | Prédiction batch (3 fichiers CSV) |
 
 ## 🚀 Démarrage rapide
 
@@ -32,7 +33,7 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --workers 2
 
 ## 🔐 Authentification
 
-L'endpoint `/predict` est protégé par API Key en production (`DEBUG=False`).
+Les endpoints `/predict` et `/predict/batch` sont protégés par API Key en production (`DEBUG=False`).
 
 ### Configuration
 ```bash
@@ -54,9 +55,9 @@ curl -X POST http://localhost:8000/predict \
 python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-## 📊 Exemple de requête
+## 📊 Prédiction unitaire (POST /predict)
 
-### Données d'entrée (format CSV brut)
+### Données d'entrée (format JSON)
 ```json
 {
   "nombre_participation_pee": 0,
@@ -100,6 +101,82 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
   "probability_1": 0.15,
   "risk_level": "Low"
 }
+```
+
+## 📦 Prédiction batch (POST /predict/batch)
+
+**Nouveau !** Envoyez directement les 3 fichiers CSV bruts pour obtenir les prédictions de tous les employés.
+
+### Requête
+```bash
+curl -X POST "http://localhost:8000/predict/batch" \
+  -H "X-API-Key: votre-cle-secrete" \
+  -F "sondage_file=@data/extrait_sondage.csv" \
+  -F "eval_file=@data/extrait_eval.csv" \
+  -F "sirh_file=@data/extrait_sirh.csv"
+```
+
+### Fichiers attendus
+
+| Fichier | Description | Colonnes clés |
+|---------|-------------|---------------|
+| `sondage_file` | Données sondage satisfaction | `code_sondage`, `satisfaction_*`, `frequence_deplacement`... |
+| `eval_file` | Données évaluations | `eval_number`, `note_evaluation_*`, `heure_supplementaires`... |
+| `sirh_file` | Données RH administratives | `id_employee`, `age`, `genre`, `revenu_mensuel`, `poste`... |
+
+### Réponse
+```json
+{
+  "total_employees": 1470,
+  "predictions": [
+    {
+      "employee_id": 1,
+      "prediction": 1,
+      "probability_stay": 0.16,
+      "probability_leave": 0.84,
+      "risk_level": "High"
+    },
+    {
+      "employee_id": 2,
+      "prediction": 0,
+      "probability_stay": 0.89,
+      "probability_leave": 0.11,
+      "risk_level": "Low"
+    }
+  ],
+  "summary": {
+    "total_stay": 1169,
+    "total_leave": 301,
+    "high_risk_count": 222,
+    "medium_risk_count": 233,
+    "low_risk_count": 1015
+  }
+}
+```
+
+### Exemple Python
+```python
+import requests
+
+url = "http://localhost:8000/predict/batch"
+headers = {"X-API-Key": "votre-cle-secrete"}
+
+files = {
+    "sondage_file": open("data/extrait_sondage.csv", "rb"),
+    "eval_file": open("data/extrait_eval.csv", "rb"),
+    "sirh_file": open("data/extrait_sirh.csv", "rb"),
+}
+
+response = requests.post(url, headers=headers, files=files)
+data = response.json()
+
+print(f"Total employés: {data['total_employees']}")
+print(f"À risque élevé: {data['summary']['high_risk_count']}")
+
+# Filtrer les employés à haut risque
+high_risk = [p for p in data["predictions"] if p["risk_level"] == "High"]
+for emp in high_risk[:5]:
+    print(f"  ID {emp['employee_id']}: {emp['probability_leave']:.1%} de départ")
 ```
 
 ## 🔄 Preprocessing

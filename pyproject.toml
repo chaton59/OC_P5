@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "oc-p5"
-version = "0.1.0"
+version = "2.2.0"
 description = "Projet OpenClassRoom - Modèle ML de prédiction du turnover avec MLflow"
 authors = ["chaton59 <v.trouillez@gmail.com>"]
 readme = "README.md"
