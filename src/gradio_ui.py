@@ -537,25 +537,26 @@ def create_gradio_interface():
 def launch_standalone():
     """Lance Gradio en mode standalone (pour HuggingFace Spaces)."""
     import sys
-    
+
     print("🚀 Démarrage de l'application Gradio...", flush=True)
     print(f"Python version: {sys.version}", flush=True)
-    
+
     # Pré-charger le modèle pour éviter le timeout au premier appel
     print("📦 Pré-chargement du modèle...", flush=True)
     try:
         from src.models import load_model
+
         model = load_model()
         print(f"✅ Modèle chargé: {type(model).__name__}", flush=True)
     except Exception as e:
         print(f"⚠️ Erreur chargement modèle: {e}", flush=True)
-    
+
     print("🎨 Création de l'interface Gradio...", flush=True)
     demo = create_gradio_interface()
-    
+
     # Activer la queue pour le mode standalone
     demo.queue()
-    
+
     print("🌐 Lancement du serveur sur 0.0.0.0:7860...", flush=True)
     demo.launch(
         server_name="0.0.0.0",
