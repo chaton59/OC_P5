@@ -67,20 +67,30 @@ def predict_turnover(
         payload = {
             "nombre_participation_pee": int(nombre_participation_pee),
             "nb_formations_suivies": int(nb_formations_suivies),
-            "nombre_employee_sous_responsabilite": int(nombre_employee_sous_responsabilite),
+            "nombre_employee_sous_responsabilite": int(
+                nombre_employee_sous_responsabilite
+            ),
             "distance_domicile_travail": int(distance_domicile_travail),
             "niveau_education": int(niveau_education),
             "domaine_etude": domaine_etude,
             "ayant_enfants": ayant_enfants,
             "frequence_deplacement": frequence_deplacement,
-            "annees_depuis_la_derniere_promotion": int(annees_depuis_la_derniere_promotion),
+            "annees_depuis_la_derniere_promotion": int(
+                annees_depuis_la_derniere_promotion
+            ),
             "annes_sous_responsable_actuel": int(annes_sous_responsable_actuel),
-            "satisfaction_employee_environnement": int(satisfaction_employee_environnement),
+            "satisfaction_employee_environnement": int(
+                satisfaction_employee_environnement
+            ),
             "note_evaluation_precedente": int(note_evaluation_precedente),
             "niveau_hierarchique_poste": int(niveau_hierarchique_poste),
-            "satisfaction_employee_nature_travail": int(satisfaction_employee_nature_travail),
+            "satisfaction_employee_nature_travail": int(
+                satisfaction_employee_nature_travail
+            ),
             "satisfaction_employee_equipe": int(satisfaction_employee_equipe),
-            "satisfaction_employee_equilibre_pro_perso": int(satisfaction_employee_equilibre_pro_perso),
+            "satisfaction_employee_equilibre_pro_perso": int(
+                satisfaction_employee_equilibre_pro_perso
+            ),
             "note_evaluation_actuelle": int(note_evaluation_actuelle),
             "heure_supplementaires": heure_supplementaires,
             "augementation_salaire_precedente": float(augementation_salaire_precedente),
