@@ -43,10 +43,12 @@ def main():
     # Upload application files
     print("📤 Uploading files to HF Space...")
 
+    # Clean deploy: delete old files first, then upload
     api.upload_folder(
         repo_id=repo_id,
         folder_path=".",
         repo_type="space",
+        delete_patterns=["*"],  # Delete everything before uploading
         ignore_patterns=[
             ".git/**",
             ".github/**",
