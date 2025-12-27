@@ -505,8 +505,8 @@ def create_gradio_interface():
                 """
                 )
 
-    # Configuration de la queue pour éviter les timeouts
-    demo.queue(max_size=10, default_concurrency_limit=1)
+    # Note: Pas de queue() car monté dans FastAPI via mount_gradio_app
+    # La queue SSE v3 ne fonctionne pas correctement avec le montage FastAPI
 
     return demo
 
