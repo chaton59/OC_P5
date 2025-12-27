@@ -7,23 +7,11 @@ Cette interface permet de:
 - Visualiser la documentation de l'API
 - Comprendre les champs requis
 """
-import os
-
 import gradio as gr
-import httpx
 
-from src.models import get_model_info
-
-
-# URL de base pour les appels API (localhost en dev, relatif en prod)
-def get_api_base_url() -> str:
-    """Retourne l'URL de base de l'API."""
-    # En production sur HF Spaces, utiliser le même host
-    space_host = os.getenv("SPACE_HOST")
-    if space_host:
-        return f"https://{space_host}"
-    # En local
-    return "http://localhost:8000"
+from src.models import get_model_info, load_model
+from src.preprocessing import preprocess_for_prediction
+from src.schemas import EmployeeInput
 
 
 def predict_turnover(
@@ -61,67 +49,69 @@ def predict_turnover(
     annees_dans_l_entreprise: int,
     annees_dans_le_poste_actuel: int,
 ) -> str:
-    """Effectue une prédiction de turnover via l'API REST."""
+    """Effectue une prédiction de turnover directement via le modèle."""
     try:
-        # Construire le payload pour l'API
-        payload = {
-            "nombre_participation_pee": int(nombre_participation_pee),
-            "nb_formations_suivies": int(nb_formations_suivies),
-            "nombre_employee_sous_responsabilite": int(
+        # Créer l'objet EmployeeInput avec validation Pydantic
+        employee = EmployeeInput(
+            nombre_participation_pee=int(nombre_participation_pee),
+            nb_formations_suivies=int(nb_formations_suivies),
+            nombre_employee_sous_responsabilite=int(
                 nombre_employee_sous_responsabilite
             ),
-            "distance_domicile_travail": int(distance_domicile_travail),
-            "niveau_education": int(niveau_education),
-            "domaine_etude": domaine_etude,
-            "ayant_enfants": ayant_enfants,
-            "frequence_deplacement": frequence_deplacement,
-            "annees_depuis_la_derniere_promotion": int(
+            distance_domicile_travail=int(distance_domicile_travail),
+            niveau_education=int(niveau_education),
+            domaine_etude=domaine_etude,
+            ayant_enfants=ayant_enfants,
+            frequence_deplacement=frequence_deplacement,
+            annees_depuis_la_derniere_promotion=int(
                 annees_depuis_la_derniere_promotion
             ),
-            "annes_sous_responsable_actuel": int(annes_sous_responsable_actuel),
-            "satisfaction_employee_environnement": int(
+            annes_sous_responsable_actuel=int(annes_sous_responsable_actuel),
+            satisfaction_employee_environnement=int(
                 satisfaction_employee_environnement
             ),
-            "note_evaluation_precedente": int(note_evaluation_precedente),
-            "niveau_hierarchique_poste": int(niveau_hierarchique_poste),
-            "satisfaction_employee_nature_travail": int(
+            note_evaluation_precedente=int(note_evaluation_precedente),
+            niveau_hierarchique_poste=int(niveau_hierarchique_poste),
+            satisfaction_employee_nature_travail=int(
                 satisfaction_employee_nature_travail
             ),
-            "satisfaction_employee_equipe": int(satisfaction_employee_equipe),
-            "satisfaction_employee_equilibre_pro_perso": int(
+            satisfaction_employee_equipe=int(satisfaction_employee_equipe),
+            satisfaction_employee_equilibre_pro_perso=int(
                 satisfaction_employee_equilibre_pro_perso
             ),
-            "note_evaluation_actuelle": int(note_evaluation_actuelle),
-            "heure_supplementaires": heure_supplementaires,
-            "augementation_salaire_precedente": float(augementation_salaire_precedente),
-            "age": int(age),
-            "genre": genre,
-            "revenu_mensuel": float(revenu_mensuel),
-            "statut_marital": statut_marital,
-            "departement": departement,
-            "poste": poste,
-            "nombre_experiences_precedentes": int(nombre_experiences_precedentes),
-            "nombre_heures_travailless": int(nombre_heures_travailless),
-            "annee_experience_totale": int(annee_experience_totale),
-            "annees_dans_l_entreprise": int(annees_dans_l_entreprise),
-            "annees_dans_le_poste_actuel": int(annees_dans_le_poste_actuel),
-        }
+            note_evaluation_actuelle=int(note_evaluation_actuelle),
+            heure_supplementaires=heure_supplementaires,
+            augementation_salaire_precedente=float(augementation_salaire_precedente),
+            age=int(age),
+            genre=genre,
+            revenu_mensuel=float(revenu_mensuel),
+            statut_marital=statut_marital,
+            departement=departement,
+            poste=poste,
+            nombre_experiences_precedentes=int(nombre_experiences_precedentes),
+            nombre_heures_travailless=int(nombre_heures_travailless),
+            annee_experience_totale=int(annee_experience_totale),
+            annees_dans_l_entreprise=int(annees_dans_l_entreprise),
+            annees_dans_le_poste_actuel=int(annees_dans_le_poste_actuel),
+        )
 
-        # Appeler l'API REST avec la clé API
-        api_url = get_api_base_url()
-        api_key = os.getenv("API_KEY", "")
-        headers = {"X-API-Key": api_key} if api_key else {}
+        # Preprocessing
+        features = preprocess_for_prediction(employee)
 
-        with httpx.Client(timeout=30.0) as client:
-            response = client.post(f"{api_url}/predict", json=payload, headers=headers)
-            response.raise_for_status()
-            data = response.json()
+        # Charger le modèle et prédire
+        model = load_model()
+        prediction = int(model.predict(features)[0])
+        proba = model.predict_proba(features)[0]
+        prob_0 = float(proba[0])
+        prob_1 = float(proba[1])
 
-        # Formater le résultat
-        prediction = data["prediction"]
-        prob_1 = data["probability_1"]
-        prob_0 = data["probability_0"]
-        risk_level = data["risk_level"]
+        # Déterminer le niveau de risque
+        if prob_1 < 0.3:
+            risk_level = "Low"
+        elif prob_1 < 0.7:
+            risk_level = "Medium"
+        else:
+            risk_level = "High"
 
         # Affichage
         if risk_level == "High":
@@ -147,10 +137,6 @@ def predict_turnover(
 """
         return result
 
-    except httpx.HTTPStatusError as e:
-        return f"❌ **Erreur API**: {e.response.status_code} - {e.response.text}"
-    except httpx.RequestError as e:
-        return f"❌ **Erreur de connexion**: {str(e)}"
     except Exception as e:
         return f"❌ **Erreur**: {str(e)}"
 
