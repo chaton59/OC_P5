@@ -248,3 +248,46 @@ class HealthCheck(BaseModel):
                 "version": "1.0.0",
             }
         }
+
+
+class EmployeePrediction(BaseModel):
+    """Prédiction pour un employé dans le batch."""
+
+    employee_id: int = Field(..., description="ID de l'employé")
+    prediction: int = Field(..., description="Classe prédite (0=reste, 1=part)")
+    probability_stay: float = Field(..., ge=0, le=1, description="Probabilité de rester")
+    probability_leave: float = Field(..., ge=0, le=1, description="Probabilité de partir")
+    risk_level: str = Field(..., description="Niveau de risque (Low/Medium/High)")
+
+
+class BatchPredictionOutput(BaseModel):
+    """Schéma de sortie pour les prédictions par lots (CSV)."""
+
+    total_employees: int = Field(..., description="Nombre total d'employés traités")
+    predictions: list[EmployeePrediction] = Field(..., description="Liste des prédictions")
+    summary: dict = Field(..., description="Résumé des prédictions")
+
+    class Config:
+        """Configuration Pydantic."""
+
+        json_schema_extra = {
+            "example": {
+                "total_employees": 100,
+                "predictions": [
+                    {
+                        "employee_id": 1,
+                        "prediction": 0,
+                        "probability_stay": 0.85,
+                        "probability_leave": 0.15,
+                        "risk_level": "Low",
+                    }
+                ],
+                "summary": {
+                    "total_stay": 80,
+                    "total_leave": 20,
+                    "high_risk_count": 15,
+                    "medium_risk_count": 10,
+                    "low_risk_count": 75,
+                },
+            }
+        }

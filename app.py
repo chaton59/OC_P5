@@ -8,12 +8,15 @@ Cette API expose le modèle de prédiction de départ des employés avec :
 - Health check pour monitoring
 - Documentation OpenAPI/Swagger automatique
 - Interface Gradio pour utilisation interactive
+- Endpoint batch pour traitement de fichiers CSV
 """
+import io
 import time
 from contextlib import asynccontextmanager
 
 import gradio as gr
-from fastapi import Depends, FastAPI, HTTPException, Request
+import pandas as pd
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -23,9 +26,19 @@ from src.config import get_settings
 from src.gradio_ui import create_gradio_interface
 from src.logger import logger, log_model_load, log_request
 from src.models import get_model_info, load_model
-from src.preprocessing import preprocess_for_prediction
+from src.preprocessing import (
+    merge_csv_dataframes,
+    preprocess_dataframe_for_prediction,
+    preprocess_for_prediction,
+)
 from src.rate_limit import limiter
-from src.schemas import EmployeeInput, HealthCheck, PredictionOutput
+from src.schemas import (
+    BatchPredictionOutput,
+    EmployeeInput,
+    EmployeePrediction,
+    HealthCheck,
+    PredictionOutput,
+)
 
 # Charger la configuration
 settings = get_settings()
@@ -236,6 +249,145 @@ async def predict(request: Request, employee: EmployeeInput):
             detail={
                 "error": "Prediction failed",
                 "message": "An unexpected error occurred. Please contact support.",
+            },
+        )
+
+
+@app.post(
+    "/predict/batch",
+    response_model=BatchPredictionOutput,
+    tags=["Prediction"],
+    dependencies=[Depends(verify_api_key)] if settings.is_api_key_required else [],
+)
+@limiter.limit("5/minute")
+async def predict_batch(
+    request: Request,
+    sondage_file: UploadFile = File(..., description="Fichier CSV du sondage"),
+    eval_file: UploadFile = File(..., description="Fichier CSV des évaluations"),
+    sirh_file: UploadFile = File(..., description="Fichier CSV SIRH"),
+):
+    """
+    Endpoint de prédiction batch à partir de fichiers CSV.
+
+    **PROTÉGÉ PAR API KEY** : Requiert le header `X-API-Key` en production.
+
+    Prend en entrée les 3 fichiers CSV (sondage, évaluation, SIRH),
+    les fusionne, applique le preprocessing et retourne les prédictions
+    pour tous les employés.
+
+    Args:
+        sondage_file: Fichier CSV contenant les données de sondage.
+        eval_file: Fichier CSV contenant les données d'évaluation.
+        sirh_file: Fichier CSV contenant les données SIRH.
+
+    Returns:
+        BatchPredictionOutput: Prédictions pour tous les employés.
+
+    Raises:
+        HTTPException: 400 si les fichiers sont invalides.
+        HTTPException: 500 si erreur lors du traitement.
+    """
+    try:
+        # 1. Lire les fichiers CSV
+        sondage_content = await sondage_file.read()
+        eval_content = await eval_file.read()
+        sirh_content = await sirh_file.read()
+
+        sondage_df = pd.read_csv(io.BytesIO(sondage_content))
+        eval_df = pd.read_csv(io.BytesIO(eval_content))
+        sirh_df = pd.read_csv(io.BytesIO(sirh_content))
+
+        logger.info(
+            f"Fichiers CSV chargés: sondage={len(sondage_df)}, "
+            f"eval={len(eval_df)}, sirh={len(sirh_df)} lignes"
+        )
+
+        # 2. Fusionner les DataFrames
+        merged_df = merge_csv_dataframes(sondage_df, eval_df, sirh_df)
+        employee_ids = merged_df["original_employee_id"].tolist()
+        merged_df = merged_df.drop(columns=["original_employee_id"])
+
+        # Supprimer la colonne cible si présente
+        if "a_quitte_l_entreprise" in merged_df.columns:
+            merged_df = merged_df.drop(columns=["a_quitte_l_entreprise"])
+
+        logger.info(f"DataFrame fusionné: {len(merged_df)} employés")
+
+        # 3. Preprocessing
+        X = preprocess_dataframe_for_prediction(merged_df)
+
+        # 4. Charger le modèle et prédire
+        model = load_model()
+        predictions = model.predict(X.values)
+        probabilities = model.predict_proba(X.values)
+
+        # 5. Construire la réponse
+        results = []
+        risk_counts = {"Low": 0, "Medium": 0, "High": 0}
+        leave_count = 0
+
+        for i, emp_id in enumerate(employee_ids):
+            prob_stay = float(probabilities[i][0])
+            prob_leave = float(probabilities[i][1])
+            pred = int(predictions[i])
+
+            if prob_leave < 0.3:
+                risk = "Low"
+            elif prob_leave < 0.7:
+                risk = "Medium"
+            else:
+                risk = "High"
+
+            risk_counts[risk] += 1
+            if pred == 1:
+                leave_count += 1
+
+            results.append(
+                EmployeePrediction(
+                    employee_id=int(emp_id),
+                    prediction=pred,
+                    probability_stay=prob_stay,
+                    probability_leave=prob_leave,
+                    risk_level=risk,
+                )
+            )
+
+        summary = {
+            "total_stay": len(results) - leave_count,
+            "total_leave": leave_count,
+            "high_risk_count": risk_counts["High"],
+            "medium_risk_count": risk_counts["Medium"],
+            "low_risk_count": risk_counts["Low"],
+        }
+
+        logger.info(f"Prédictions terminées: {summary}")
+
+        return BatchPredictionOutput(
+            total_employees=len(results),
+            predictions=results,
+            summary=summary,
+        )
+
+    except pd.errors.EmptyDataError:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Empty CSV file", "message": "Un des fichiers CSV est vide."},
+        )
+    except KeyError as e:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "Missing column",
+                "message": f"Colonne manquante dans les CSV: {e}",
+            },
+        )
+    except Exception as e:
+        logger.exception("Unexpected error during batch prediction")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Batch prediction failed",
+                "message": str(e),
             },
         )
 
