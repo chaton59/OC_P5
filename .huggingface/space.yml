@@ -1,0 +1,3 @@
+sdk: docker
+dockerfile: src/Dockerfile
+build_context: .
