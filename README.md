@@ -43,6 +43,8 @@ Schéma UML pour traçabilité ML (basé sur P5 prédiction turnover employé) :
 Choix : Structure relationnelle pour efficacité volume data ; sécurité via user dédié (ml_user).
 Instructions : Voir create_db.py pour création.
 
+📖 **Guide complet pour débutants** : [docs/database_guide.md](docs/database_guide.md)
+
 ### Prérequis
 - Python 3.12+
 - Poetry 1.7+
