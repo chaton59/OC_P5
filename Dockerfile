@@ -2,16 +2,22 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Installer Poetry
+RUN pip install poetry
+
 # Installer les dépendances système
 RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copier les fichiers de dépendances
-COPY requirements.txt .
+# Copier les fichiers de dépendances Poetry
+COPY pyproject.toml poetry.lock ./
 
-# Installer les dépendances Python
-RUN pip install --no-cache-dir -r requirements.txt
+# Configurer Poetry pour ne pas créer d'environnement virtuel
+RUN poetry config virtualenvs.create false
+
+# Installer les dépendances Python via Poetry
+RUN poetry install --no-dev --no-interaction --no-ansi
 
 # Copier le code de l'application
 COPY app.py .
