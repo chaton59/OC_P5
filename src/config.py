@@ -40,6 +40,11 @@ class Settings:
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 
+    # ===== BASE DE DONNÉES =====
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL", "postgresql://ml_user:15975359320@localhost:5432/oc_p5_db"
+    )
+
     @property
     def is_api_key_required(self) -> bool:
         """
