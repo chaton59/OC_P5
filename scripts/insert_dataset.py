@@ -13,6 +13,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.config import get_settings
 
+
 def load_csv_files():
     """Charge les fichiers CSV."""
     print("📂 Chargement des fichiers CSV...")
@@ -34,6 +35,7 @@ def load_csv_files():
 
     return df_sondage, df_eval, df_sirh
 
+
 def merge_datasets(df_sondage, df_eval, df_sirh):
     """Fusionne les datasets selon les clés communes."""
     print("🔗 Fusion des datasets...")
@@ -45,10 +47,13 @@ def merge_datasets(df_sondage, df_eval, df_sirh):
     # Supprimer les colonnes dupliquées si elles existent
     df_merged = df_merged.loc[:, ~df_merged.columns.duplicated()]
 
-    print(f"✅ Dataset fusionné: {len(df_merged)} lignes, {len(df_merged.columns)} colonnes")
+    print(
+        f"✅ Dataset fusionné: {len(df_merged)} lignes, {len(df_merged.columns)} colonnes"
+    )
     print(f"📊 Colonnes: {list(df_merged.columns)}")
 
     return df_merged
+
 
 def prepare_for_db(df):
     """Prépare les données pour l'insertion en base."""
@@ -56,20 +61,23 @@ def prepare_for_db(df):
 
     # Séparer les features et la target
     # La colonne 'a_quitte_l_entreprise' semble être la target (Oui/Non)
-    target_col = 'a_quitte_l_entreprise'
+    target_col = "a_quitte_l_entreprise"
 
     if target_col in df.columns:
         features_df = df.drop(columns=[target_col])
         target_df = df[target_col]
     else:
-        print("⚠️ Colonne target non trouvée, utilisation de toutes les colonnes comme features")
+        print(
+            "⚠️ Colonne target non trouvée, utilisation de toutes les colonnes comme features"
+        )
         features_df = df
-        target_df = pd.Series(['Non'] * len(df))  # Valeur par défaut
+        target_df = pd.Series(["Non"] * len(df))  # Valeur par défaut
 
     print(f"✅ Features: {len(features_df.columns)} colonnes")
     print(f"✅ Target: {len(target_df)} valeurs")
 
     return features_df, target_df
+
 
 def insert_into_db(features_df, target_df, db_url):
     """Insère les données dans PostgreSQL."""
@@ -96,16 +104,15 @@ def insert_into_db(features_df, target_df, db_url):
             features_dict = row.to_dict()
 
             # Nettoyer les valeurs (remplacer NaN par None)
-            features_dict = {k: (v if pd.notna(v) else None) for k, v in features_dict.items()}
+            features_dict = {
+                k: (v if pd.notna(v) else None) for k, v in features_dict.items()
+            }
 
             # Récupérer la target
-            target = str(target_df.iloc[idx]) if idx < len(target_df) else 'Non'
+            target = str(target_df.iloc[idx]) if idx < len(target_df) else "Non"
 
             # Créer l'enregistrement
-            dataset_entry = Dataset(
-                features_json=features_dict,
-                target=target
-            )
+            dataset_entry = Dataset(features_json=features_dict, target=target)
 
             session.add(dataset_entry)
             inserted_count += 1
@@ -125,6 +132,7 @@ def insert_into_db(features_df, target_df, db_url):
         raise
     finally:
         session.close()
+
 
 def main():
     """Fonction principale."""
@@ -155,6 +163,7 @@ def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     exit(main())

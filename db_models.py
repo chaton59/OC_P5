@@ -3,14 +3,16 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+
 class Dataset(Base):
-    __tablename__ = 'dataset'
+    __tablename__ = "dataset"
     id = Column(Integer, primary_key=True)
     features_json = Column(JSON)  # Features from sondage, eval, sirh data
     target = Column(String)  # Target: 'Oui' or 'Non' for turnover
 
+
 class MLLog(Base):
-    __tablename__ = 'ml_logs'
+    __tablename__ = "ml_logs"
     id = Column(Integer, primary_key=True)
     input_json = Column(JSON)  # Inputs flexibles (JSON for features variables)
     prediction = Column(String)  # Output ML ('Oui' or 'Non')

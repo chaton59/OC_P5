@@ -140,7 +140,7 @@ def predict_turnover(
             # Créer le log
             log_entry = MLLog(
                 input_json=employee.dict(),  # Convertir Pydantic en dict
-                prediction="Oui" if prediction == 1 else "Non"
+                prediction="Oui" if prediction == 1 else "Non",
             )
             session.add(log_entry)
             session.commit()

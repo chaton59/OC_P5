@@ -10,23 +10,28 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # Configuration de la base de données (pour test local)
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://ml_user:15975359320@localhost:5432/oc_p5_db")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql://ml_user:15975359320@localhost:5432/oc_p5_db"
+)
 
 # Importer les modèles
 Base = declarative_base()
 
+
 class Dataset(Base):
-    __tablename__ = 'dataset'
+    __tablename__ = "dataset"
     id = Column(Integer, primary_key=True)
     features_json = Column(JSON)  # Features from sondage, eval, sirh data
     target = Column(String)  # Target: 'Oui' or 'Non' for turnover
 
+
 class MLLog(Base):
-    __tablename__ = 'ml_logs'
+    __tablename__ = "ml_logs"
     id = Column(Integer, primary_key=True)
     input_json = Column(JSON)  # Inputs flexibles (JSON for features variables)
     prediction = Column(String)  # Output ML ('Oui' or 'Non')
     created_at = Column(DateTime, default=func.now())  # Timestamp auto pour traçabilité
+
 
 def test_database_connection():
     """Test de connexion à la base de données."""
@@ -39,6 +44,7 @@ def test_database_connection():
         print(f"❌ Erreur de connexion: {e}")
         return None
 
+
 def create_tables(engine):
     """Création des tables."""
     try:
@@ -48,6 +54,7 @@ def create_tables(engine):
     except Exception as e:
         print(f"❌ Erreur lors de la création des tables: {e}")
         return False
+
 
 def test_insert_data(engine):
     """Test d'insertion de données d'exemple."""
@@ -61,9 +68,9 @@ def test_insert_data(engine):
                 "age": 35,
                 "genre": "M",
                 "revenu_mensuel": 4500,
-                "satisfaction_employee_environnement": 3
+                "satisfaction_employee_environnement": 3,
             },
-            target="Non"
+            target="Non",
         )
 
         # Exemple de log ML
@@ -72,9 +79,9 @@ def test_insert_data(engine):
                 "age": 35,
                 "genre": "M",
                 "revenu_mensuel": 4500,
-                "satisfaction_employee_environnement": 3
+                "satisfaction_employee_environnement": 3,
             },
-            prediction="Non"
+            prediction="Non",
         )
 
         session.add(sample_dataset)
@@ -96,6 +103,7 @@ def test_insert_data(engine):
     except Exception as e:
         print(f"❌ Erreur lors de l'insertion: {e}")
         return False
+
 
 if __name__ == "__main__":
     print("🧪 Test des modèles de base de données\n")
