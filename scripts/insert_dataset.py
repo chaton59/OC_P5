@@ -82,7 +82,7 @@ def insert_into_db(features_df, target_df, db_url):
 
     try:
         # Importer le modèle
-        from models import Dataset
+        from db_models import Dataset
 
         # Vider la table existante (optionnel, pour éviter les doublons)
         session.query(Dataset).delete()

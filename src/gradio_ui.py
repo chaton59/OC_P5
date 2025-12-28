@@ -135,7 +135,7 @@ def predict_turnover(
             session = Session()
 
             # Importer le modèle MLLog
-            from models import MLLog
+            from db_models import MLLog
 
             # Créer le log
             log_entry = MLLog(

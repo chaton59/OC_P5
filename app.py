@@ -225,7 +225,7 @@ async def predict(request: Request, employee: EmployeeInput):
         try:
             from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
-            from models import MLLog
+            from db_models import MLLog
 
             engine = create_engine(settings.DATABASE_URL)
             Session = sessionmaker(bind=engine)

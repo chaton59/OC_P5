@@ -25,7 +25,7 @@ sudo snap install dbeaver-ce
 - **Port** : `5432`
 - **Base** : `oc_p5_db`
 - **Utilisateur** : `ml_user`
-- **Mot de passe** : `15975359320`
+- **Mot de passe** : `xxxxxxx`
 
 ### Commande de connexion :
 ```bash
@@ -152,7 +152,7 @@ ORDER BY tranche_age, prediction;
 ```python
 # Dans l'API FastAPI
 from sqlalchemy.orm import sessionmaker
-from models import MLLog
+from db_models import MLLog
 
 # Après prédiction
 log_entry = MLLog(
