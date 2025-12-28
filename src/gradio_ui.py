@@ -123,6 +123,33 @@ def predict_turnover(
 
         confidence = max(prob_0, prob_1) * 100
 
+        # Enregistrer dans la base de données (optionnel pour Gradio)
+        try:
+            from sqlalchemy import create_engine
+            from sqlalchemy.orm import sessionmaker
+            from src.config import get_settings
+
+            settings = get_settings()
+            engine = create_engine(settings.DATABASE_URL)
+            Session = sessionmaker(bind=engine)
+            session = Session()
+
+            # Importer le modèle MLLog
+            from models import MLLog
+
+            # Créer le log
+            log_entry = MLLog(
+                input_json=employee.dict(),  # Convertir Pydantic en dict
+                prediction="Oui" if prediction == 1 else "Non"
+            )
+            session.add(log_entry)
+            session.commit()
+            session.close()
+
+            db_status = "✅ Enregistré en DB"
+        except Exception as db_error:
+            db_status = f"⚠️ Erreur DB: {str(db_error)}"
+
         result = f"""
 ## {risk_emoji}
 
@@ -131,6 +158,9 @@ def predict_turnover(
 - **Confiance**: {confidence:.1f}%
 - **Probabilité de départ**: {prob_1 * 100:.1f}%
 - **Probabilité de maintien**: {prob_0 * 100:.1f}%
+
+### Base de données
+{db_status}
 
 ### Interprétation
 {"⚠️ Cet employé présente des facteurs de risque de départ. Il est recommandé d'engager un dialogue pour comprendre ses attentes." if prediction == 1 else "✅ Cet employé semble stable. Continuez à maintenir un environnement de travail positif."}

@@ -221,6 +221,28 @@ async def predict(request: Request, employee: EmployeeInput):
         else:
             risk_level = "High"
 
+        # 6. Enregistrer dans la base de données
+        try:
+            from sqlalchemy import create_engine
+            from sqlalchemy.orm import sessionmaker
+            from models import MLLog
+
+            engine = create_engine(settings.DATABASE_URL)
+            Session = sessionmaker(bind=engine)
+            session = Session()
+
+            log_entry = MLLog(
+                input_json=employee.dict(),
+                prediction="Oui" if prediction == 1 else "Non"
+            )
+            session.add(log_entry)
+            session.commit()
+            session.close()
+
+            logger.info(f"Prediction logged to database: {prediction}")
+        except Exception as db_error:
+            logger.warning(f"Failed to log prediction to database: {db_error}")
+
         return PredictionOutput(
             prediction=prediction,
             probability_0=prob_0,
