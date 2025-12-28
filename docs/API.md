@@ -1,4 +1,5 @@
-# 🚀 API Employee Turnover Prediction
+
+# 🚀 API Employee Turnover Prediction (v3.2.1)
 
 API REST FastAPI pour prédire le risque de départ d'un employé.
 
@@ -6,12 +7,11 @@ API REST FastAPI pour prédire le risque de départ d'un employé.
 
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
-| GET | `/` | Informations sur l'API |
 | GET | `/health` | Health check |
 | GET | `/docs` | Documentation Swagger |
 | GET | `/ui` | Interface Gradio |
-| POST | `/predict` | Prédiction unitaire (JSON) |
-| POST | `/predict/batch` | Prédiction batch (3 fichiers CSV) |
+| POST | `/predict` | Prédiction unitaire (JSON, contraintes réelles) |
+| POST | `/predict/batch` | Prédiction batch (3 fichiers CSV bruts) |
 
 ## 🚀 Démarrage rapide
 
@@ -59,7 +59,8 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 ### Données d'entrée (format JSON)
 
-**Contraintes de validation** (basées sur les données d'entraînement) :
+
+**Contraintes de validation strictes** (v3.2.1, issues des données d'entraînement) :
 
 | Champ | Type | Plage | Description |
 |-------|------|-------|-------------|
@@ -68,9 +69,9 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 | `nombre_employee_sous_responsabilite` | int | 1 (fixe) | Employés sous responsabilité |
 | `distance_domicile_travail` | int | 1-30 | Distance en km |
 | `niveau_education` | int | 1-5 | Niveau d'éducation |
-| `domaine_etude` | enum | voir ci-dessous | Domaine d'études |
+| `domaine_etude` | enum | Infra & Cloud, Transformation Digitale, Marketing, Entrepreunariat, Ressources Humaines, Autre | Domaine d'études |
 | `ayant_enfants` | "Y"/"N" | | A des enfants |
-| `frequence_deplacement` | enum | Aucun/Occasionnel/Frequent | Fréquence déplacements |
+| `frequence_deplacement` | enum | Aucun, Occasionnel, Frequent | Fréquence déplacements |
 | `annees_depuis_la_derniere_promotion` | int | 0-15 | Années depuis promotion |
 | `annes_sous_responsable_actuel` | int | 0-17 | Années sous responsable |
 | `satisfaction_employee_environnement` | int | 1-4 | Satisfaction environnement |
@@ -85,18 +86,17 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 | `age` | int | 18-60 | Âge |
 | `genre` | "M"/"F" | | Genre |
 | `revenu_mensuel` | float | 1000-20000 | Revenu mensuel (€) |
-| `statut_marital` | enum | Célibataire/Marié(e)/Divorcé(e) | Statut marital |
-| `departement` | enum | Commercial/Consulting/Ressources Humaines | Département |
-| `poste` | enum | voir ci-dessous | Poste |
+| `statut_marital` | enum | Célibataire, Marié(e), Divorcé(e) | Statut marital |
+| `departement` | enum | Commercial, Consulting, Ressources Humaines | Département |
+| `poste` | enum | Cadre Commercial, Assistant de Direction, Consultant, Tech Lead, Manager, Senior Manager, Représentant Commercial, Directeur Technique, Ressources Humaines | Poste |
 | `nombre_experiences_precedentes` | int | 0-9 | Expériences précédentes |
 | `nombre_heures_travailless` | int | 80 (fixe) | Heures/semaine |
 | `annee_experience_totale` | int | 0-40 | Années expérience totale |
 | `annees_dans_l_entreprise` | int | 0-40 | Années dans l'entreprise |
 | `annees_dans_le_poste_actuel` | int | 0-18 | Années dans le poste |
 
-**Valeurs enum `domaine_etude`** : `Infra & Cloud`, `Transformation Digitale`, `Marketing`, `Entrepreunariat`, `Ressources Humaines`, `Autre`
 
-**Valeurs enum `poste`** : `Cadre Commercial`, `Assistant de Direction`, `Consultant`, `Tech Lead`, `Manager`, `Senior Manager`, `Représentant Commercial`, `Directeur Technique`, `Ressources Humaines`
+**Remarque :** Toute valeur hors de ces bornes ou listes sera rejetée (422).
 
 ```json
 {
@@ -133,6 +133,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 }
 ```
 
+
 ### Réponse
 ```json
 {
@@ -156,13 +157,14 @@ curl -X POST "http://localhost:8000/predict/batch" \
   -F "sirh_file=@data/extrait_sirh.csv"
 ```
 
+
 ### Fichiers attendus
 
 | Fichier | Description | Colonnes clés |
 |---------|-------------|---------------|
-| `sondage_file` | Données sondage satisfaction | `code_sondage`, `satisfaction_*`, `frequence_deplacement`... |
-| `eval_file` | Données évaluations | `eval_number`, `note_evaluation_*`, `heure_supplementaires`... |
-| `sirh_file` | Données RH administratives | `id_employee`, `age`, `genre`, `revenu_mensuel`, `poste`... |
+| `sondage_file` | Données sondage satisfaction | `code_sondage`, `satisfaction_*`, `frequence_deplacement`, ... |
+| `eval_file` | Données évaluations | `eval_number`, `note_evaluation_*`, `heure_supplementaires`, ... |
+| `sirh_file` | Données RH administratives | `id_employee`, `age`, `genre`, `revenu_mensuel`, `poste`, ... |
 
 ### Réponse
 ```json
@@ -219,13 +221,14 @@ for emp in high_risk[:5]:
     print(f"  ID {emp['employee_id']}: {emp['probability_leave']:.1%} de départ")
 ```
 
+
 ## 🔄 Preprocessing
 
 Le preprocessing est appliqué automatiquement à chaque requête :
 
 1. **Feature Engineering** : ratios (revenu/ancienneté), moyennes satisfaction
 2. **Encoding** : OneHot (genre, département, poste...), Ordinal (fréquence déplacement)
-3. **Scaling** : StandardScaler sur variables numériques
+3. **Scaling** : StandardScaler sur variables numériques (min/max réels appliqués)
 
 ## ⚠️ Codes d'erreur
 
@@ -250,16 +253,17 @@ poetry run pytest --cov=src --cov=app
 poetry run pytest tests/test_api_predict.py -v
 ```
 
+
 ## 📁 Structure du code
 
 ```
 src/
 ├── auth.py          # Authentification API Key
 ├── config.py        # Configuration (.env)
-├── gradio_ui.py     # Interface Gradio
+├── gradio_ui.py     # Interface Gradio (sliders = min/max réels)
 ├── logger.py        # Logging JSON structuré
 ├── models.py        # Chargement modèle HF Hub
-├── preprocessing.py # Pipeline de transformation
+├── preprocessing.py # Pipeline de transformation (scaling, encoding)
 ├── rate_limit.py    # Rate limiting SlowAPI
-└── schemas.py       # Schémas Pydantic
+└── schemas.py       # Schémas Pydantic (validation stricte)
 ```

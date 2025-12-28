@@ -1,19 +1,16 @@
-# 🚀 Employee Turnover Prediction API - v2.2.0
+# 🚀 Employee Turnover Prediction API - v3.2.1
 
 ## 📊 Vue d'ensemble
 
 API REST de prédiction du turnover des employés basée sur un modèle XGBoost avec SMOTE.
 
-**✨ Nouveautés v2.2.0** :
-- 📦 **Endpoint batch CSV** : Envoyez directement vos 3 fichiers CSV bruts
-- 🔧 Correction du preprocessing (scaling + ordre des colonnes)
-- 📊 Prédictions plus précises (~90% accuracy)
 
-**✨ v2.1.0** :
-- 📝 Logging structuré JSON
-- 🛡️ Rate limiting (20 req/min par IP)
-- ⚡ Gestion d'erreurs améliorée
-- 🔐 Authentification API Key
+**✨ Nouveautés v3.2.1** :
+- 🎛️ Sliders Gradio et schémas Pydantic alignés sur les min/max réels des données d'entraînement
+- 📦 Endpoint batch CSV (3 fichiers bruts)
+- 🔑 Authentification API Key (prod)
+- 🔧 Correction preprocessing (scaling, ordre des colonnes)
+- 📝 Documentation et exemples mis à jour
 
 ## 🏗️ Architecture
 
@@ -99,6 +96,7 @@ curl http://localhost:8000/predict \
   -d '{...}'
 ```
 
+
 ## 📡 Endpoints
 
 ### 🏥 Health Check
@@ -110,7 +108,7 @@ GET /health
   "status": "healthy",
   "model_loaded": true,
   "model_type": "Pipeline",
-  "version": "2.2.0"
+  "version": "3.2.1"
 }
 ```
 
@@ -120,12 +118,38 @@ POST /predict
 Content-Type: application/json
 X-API-Key: your-key (en production)
 
-# Payload (tous les champs d'un employé)
+# Payload (exemple, contraintes réelles appliquées)
 {
   "nombre_participation_pee": 0,
   "nb_formations_suivies": 2,
+  "nombre_employee_sous_responsabilite": 1,
+  "distance_domicile_travail": 15,
+  "niveau_education": 3,
+  "domaine_etude": "Infra & Cloud",
+  "ayant_enfants": "Y",
+  "frequence_deplacement": "Occasionnel",
+  "annees_depuis_la_derniere_promotion": 2,
+  "annes_sous_responsable_actuel": 5,
   "satisfaction_employee_environnement": 3,
-  ...
+  "note_evaluation_precedente": 4,
+  "niveau_hierarchique_poste": 2,
+  "satisfaction_employee_nature_travail": 3,
+  "satisfaction_employee_equipe": 3,
+  "satisfaction_employee_equilibre_pro_perso": 2,
+  "note_evaluation_actuelle": 4,
+  "heure_supplementaires": "Non",
+  "augementation_salaire_precedente": 5.5,
+  "age": 35,
+  "genre": "M",
+  "revenu_mensuel": 4500.0,
+  "statut_marital": "Marié(e)",
+  "departement": "Commercial",
+  "poste": "Manager",
+  "nombre_experiences_precedentes": 3,
+  "nombre_heures_travailless": 80,
+  "annee_experience_totale": 10,
+  "annees_dans_l_entreprise": 5,
+  "annees_dans_le_poste_actuel": 2
 }
 
 # Réponse
@@ -137,7 +161,7 @@ X-API-Key: your-key (en production)
 }
 ```
 
-### 📦 Prédiction batch (NOUVEAU)
+### 📦 Prédiction batch (CSV)
 ```bash
 POST /predict/batch
 X-API-Key: your-key (en production)
@@ -249,7 +273,15 @@ Prêt pour déploiement avec `app.py` et `requirements.txt`
 - **python-json-logger** 4.0.0 : Logs structurés
 - **pytest** 9.0.2 : Tests
 
+
 ## 🔄 Changelog
+
+### v3.2.1 (janvier 2026)
+- 🎛️ Sliders Gradio et schémas Pydantic alignés sur les min/max réels des données d'entraînement
+- 📦 Endpoint batch CSV (3 fichiers bruts)
+- 🔑 Authentification API Key (prod)
+- 🔧 Correction preprocessing (scaling, ordre des colonnes)
+- 📝 Documentation et exemples mis à jour
 
 ### v2.2.0 (27 décembre 2025)
 - 📦 Nouvel endpoint `/predict/batch` pour traitement CSV direct
