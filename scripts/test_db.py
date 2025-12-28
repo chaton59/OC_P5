@@ -37,7 +37,7 @@ def test_database_connection():
     """Test de connexion à la base de données."""
     try:
         engine = create_engine(DATABASE_URL)
-        with engine.connect() as conn:
+        with engine.connect():
             print("✅ Connexion à PostgreSQL réussie")
         return engine
     except Exception as e:
