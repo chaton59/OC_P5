@@ -1,0 +1,15 @@
+@startuml
+entity "Dataset" {
+  * id : Integer <<PK>>
+  --
+  text : String
+  category : String
+}
+entity "MLLog" {
+  * id : Integer <<PK>>
+  --
+  input_json : JSON
+  prediction : String
+  created_at : DateTime
+}
+@enduml
