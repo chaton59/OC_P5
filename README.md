@@ -45,6 +45,15 @@ Instructions : Voir create_db.py pour création.
 
 📖 **Guide complet pour débutants** : [docs/database_guide.md](docs/database_guide.md)
 
+### 💾 Insertion du Dataset
+```bash
+# Insérer le dataset complet (1470 employés)
+poetry run python insert_dataset.py
+
+# Vérifier l'insertion
+psql -h localhost -U ml_user -d oc_p5_db -c "SELECT COUNT(*) FROM dataset;"
+```
+
 ### Prérequis
 - Python 3.12+
 - Poetry 1.7+
