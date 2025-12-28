@@ -2,8 +2,8 @@
 entity "Dataset" {
   * id : Integer <<PK>>
   --
-  text : String
-  category : String
+  features_json : JSON
+  target : String
 }
 entity "MLLog" {
   * id : Integer <<PK>>

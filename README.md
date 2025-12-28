@@ -32,25 +32,16 @@ OC_P5/
 ├── docs/                    # Documentation
 ├── ml_model/                # Scripts training
 └── data/                    # Données sources
-```
-
-
 ## 🗄️ Schéma de la Base de Données (PostgreSQL)
 
-Schéma UML pour traçabilité ML (basé sur P4 ; adapte si P3) :
-
+Schéma UML pour traçabilité ML (basé sur P5 prédiction turnover employé) :
 ![Schéma BDD](docs/schema.png)
 
-- **dataset** : Dataset original (référence pour tests/retraining). Colonnes adaptées au modèle.
+- **dataset** : Dataset original (référence pour tests/retraining). Colonnes adaptées au modèle de prédiction turnover.
 - **ml_logs** : Logs inputs/outputs (JSON pour flexibilité, timestamp pour audits).
 
-Choix : Structure relationnelle pour efficacité volume data ; sécurité via user dédié (`ml_user`).
-
-Instructions : Voir `create_db.py` pour création.
-
-Choix : Markdown pour lisibilité GitHub/HF ; complète mission (présentation à Aurélien).
-
-## 🚀 Installation
+Choix : Structure relationnelle pour efficacité volume data ; sécurité via user dédié (ml_user).
+Instructions : Voir create_db.py pour création.
 
 ### Prérequis
 - Python 3.12+
