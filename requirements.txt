@@ -1,3 +1,6 @@
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+python-dotenv==1.0.0
 aiofiles==24.1.0 ; python_version >= "3.12" and python_version < "4.0"
 alembic==1.17.2 ; python_version >= "3.12" and python_version < "4.0"
 annotated-doc==0.0.4 ; python_version >= "3.12" and python_version < "4.0"
