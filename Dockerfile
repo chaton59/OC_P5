@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier le code de l'application
 COPY app.py .
+COPY db_models.py .
 COPY src/ ./src/
 COPY .env.example .env
 
