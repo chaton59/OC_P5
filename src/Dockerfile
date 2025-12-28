@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copier les fichiers de dépendances Poetry
-COPY pyproject.toml poetry.lock ./
+COPY ../pyproject.toml ../poetry.lock ./
 
 # Configurer Poetry pour ne pas créer d'environnement virtuel
 RUN poetry config virtualenvs.create false
@@ -20,10 +20,10 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev --no-interaction --no-ansi
 
 # Copier le code de l'application
-COPY app.py .
-COPY db_models.py .
-COPY src/ ./src/
-COPY .env.example .env
+COPY ../app.py .
+COPY ../db_models.py .
+COPY . ./src/
+COPY ../.env.example .env
 
 # Créer le dossier logs
 RUN mkdir -p logs
