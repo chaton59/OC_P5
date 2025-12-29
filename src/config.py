@@ -41,11 +41,11 @@ class Settings:
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 
     # ===== BASE DE DONNÉES =====
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL"
-    )
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
     if not DATABASE_URL:
-        raise ValueError("DATABASE_URL must be set in environment variables or .env file")
+        raise ValueError(
+            "DATABASE_URL must be set in environment variables or .env file"
+        )
 
     @property
     def is_api_key_required(self) -> bool:

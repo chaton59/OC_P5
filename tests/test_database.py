@@ -39,15 +39,19 @@ class TestDatabaseConnection:
 
         with engine.connect() as conn:
             # Vérifier que les tables existent
-            result = conn.execute(text("""
+            result = conn.execute(
+                text(
+                    """
                 SELECT table_name
                 FROM information_schema.tables
                 WHERE table_schema = 'public'
                 AND table_name IN ('dataset', 'ml_logs')
-            """))
+            """
+                )
+            )
             tables = [row[0] for row in result]
-            assert 'dataset' in tables
-            assert 'ml_logs' in tables
+            assert "dataset" in tables
+            assert "ml_logs" in tables
 
 
 class TestDatasetOperations:
@@ -67,9 +71,9 @@ class TestDatasetOperations:
                     "age": 30,
                     "genre": "M",
                     "revenu_mensuel": 3500,
-                    "satisfaction_employee_environnement": 3
+                    "satisfaction_employee_environnement": 3,
                 },
-                target="Non"
+                target="Non",
             )
 
             session.add(test_entry)
@@ -126,12 +130,8 @@ class TestMLLogOperations:
         try:
             # Créer une entrée de test
             test_entry = MLLog(
-                input_json={
-                    "age": 30,
-                    "genre": "M",
-                    "revenu_mensuel": 3500
-                },
-                prediction="Non"
+                input_json={"age": 30, "genre": "M", "revenu_mensuel": 3500},
+                prediction="Non",
             )
 
             session.add(test_entry)
@@ -192,10 +192,7 @@ class TestDatabaseIntegrity:
             # (Ces tests dépendent des contraintes définies dans les modèles)
 
             # Test target valide
-            valid_entry = Dataset(
-                features_json={"test": "data"},
-                target="Oui"
-            )
+            valid_entry = Dataset(features_json={"test": "data"}, target="Oui")
             session.add(valid_entry)
             session.commit()
             session.delete(valid_entry)
