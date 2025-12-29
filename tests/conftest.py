@@ -24,6 +24,7 @@ def mock_model_loading(monkeypatch):
 
     Crée un modèle XGBoost factice qui retourne toujours une prédiction de 0.5.
     """
+
     # Créer un mock du modèle XGBoost
     class MockXGBoostModel:
         def __init__(self):
@@ -32,19 +33,21 @@ def mock_model_loading(monkeypatch):
         def predict_proba(self, X):
             """Retourne toujours [0.5, 0.5] pour les probabilités."""
             import numpy as np
-            n_samples = X.shape[0] if hasattr(X, 'shape') else len(X)
+
+            n_samples = X.shape[0] if hasattr(X, "shape") else len(X)
             return np.array([[0.5, 0.5]] * n_samples)
 
         def predict(self, X):
             """Retourne toujours 0 (pas de turnover)."""
             import numpy as np
-            n_samples = X.shape[0] if hasattr(X, 'shape') else len(X)
+
+            n_samples = X.shape[0] if hasattr(X, "shape") else len(X)
             return np.array([0] * n_samples)
 
     # Mock de la fonction load_model
     mock_model = MockXGBoostModel()
-    monkeypatch.setattr('src.models.load_model', lambda: mock_model)
-    monkeypatch.setattr('src.models._model_cache', mock_model)  # Aussi patcher le cache
+    monkeypatch.setattr("src.models.load_model", lambda: mock_model)
+    monkeypatch.setattr("src.models._model_cache", mock_model)  # Aussi patcher le cache
 
 
 @pytest.fixture
