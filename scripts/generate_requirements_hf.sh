@@ -1,4 +1,8 @@
-# Requirements for Hugging Face Spaces (Gradio app)
+#!/bin/bash
+# Script to generate requirements.txt for HF Spaces from pyproject.toml
+# This creates a minimal requirements file with only essential dependencies
+
+echo "# Requirements for Hugging Face Spaces (Gradio app)
 # Minimal dependencies needed for the Gradio interface
 # Generated from pyproject.toml with essential packages only
 
@@ -24,5 +28,6 @@ huggingface-hub>=1.2.0,<2.0.0
 
 # Utilities
 python-dotenv>=1.0.0,<2.0.0
-python-json-logger>=4.0.0,<5.0.0
-python-json-logger==4.0.0
+python-json-logger>=4.0.0,<5.0.0" > requirements.txt
+
+echo "✅ requirements.txt generated for HF Spaces"
