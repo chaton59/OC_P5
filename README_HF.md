@@ -3,7 +3,7 @@ title: Employee Turnover Prediction API
 emoji: 👔
 colorFrom: blue
 colorTo: purple
-sdk: docker
+sdk: gradio
 pinned: true
 license: mit
 app_port: 7860
