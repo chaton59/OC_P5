@@ -56,7 +56,7 @@ def can_reach_api():
             data = response.json()
             return "status" in data and data["status"] == "healthy"
         return False
-    except:
+    except Exception:
         return False
 
 
@@ -90,8 +90,14 @@ def test_root_endpoint():
         assert False
 
 
-@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
-@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+@pytest.mark.skipif(
+    not can_reach_api(),
+    reason="API non accessible (tests d'intégration pour l'API déployée)",
+)
+@pytest.mark.skipif(
+    not can_reach_api(),
+    reason="API non accessible (tests d'intégration pour l'API déployée)",
+)
 def test_health_endpoint():
     """Test de l'endpoint de santé (GET /health)."""
     print_section("2. TEST HEALTH CHECK (GET /health)")
@@ -112,7 +118,10 @@ def test_health_endpoint():
         assert False
 
 
-@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+@pytest.mark.skipif(
+    not can_reach_api(),
+    reason="API non accessible (tests d'intégration pour l'API déployée)",
+)
 def test_predict_single():
     """Test de prédiction unitaire (POST /predict)."""
     print_section("3. TEST PRÉDICTION UNITAIRE (POST /predict)")
@@ -197,7 +206,10 @@ def test_predict_single():
         assert False
 
 
-@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+@pytest.mark.skipif(
+    not can_reach_api(),
+    reason="API non accessible (tests d'intégration pour l'API déployée)",
+)
 def test_predict_high_risk():
     """Test avec un employé à haut risque de départ."""
     print_section("4. TEST EMPLOYÉ À HAUT RISQUE")
@@ -271,7 +283,10 @@ def test_predict_high_risk():
         assert False
 
 
-@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+@pytest.mark.skipif(
+    not can_reach_api(),
+    reason="API non accessible (tests d'intégration pour l'API déployée)",
+)
 def test_predict_batch():
     """Test de prédiction batch avec les 3 fichiers CSV."""
     print_section("5. TEST PRÉDICTION BATCH (POST /predict/batch)")
@@ -360,7 +375,10 @@ def test_predict_batch():
         assert False
 
 
-@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+@pytest.mark.skipif(
+    not can_reach_api(),
+    reason="API non accessible (tests d'intégration pour l'API déployée)",
+)
 def test_validation_errors():
     """Test des erreurs de validation."""
     print_section("6. TEST VALIDATION DES ERREURS")
@@ -413,7 +431,10 @@ def test_validation_errors():
     assert all_passed
 
 
-@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+@pytest.mark.skipif(
+    not can_reach_api(),
+    reason="API non accessible (tests d'intégration pour l'API déployée)",
+)
 def test_all_postes():
     """Test avec différents postes pour vérifier l'impact."""
     print_section("7. TEST IMPACT DES DIFFÉRENTS POSTES")
