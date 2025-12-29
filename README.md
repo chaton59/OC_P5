@@ -45,6 +45,31 @@ Instructions : Voir create_db.py pour création.
 
 📖 **Guide complet pour débutants** : [docs/database_guide.md](docs/database_guide.md)
 
+### 🖥️ Outils DB Visuels
+
+Pour une gestion visuelle de la base de données PostgreSQL, utilisez DBeaver (recommandé pour la mission POC).
+
+#### Installation de DBeaver
+1. Téléchargez DBeaver Community depuis [dbeaver.io](https://dbeaver.io/download/).
+2. Installez l'application sur votre système (Windows/Mac/Linux).
+
+#### Configuration de la connexion PostgreSQL
+1. Ouvrez DBeaver et cliquez sur "New Database Connection".
+2. Sélectionnez "PostgreSQL" comme type de base de données.
+3. Renseignez les paramètres de connexion :
+   - **Host** : `localhost` (ou l'IP de votre serveur PostgreSQL)
+   - **Port** : `5432` (port par défaut PostgreSQL)
+   - **Database** : `oc_p5_db`
+   - **Username** : `ml_user`
+   - **Password** : Le mot de passe défini dans votre fichier `.env` (variable `DB_PASSWORD`)
+4. Cliquez sur "Test Connection" pour vérifier.
+5. Enregistrez la connexion.
+
+#### Utilisation
+- Explorez les tables `dataset` et `ml_logs`.
+- Exécutez des requêtes SQL directement dans l'interface.
+- Visualisez les données et les schémas.
+
 ### 💾 Insertion du Dataset
 ```bash
 # Insérer le dataset complet (1470 employés)
