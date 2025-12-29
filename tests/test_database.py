@@ -47,6 +47,7 @@ class TestDatabaseConnection:
             with engine.connect() as conn:
                 result = conn.execute(text("SELECT 1"))
                 row = result.fetchone()
+                assert row is not None
                 assert row[0] == 1
         except SQLAlchemyError as e:
             pytest.fail(f"Connexion à la base de données échouée: {e}")
@@ -127,6 +128,7 @@ class TestDatasetOperations:
             # Tester une requête avec filtre
             if count > 0:
                 sample = session.query(Dataset).first()
+                assert sample is not None
                 assert sample.features_json is not None
                 assert sample.target in ["Oui", "Non"]
 
@@ -186,6 +188,7 @@ class TestMLLogOperations:
             # Tester une requête avec filtre
             if count > 0:
                 sample = session.query(MLLog).first()
+                assert sample is not None
                 assert sample.input_json is not None
                 assert sample.prediction in ["Oui", "Non"]
                 assert sample.created_at is not None
