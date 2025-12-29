@@ -17,6 +17,25 @@ from src.config import get_settings
 from db_models import Dataset, MLLog
 
 
+def can_connect_to_db():
+    """Vérifie si la connexion à la base de données est possible."""
+    try:
+        settings = get_settings()
+        engine = create_engine(settings.DATABASE_URL)
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return True
+    except SQLAlchemyError:
+        return False
+
+
+# Skip tous les tests de ce module si la DB n'est pas disponible
+pytestmark = pytest.mark.skipif(
+    not can_connect_to_db(),
+    reason="Base de données PostgreSQL non disponible (tests locaux uniquement)"
+)
+
+
 class TestDatabaseConnection:
     """Tests de connexion à la base de données."""
 
