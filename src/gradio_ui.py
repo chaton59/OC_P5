@@ -595,9 +595,9 @@ def launch_standalone():
     sys.stderr.flush()
 
     demo.launch(
-        server_name="0.0.0.0",
+        server_name="0.0.0.0",  # Retour à 0.0.0.0 pour HF Spaces
         server_port=7860,
-        share=False,  # Pas de tunnel Gradio sur HF Spaces
+        share=False,
         show_error=True,
     )
 
