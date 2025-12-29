@@ -10,11 +10,11 @@ Ces tests vérifient :
 """
 import pytest
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import sessionmaker
 
-from src.config import get_settings
 from db_models import Dataset, MLLog
+from src.config import get_settings
 
 
 def can_connect_to_db():
@@ -32,7 +32,7 @@ def can_connect_to_db():
 # Skip tous les tests de ce module si la DB n'est pas disponible
 pytestmark = pytest.mark.skipif(
     not can_connect_to_db(),
-    reason="Base de données PostgreSQL non disponible (tests locaux uniquement)"
+    reason="Base de données PostgreSQL non disponible (tests locaux uniquement)",
 )
 
 
