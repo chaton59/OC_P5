@@ -22,6 +22,7 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
 import requests
 
 # Configuration de l'API
@@ -47,7 +48,23 @@ def print_section(title: str) -> None:
     print("=" * 60 + "\n")
 
 
-def test_root_endpoint() -> bool:
+def can_reach_api():
+    """Vérifie si l'API est accessible."""
+    try:
+        response = requests.get(f"{API_BASE_URL}/health", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            return "status" in data and data["status"] == "healthy"
+        return False
+    except:
+        return False
+
+
+@pytest.mark.skipif(
+    not can_reach_api(),
+    reason="API non accessible (tests d'intégration pour l'API déployée)",
+)
+def test_root_endpoint():
     """Test de l'endpoint racine (GET /) - Interface Gradio."""
     print_section("1. TEST INTERFACE GRADIO (GET /)")
 
@@ -62,17 +79,20 @@ def test_root_endpoint() -> bool:
                 or "<!doctype html>" in response.text.lower()
             ):
                 print("✅ Interface Gradio accessible")
-                return True
+                assert True
             else:
                 print("⚠️ Réponse inattendue (pas Gradio)")
-                return False
-        return False
+                assert False
+        else:
+            assert False
     except Exception as e:
         print(f"❌ Erreur: {e}")
-        return False
+        assert False
 
 
-def test_health_endpoint() -> bool:
+@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+def test_health_endpoint():
     """Test de l'endpoint de santé (GET /health)."""
     print_section("2. TEST HEALTH CHECK (GET /health)")
 
@@ -86,13 +106,14 @@ def test_health_endpoint() -> bool:
         assert data["status"] == "healthy", "Status devrait être 'healthy'"
         assert data["model_loaded"] is True, "Modèle devrait être chargé"
         print("\n✅ Health check OK - Modèle chargé et prêt")
-        return True
+        assert True
     except Exception as e:
         print(f"❌ Erreur: {e}")
-        return False
+        assert False
 
 
-def test_predict_single() -> bool:
+@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+def test_predict_single():
     """Test de prédiction unitaire (POST /predict)."""
     print_section("3. TEST PRÉDICTION UNITAIRE (POST /predict)")
 
@@ -166,17 +187,18 @@ def test_predict_single() -> bool:
             print(f"   📈 Prédiction: {prediction}")
             print(f"   🎯 Probabilité de départ: {data['probability_1']:.1%}")
             print(f"   ✅ Probabilité de maintien: {data['probability_0']:.1%}")
-            return True
+            assert True
         else:
             print(f"Response: {response.text}")
-            return False
+            assert False
 
     except Exception as e:
         print(f"❌ Erreur: {e}")
-        return False
+        assert False
 
 
-def test_predict_high_risk() -> bool:
+@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+def test_predict_high_risk():
     """Test avec un employé à haut risque de départ."""
     print_section("4. TEST EMPLOYÉ À HAUT RISQUE")
 
@@ -238,18 +260,19 @@ def test_predict_high_risk() -> bool:
 
             if data["risk_level"] == "High" or data["probability_1"] > 0.5:
                 print("\n   ⚠️  Comme attendu, cet employé présente un risque élevé !")
-            return True
+            assert True
         else:
             print(f"Status: {response.status_code}")
             print(f"Response: {response.text}")
-            return False
+            assert False
 
     except Exception as e:
         print(f"❌ Erreur: {e}")
-        return False
+        assert False
 
 
-def test_predict_batch() -> bool:
+@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+def test_predict_batch():
     """Test de prédiction batch avec les 3 fichiers CSV."""
     print_section("5. TEST PRÉDICTION BATCH (POST /predict/batch)")
 
@@ -257,7 +280,7 @@ def test_predict_batch() -> bool:
     for f in [SONDAGE_FILE, EVAL_FILE, SIRH_FILE]:
         if not f.exists():
             print(f"❌ Fichier manquant: {f}")
-            return False
+            assert False
 
     try:
         print("📂 Fichiers CSV utilisés:")
@@ -327,17 +350,18 @@ def test_predict_batch() -> bool:
                         f"   ID {emp['employee_id']:4d}: {emp['probability_stay']:.1%} de maintien"
                     )
 
-            return True
+            assert True
         else:
             print(f"Response: {response.text[:500]}")
-            return False
+            assert False
 
     except Exception as e:
         print(f"❌ Erreur: {e}")
-        return False
+        assert False
 
 
-def test_validation_errors() -> bool:
+@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+def test_validation_errors():
     """Test des erreurs de validation."""
     print_section("6. TEST VALIDATION DES ERREURS")
 
@@ -386,10 +410,11 @@ def test_validation_errors() -> bool:
             print(f"❌ {test['name']}: Erreur - {e}")
             all_passed = False
 
-    return all_passed
+    assert all_passed
 
 
-def test_all_postes() -> bool:
+@pytest.mark.skipif(not can_reach_api(), reason="API non accessible (tests d'intégration pour l'API déployée)")
+def test_all_postes():
     """Test avec différents postes pour vérifier l'impact."""
     print_section("7. TEST IMPACT DES DIFFÉRENTS POSTES")
 
@@ -467,7 +492,7 @@ def test_all_postes() -> bool:
         bar = "█" * int(prob * 20)
         print(f"   {risk_emoji} {poste:25s} {prob:5.1%} {bar}")
 
-    return len(results) > 0
+    assert len(results) > 0
 
 
 def main():
