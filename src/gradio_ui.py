@@ -8,6 +8,7 @@ Cette interface permet de:
 - Comprendre les champs requis
 """
 import gradio as gr
+import os
 
 from src.models import get_model_info, load_model
 from src.preprocessing import preprocess_for_prediction
@@ -123,30 +124,33 @@ def predict_turnover(
 
         confidence = max(prob_0, prob_1) * 100
 
-        # Enregistrer dans la base de données (optionnel pour Gradio)
+        # Enregistrer dans la base de données (uniquement en local)
+        db_status = "ℹ️ DB désactivée sur HF Spaces"
         try:
-            from sqlalchemy import create_engine
-            from sqlalchemy.orm import sessionmaker
-            from src.config import get_settings
+            # Vérifier si on est sur HF Spaces (variable d'environnement)
+            if os.getenv("SPACE_ID") is None:  # Pas sur HF Spaces
+                from sqlalchemy import create_engine
+                from sqlalchemy.orm import sessionmaker
+                from src.config import get_settings
 
-            settings = get_settings()
-            engine = create_engine(settings.DATABASE_URL)
-            Session = sessionmaker(bind=engine)
-            session = Session()
+                settings = get_settings()
+                engine = create_engine(settings.DATABASE_URL)
+                Session = sessionmaker(bind=engine)
+                session = Session()
 
-            # Importer le modèle MLLog
-            from db_models import MLLog
+                # Importer le modèle MLLog
+                from db_models import MLLog
 
-            # Créer le log
-            log_entry = MLLog(
-                input_json=employee.dict(),  # Convertir Pydantic en dict
-                prediction="Oui" if prediction == 1 else "Non",
-            )
-            session.add(log_entry)
-            session.commit()
-            session.close()
+                # Créer le log
+                log_entry = MLLog(
+                    input_json=employee.dict(),  # Convertir Pydantic en dict
+                    prediction="Oui" if prediction == 1 else "Non",
+                )
+                session.add(log_entry)
+                session.commit()
+                session.close()
 
-            db_status = "✅ Enregistré en DB"
+                db_status = "✅ Enregistré en DB"
         except Exception as db_error:
             db_status = f"⚠️ Erreur DB: {str(db_error)}"
 
@@ -595,7 +599,7 @@ def launch_standalone():
     sys.stderr.flush()
 
     demo.launch(
-        server_name="0.0.0.0",  # Retour à 0.0.0.0 pour HF Spaces
+        server_name="0.0.0.0",
         server_port=7860,
         share=False,
         show_error=True,
