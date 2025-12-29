@@ -14,8 +14,7 @@ else
   echo "[2/4] Fichier .env déjà présent."
 fi
 
-# 3. Lancer l'API FastAPI (inclut Gradio)
-echo "[3/4] Lancement de l'API (FastAPI + Gradio)..."
-echo "Accès docs : http://localhost:8000/docs"
-echo "Accès Gradio : http://localhost:8000/ui"
-poetry run uvicorn app:app --reload
+# 3. Lancer l'interface Gradio
+echo "[3/4] Lancement de l'interface Gradio..."
+echo "Accès Gradio : http://localhost:7860"
+poetry run python app.py
