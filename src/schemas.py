@@ -8,7 +8,7 @@ permettant une validation stricte des inputs avec messages d'erreur clairs.
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 # Enums pour les valeurs catégorielles
@@ -172,10 +172,8 @@ class EmployeeInput(BaseModel):
             v = float(v.replace(" %", "").replace("%", ""))
         return v
 
-    class Config:
-        """Configuration Pydantic."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 # Exemple basé sur la première ligne des CSV
                 "nombre_participation_pee": 0,
@@ -210,6 +208,7 @@ class EmployeeInput(BaseModel):
                 "annees_dans_le_poste_actuel": 4,
             }
         }
+    )
 
 
 class PredictionOutput(BaseModel):
@@ -224,10 +223,8 @@ class PredictionOutput(BaseModel):
     )
     risk_level: str = Field(..., description="Niveau de risque (Low/Medium/High)")
 
-    class Config:
-        """Configuration Pydantic."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "prediction": 1,
                 "probability_0": 0.35,
@@ -235,6 +232,7 @@ class PredictionOutput(BaseModel):
                 "risk_level": "High",
             }
         }
+    )
 
 
 class HealthCheck(BaseModel):
@@ -245,10 +243,8 @@ class HealthCheck(BaseModel):
     model_type: str = Field(..., description="Type du modèle")
     version: str = Field(..., description="Version de l'API")
 
-    class Config:
-        """Configuration Pydantic."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "status": "healthy",
                 "model_loaded": True,
@@ -256,6 +252,7 @@ class HealthCheck(BaseModel):
                 "version": "1.0.0",
             }
         }
+    )
 
 
 class EmployeePrediction(BaseModel):
@@ -281,10 +278,8 @@ class BatchPredictionOutput(BaseModel):
     )
     summary: dict = Field(..., description="Résumé des prédictions")
 
-    class Config:
-        """Configuration Pydantic."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "total_employees": 100,
                 "predictions": [
@@ -305,3 +300,4 @@ class BatchPredictionOutput(BaseModel):
                 },
             }
         }
+    )
