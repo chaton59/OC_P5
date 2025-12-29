@@ -11,6 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 # Forcer le mode DEBUG pour les tests (désactive auth)
+# flake8: noqa: E402  # Import de l'app doit se faire après configuration DEBUG
 os.environ["DEBUG"] = "True"
 os.environ["API_KEY"] = "test-api-key-12345"
 
