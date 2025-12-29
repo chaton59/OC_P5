@@ -10,11 +10,11 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
-from api import app
-
 # Forcer le mode DEBUG pour les tests (désactive auth)
 os.environ["DEBUG"] = "True"
 os.environ["API_KEY"] = "test-api-key-12345"
+
+from api import app
 
 
 @pytest.fixture(autouse=True)
