@@ -232,7 +232,7 @@ async def predict(request: Request, employee: EmployeeInput):
             session = Session()
 
             log_entry = MLLog(
-                input_json=employee.dict(),
+                input_json=employee.model_dump(),
                 prediction="Oui" if prediction == 1 else "Non",
             )
             session.add(log_entry)
