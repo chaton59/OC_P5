@@ -13,7 +13,6 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
-from db_models import Dataset, MLLog
 from src.config import get_settings
 
 
@@ -96,7 +95,6 @@ class TestEndToEndPrediction:
             response = client.post("/predict", json=employee_data)
             assert response.status_code == 200
 
-            data = response.json()
             # Note: L'API actuelle ne retourne pas de request_id
 
             # 2. Vérifier en BDD que des enregistrements ont été ajoutés
@@ -111,13 +109,13 @@ class TestEndToEndPrediction:
                 ).scalar()
 
                 # Vérifier qu'il y a des données (le nombre exact dépend des tests précédents)
-                assert ml_count > 0, f"Prédiction {i+1} : devrait y avoir des logs ML"
+                assert ml_count > 0, f"Prédiction {i + 1} : devrait y avoir des logs ML"
                 assert (
                     dataset_count > 0
-                ), f"Prédiction {i+1} : devrait y avoir des datasets"
+                ), f"Prédiction {i + 1} : devrait y avoir des datasets"
 
                 print(
-                    f"✅ Prédiction {i+1} : {ml_count} logs ML, {dataset_count} datasets"
+                    f"✅ Prédiction {i + 1} : {ml_count} logs ML, {dataset_count} datasets"
                 )
 
     def test_predict_performance_timing(self, client, valid_employee_data):
@@ -158,7 +156,7 @@ class TestEndToEndPrediction:
             # Note: request_id n'est pas inclus dans PredictionOutput
 
             print(
-                f"✅ Requête {i+1}: prediction={data['prediction']}, risk_level={data['risk_level']}"
+                f"✅ Requête {i + 1}: prediction={data['prediction']}, risk_level={data['risk_level']}"
             )
 
     def test_predict_error_handling_invalid_data(self, client, invalid_employee_data):

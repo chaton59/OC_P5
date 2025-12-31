@@ -5,7 +5,6 @@ Tests pour l'authentification API Key de l'API.
 Ces tests vérifient que le système d'authentification est bien en place.
 Note: Les tests en mode production nécessitent de redémarrer l'app avec DEBUG=False.
 """
-import pytest
 
 
 def test_auth_system_exists(client):
@@ -103,8 +102,6 @@ def test_get_api_key_dependency_production_mode():
 def test_get_rate_limit_key_with_api_key():
     """Test get_rate_limit_key avec header API Key."""
     from unittest.mock import Mock
-
-    from fastapi import Request
 
     from src.rate_limit import get_rate_limit_key
 
