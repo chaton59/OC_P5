@@ -25,7 +25,7 @@ OC_P5/
 │   ├── preprocessing.py     # Pipeline preprocessing
 │   ├── rate_limit.py        # Rate limiting (NOUVEAU)
 │   └── schemas.py           # Validation Pydantic
-├── tests/                   # Suite pytest (33 tests, 88% couverture)
+├── tests/                   # Suite pytest (84 tests, 75.12% couverture)
 ├── logs/                    # Logs JSON (NOUVEAU)
 │   ├── api.log              # Tous les logs
 │   └── error.log            # Erreurs uniquement
@@ -284,8 +284,8 @@ open htmlcov/index.html
 ```
 
 **Résultats** :
-- ✅ 33 tests passés
-- 📊 88% de couverture globale
+- ✅ 84 tests passés
+- 📊 75.12% de couverture globale
 
 ## 🚀 Déploiement
 
@@ -339,7 +339,7 @@ Prêt pour déploiement avec `app.py` et `requirements.txt`
 - 📊 Monitoring des performances
 
 ### v2.0.0 (26 décembre 2025)
-- ✅ Suite de tests complète (36 tests)
+- ✅ Suite de tests complète (84 tests)
 - 🔐 Authentification API Key
 - 📊 88% de couverture de code
 
