@@ -8,7 +8,7 @@ permettant une validation stricte des inputs avec messages d'erreur clairs.
 from enum import Enum
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
 
 def validate_augmentation(v):
