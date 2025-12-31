@@ -77,15 +77,36 @@ class TestPreprocessing:
 
         # Vérifier que toutes les colonnes attendues sont présentes
         expected_columns = [
-            "nombre_participation_pee", "nb_formations_suivies", "nombre_employee_sous_responsabilite",
-            "distance_domicile_travail", "niveau_education", "domaine_etude", "ayant_enfants",
-            "frequence_deplacement", "annees_depuis_la_derniere_promotion", "annes_sous_responsable_actuel",
-            "satisfaction_employee_environnement", "note_evaluation_precedente", "niveau_hierarchique_poste",
-            "satisfaction_employee_nature_travail", "satisfaction_employee_equipe",
-            "satisfaction_employee_equilibre_pro_perso", "note_evaluation_actuelle", "heure_supplementaires",
-            "augementation_salaire_precedente", "age", "genre", "revenu_mensuel", "statut_marital",
-            "departement", "poste", "nombre_experiences_precedentes", "nombre_heures_travailless",
-            "annee_experience_totale", "annees_dans_l_entreprise", "annees_dans_le_poste_actuel"
+            "nombre_participation_pee",
+            "nb_formations_suivies",
+            "nombre_employee_sous_responsabilite",
+            "distance_domicile_travail",
+            "niveau_education",
+            "domaine_etude",
+            "ayant_enfants",
+            "frequence_deplacement",
+            "annees_depuis_la_derniere_promotion",
+            "annes_sous_responsable_actuel",
+            "satisfaction_employee_environnement",
+            "note_evaluation_precedente",
+            "niveau_hierarchique_poste",
+            "satisfaction_employee_nature_travail",
+            "satisfaction_employee_equipe",
+            "satisfaction_employee_equilibre_pro_perso",
+            "note_evaluation_actuelle",
+            "heure_supplementaires",
+            "augementation_salaire_precedente",
+            "age",
+            "genre",
+            "revenu_mensuel",
+            "statut_marital",
+            "departement",
+            "poste",
+            "nombre_experiences_precedentes",
+            "nombre_heures_travailless",
+            "annee_experience_totale",
+            "annees_dans_l_entreprise",
+            "annees_dans_le_poste_actuel",
         ]
 
         for col in expected_columns:
@@ -99,7 +120,10 @@ class TestPreprocessing:
 
         # Vérifier que les nouvelles colonnes sont ajoutées
         new_columns = [
-            "revenu_par_anciennete", "experience_par_anciennete", "satisfaction_moyenne", "promo_par_anciennete"
+            "revenu_par_anciennete",
+            "experience_par_anciennete",
+            "satisfaction_moyenne",
+            "promo_par_anciennete",
         ]
 
         for col in new_columns:
@@ -262,3 +286,93 @@ class TestModelIntegration:
         # Toutes les prédictions devraient être identiques
         assert all(p == predictions[0] for p in predictions)
         assert all(np.allclose(p, probabilities[0]) for p in probabilities)
+
+
+class TestHuggingFaceIntegration:
+    """Tests d'intégration avec l'API Hugging Face (optionnels - nécessitent connexion internet)."""
+
+    @pytest.mark.integration
+    @pytest.mark.slow
+    def test_real_model_loading_from_hf_hub(self):
+        """Test le chargement réel du modèle depuis HF Hub (nécessite connexion internet)."""
+        # Forcer le rechargement pour tester HF Hub
+        import src.models
+        src.models._model_cache = None  # Reset cache
+
+        try:
+            model = load_model(force_reload=True)
+            assert model is not None
+            assert hasattr(model, "predict")
+            assert hasattr(model, "predict_proba")
+
+            # Tester une prédiction réelle
+            X_test = np.array([[0.5] * 50])  # 50 features
+            prediction = model.predict(X_test)
+            probabilities = model.predict_proba(X_test)
+
+            assert isinstance(prediction, np.ndarray)
+            assert isinstance(probabilities, np.ndarray)
+            assert prediction[0] in [0, 1]
+            assert probabilities.shape == (1, 2)
+            assert abs(probabilities.sum() - 1.0) < 1e-6
+
+        finally:
+            # Remettre le cache à None pour les autres tests
+            src.models._model_cache = None
+
+    @pytest.mark.integration
+    @pytest.mark.slow
+    def test_real_model_info_from_hf_hub(self):
+        """Test les informations du modèle réel depuis HF Hub."""
+        import src.models
+        src.models._model_cache = None  # Reset cache
+
+        try:
+            info = get_model_info()
+
+            required_keys = ["status", "model_type", "hf_hub_repo", "model_file", "cached"]
+            for key in required_keys:
+                assert key in info, f"Clé manquante: {key}"
+
+            assert info["status"] == "✅ Modèle chargé"
+            assert info["hf_hub_repo"] == "ASI-Engineer/employee-turnover-model"
+            assert info["model_file"] == "model/model.pkl"
+            assert info["cached"] is False  # Pas en cache lors du premier chargement
+
+        finally:
+            src.models._model_cache = None
+
+    @pytest.mark.integration
+    @pytest.mark.slow
+    def test_full_pipeline_with_real_model(self, valid_employee_data):
+        """Test le pipeline complet avec le modèle réel depuis HF."""
+        import src.models
+        src.models._model_cache = None  # Reset cache
+
+        try:
+            # 1. Validation Pydantic
+            employee = EmployeeInput(**valid_employee_data)
+
+            # 2. Preprocessing
+            X = preprocess_for_prediction(employee)
+
+            # 3. Chargement modèle réel
+            model = load_model(force_reload=True)
+
+            # 4. Prédiction avec modèle réel
+            prediction = model.predict(X)
+            probabilities = model.predict_proba(X)
+
+            # Vérifications
+            assert isinstance(prediction, np.ndarray)
+            assert isinstance(probabilities, np.ndarray)
+            assert prediction[0] in [0, 1]
+            assert probabilities.shape == (1, 2)
+            assert abs(probabilities.sum() - 1.0) < 1e-6
+
+            # Les probabilités devraient être différentes du mock (qui retourne toujours 0.5)
+            # Vérifier que les probabilités ne sont pas exactement 0.5 (cas du mock)
+            assert not np.allclose(probabilities, [[0.5, 0.5]], atol=0.01)
+
+        finally:
+            src.models._model_cache = None
