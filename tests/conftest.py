@@ -175,3 +175,212 @@ def invalid_employee_data():
         "departement": "InvalidDept",  # Département inexistant
         # ... manque plein de champs requis
     }
+
+
+@pytest.fixture
+def sample_dataset_rows():
+    """
+    Échantillon de données réelles du dataset pour tests variés.
+
+    Charge quelques lignes des fichiers CSV et les fusionne pour fournir
+    des données représentatives incluant des cas limites.
+
+    Returns:
+        list[dict]: Liste de dictionnaires avec données d'employés réelles.
+    """
+    import os
+
+    import pandas as pd
+
+    # Chemins des fichiers
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    sondage_file = os.path.join(data_dir, "extrait_sondage.csv")
+    eval_file = os.path.join(data_dir, "extrait_eval.csv")
+    sirh_file = os.path.join(data_dir, "extrait_sirh.csv")
+
+    # Charger les dataframes
+    df_sondage = pd.read_csv(sondage_file)
+    df_eval = pd.read_csv(eval_file)
+    df_sirh = pd.read_csv(sirh_file)
+
+    # Fusionner horizontalement (même ordre)
+    df_merged = pd.concat([df_sondage, df_eval, df_sirh], axis=1)
+    df_merged = df_merged.loc[:, ~df_merged.columns.duplicated()]
+
+    # Sélectionner quelques exemples représentatifs
+    samples = []
+
+    # Exemple 1: Employé qui a quitté (cas positif)
+    quitter_row = df_merged[df_merged["a_quitte_l_entreprise"] == "Oui"].iloc[0]
+    samples.append(
+        {
+            "nombre_participation_pee": int(quitter_row["nombre_participation_pee"]),
+            "nb_formations_suivies": int(quitter_row["nb_formations_suivies"]),
+            "nombre_employee_sous_responsabilite": int(
+                quitter_row["nombre_employee_sous_responsabilite"]
+            ),
+            "distance_domicile_travail": int(quitter_row["distance_domicile_travail"]),
+            "niveau_education": int(quitter_row["niveau_education"]),
+            "domaine_etude": quitter_row["domaine_etude"],
+            "ayant_enfants": quitter_row["ayant_enfants"],
+            "frequence_deplacement": quitter_row["frequence_deplacement"],
+            "annees_depuis_la_derniere_promotion": int(
+                quitter_row["annees_depuis_la_derniere_promotion"]
+            ),
+            "annes_sous_responsable_actuel": int(
+                quitter_row["annes_sous_responsable_actuel"]
+            ),
+            "satisfaction_employee_environnement": int(
+                quitter_row["satisfaction_employee_environnement"]
+            ),
+            "note_evaluation_precedente": int(
+                quitter_row["note_evaluation_precedente"]
+            ),
+            "niveau_hierarchique_poste": int(quitter_row["niveau_hierarchique_poste"]),
+            "satisfaction_employee_nature_travail": int(
+                quitter_row["satisfaction_employee_nature_travail"]
+            ),
+            "satisfaction_employee_equipe": int(
+                quitter_row["satisfaction_employee_equipe"]
+            ),
+            "satisfaction_employee_equilibre_pro_perso": int(
+                quitter_row["satisfaction_employee_equilibre_pro_perso"]
+            ),
+            "note_evaluation_actuelle": int(quitter_row["note_evaluation_actuelle"]),
+            "heure_supplementaires": quitter_row["heure_supplementaires"],
+            "augementation_salaire_precedente": float(
+                quitter_row["augementation_salaire_precedente"].strip("%")
+            ),
+            "age": int(quitter_row["age"]),
+            "genre": quitter_row["genre"],
+            "revenu_mensuel": float(quitter_row["revenu_mensuel"]),
+            "statut_marital": quitter_row["statut_marital"],
+            "departement": quitter_row["departement"],
+            "poste": quitter_row["poste"],
+            "nombre_experiences_precedentes": int(
+                quitter_row["nombre_experiences_precedentes"]
+            ),
+            "nombre_heures_travailless": int(quitter_row["nombre_heures_travailless"]),
+            "annee_experience_totale": int(quitter_row["annee_experience_totale"]),
+            "annees_dans_l_entreprise": int(quitter_row["annees_dans_l_entreprise"]),
+            "annees_dans_le_poste_actuel": int(
+                quitter_row["annees_dans_le_poste_actuel"]
+            ),
+        }
+    )
+
+    # Exemple 2: Employé qui reste (cas négatif)
+    rester_row = df_merged[df_merged["a_quitte_l_entreprise"] == "Non"].iloc[0]
+    samples.append(
+        {
+            "nombre_participation_pee": int(rester_row["nombre_participation_pee"]),
+            "nb_formations_suivies": int(rester_row["nb_formations_suivies"]),
+            "nombre_employee_sous_responsabilite": int(
+                rester_row["nombre_employee_sous_responsabilite"]
+            ),
+            "distance_domicile_travail": int(rester_row["distance_domicile_travail"]),
+            "niveau_education": int(rester_row["niveau_education"]),
+            "domaine_etude": rester_row["domaine_etude"],
+            "ayant_enfants": rester_row["ayant_enfants"],
+            "frequence_deplacement": rester_row["frequence_deplacement"],
+            "annees_depuis_la_derniere_promotion": int(
+                rester_row["annees_depuis_la_derniere_promotion"]
+            ),
+            "annes_sous_responsable_actuel": int(
+                rester_row["annes_sous_responsable_actuel"]
+            ),
+            "satisfaction_employee_environnement": int(
+                rester_row["satisfaction_employee_environnement"]
+            ),
+            "note_evaluation_precedente": int(rester_row["note_evaluation_precedente"]),
+            "niveau_hierarchique_poste": int(rester_row["niveau_hierarchique_poste"]),
+            "satisfaction_employee_nature_travail": int(
+                rester_row["satisfaction_employee_nature_travail"]
+            ),
+            "satisfaction_employee_equipe": int(
+                rester_row["satisfaction_employee_equipe"]
+            ),
+            "satisfaction_employee_equilibre_pro_perso": int(
+                rester_row["satisfaction_employee_equilibre_pro_perso"]
+            ),
+            "note_evaluation_actuelle": int(rester_row["note_evaluation_actuelle"]),
+            "heure_supplementaires": rester_row["heure_supplementaires"],
+            "augementation_salaire_precedente": float(
+                rester_row["augementation_salaire_precedente"].strip("%")
+            ),
+            "age": int(rester_row["age"]),
+            "genre": rester_row["genre"],
+            "revenu_mensuel": float(rester_row["revenu_mensuel"]),
+            "statut_marital": rester_row["statut_marital"],
+            "departement": rester_row["departement"],
+            "poste": rester_row["poste"],
+            "nombre_experiences_precedentes": int(
+                rester_row["nombre_experiences_precedentes"]
+            ),
+            "nombre_heures_travailless": int(rester_row["nombre_heures_travailless"]),
+            "annee_experience_totale": int(rester_row["annee_experience_totale"]),
+            "annees_dans_l_entreprise": int(rester_row["annees_dans_l_entreprise"]),
+            "annees_dans_le_poste_actuel": int(
+                rester_row["annees_dans_le_poste_actuel"]
+            ),
+        }
+    )
+
+    # Exemple 3: Cas limite - âge minimum
+    jeune_row = df_merged[df_merged["age"] == df_merged["age"].min()].iloc[0]
+    samples.append(
+        {
+            "nombre_participation_pee": int(jeune_row["nombre_participation_pee"]),
+            "nb_formations_suivies": int(jeune_row["nb_formations_suivies"]),
+            "nombre_employee_sous_responsabilite": int(
+                jeune_row["nombre_employee_sous_responsabilite"]
+            ),
+            "distance_domicile_travail": int(jeune_row["distance_domicile_travail"]),
+            "niveau_education": int(jeune_row["niveau_education"]),
+            "domaine_etude": jeune_row["domaine_etude"],
+            "ayant_enfants": jeune_row["ayant_enfants"],
+            "frequence_deplacement": jeune_row["frequence_deplacement"],
+            "annees_depuis_la_derniere_promotion": int(
+                jeune_row["annees_depuis_la_derniere_promotion"]
+            ),
+            "annes_sous_responsable_actuel": int(
+                jeune_row["annes_sous_responsable_actuel"]
+            ),
+            "satisfaction_employee_environnement": int(
+                jeune_row["satisfaction_employee_environnement"]
+            ),
+            "note_evaluation_precedente": int(jeune_row["note_evaluation_precedente"]),
+            "niveau_hierarchique_poste": int(jeune_row["niveau_hierarchique_poste"]),
+            "satisfaction_employee_nature_travail": int(
+                jeune_row["satisfaction_employee_nature_travail"]
+            ),
+            "satisfaction_employee_equipe": int(
+                jeune_row["satisfaction_employee_equipe"]
+            ),
+            "satisfaction_employee_equilibre_pro_perso": int(
+                jeune_row["satisfaction_employee_equilibre_pro_perso"]
+            ),
+            "note_evaluation_actuelle": int(jeune_row["note_evaluation_actuelle"]),
+            "heure_supplementaires": jeune_row["heure_supplementaires"],
+            "augementation_salaire_precedente": float(
+                jeune_row["augementation_salaire_precedente"].strip("%")
+            ),
+            "age": int(jeune_row["age"]),
+            "genre": jeune_row["genre"],
+            "revenu_mensuel": float(jeune_row["revenu_mensuel"]),
+            "statut_marital": jeune_row["statut_marital"],
+            "departement": jeune_row["departement"],
+            "poste": jeune_row["poste"],
+            "nombre_experiences_precedentes": int(
+                jeune_row["nombre_experiences_precedentes"]
+            ),
+            "nombre_heures_travailless": int(jeune_row["nombre_heures_travailless"]),
+            "annee_experience_totale": int(jeune_row["annee_experience_totale"]),
+            "annees_dans_l_entreprise": int(jeune_row["annees_dans_l_entreprise"]),
+            "annees_dans_le_poste_actuel": int(
+                jeune_row["annees_dans_le_poste_actuel"]
+            ),
+        }
+    )
+
+    return samples
