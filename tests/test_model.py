@@ -43,6 +43,31 @@ class TestModelLoading:
         assert info["status"] == "✅ Modèle chargé"
         assert info["cached"] is True
 
+    def test_get_model_info_error_handling(self, monkeypatch):
+        """Test que get_model_info gère les erreurs de chargement."""
+        from fastapi import HTTPException
+
+        # Mock load_model pour qu'il lève une exception
+        def mock_load_model_error():
+            raise Exception("Mock model loading error")
+
+        monkeypatch.setattr("src.models.load_model", mock_load_model_error)
+
+        with pytest.raises(HTTPException) as exc_info:
+            get_model_info()
+
+        assert exc_info.value.status_code == 500
+        assert "Model info unavailable" in exc_info.value.detail["error"]
+
+    def test_load_preprocessing_artifacts_not_implemented(self):
+        """Test que load_preprocessing_artifacts lève NotImplementedError."""
+        from src.models import load_preprocessing_artifacts
+
+        with pytest.raises(NotImplementedError) as exc_info:
+            load_preprocessing_artifacts("dummy_run_id")
+
+        assert "preprocessing artifacts sera implémenté" in str(exc_info.value)
+
     def test_model_predict_returns_correct_types(self, monkeypatch):
         """Test que les prédictions du modèle ont les bons types."""
         model = load_model()
@@ -297,6 +322,7 @@ class TestHuggingFaceIntegration:
         """Test le chargement réel du modèle depuis HF Hub (nécessite connexion internet)."""
         # Forcer le rechargement pour tester HF Hub
         import src.models
+
         src.models._model_cache = None  # Reset cache
 
         try:
@@ -325,12 +351,19 @@ class TestHuggingFaceIntegration:
     def test_real_model_info_from_hf_hub(self):
         """Test les informations du modèle réel depuis HF Hub."""
         import src.models
+
         src.models._model_cache = None  # Reset cache
 
         try:
             info = get_model_info()
 
-            required_keys = ["status", "model_type", "hf_hub_repo", "model_file", "cached"]
+            required_keys = [
+                "status",
+                "model_type",
+                "hf_hub_repo",
+                "model_file",
+                "cached",
+            ]
             for key in required_keys:
                 assert key in info, f"Clé manquante: {key}"
 
@@ -347,6 +380,7 @@ class TestHuggingFaceIntegration:
     def test_full_pipeline_with_real_model(self, valid_employee_data):
         """Test le pipeline complet avec le modèle réel depuis HF."""
         import src.models
+
         src.models._model_cache = None  # Reset cache
 
         try:

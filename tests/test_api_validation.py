@@ -184,18 +184,58 @@ def test_predict_empty_json(client):
 
 def test_predict_revenu_too_low(client, valid_employee_data):
     """
-    Test que l'API rejette les revenus < 1000€.
+    Test que l'API rejette les revenus trop bas.
 
     Args:
         client: Fixture TestClient FastAPI.
         valid_employee_data: Fixture avec données valides.
     """
     invalid_data = valid_employee_data.copy()
-    invalid_data["revenu_mensuel"] = 500.0
+    invalid_data["revenu_mensuel"] = 500  # Trop bas
 
     response = client.post("/predict", json=invalid_data)
 
     assert response.status_code == 422
+
+
+def test_predict_augmentation_percentage_format(client, valid_employee_data):
+    """
+    Test que l'API accepte les augmentations avec format pourcentage.
+
+    Args:
+        client: Fixture TestClient FastAPI.
+        valid_employee_data: Fixture avec données valides.
+    """
+    test_data = valid_employee_data.copy()
+    test_data["augementation_salaire_precedente"] = "15%"  # Format avec %
+
+    response = client.post("/predict", json=test_data)
+
+    # Devrait réussir car le validator nettoie le format
+    assert response.status_code == 200
+
+    data = response.json()
+    assert "prediction" in data
+
+
+def test_predict_augmentation_percentage_space_format(client, valid_employee_data):
+    """
+    Test que l'API accepte les augmentations avec format pourcentage et espace.
+
+    Args:
+        client: Fixture TestClient FastAPI.
+        valid_employee_data: Fixture avec données valides.
+    """
+    test_data = valid_employee_data.copy()
+    test_data["augementation_salaire_precedente"] = "10 %"  # Format avec espace
+
+    response = client.post("/predict", json=test_data)
+
+    # Devrait réussir car le validator nettoie le format
+    assert response.status_code == 200
+
+    data = response.json()
+    assert "prediction" in data
 
 
 def test_predict_nb_formations_out_of_range(client, valid_employee_data):

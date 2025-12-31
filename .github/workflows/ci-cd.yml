@@ -73,16 +73,23 @@ jobs:
       
       - name: Run pytest with coverage
         run: |
-          poetry run pytest tests/ -v --cov --cov-report=xml --cov-report=term
+          poetry run pytest tests/ -v --cov=src --cov-report=xml --cov-report=html --cov-report=term
         env:
           DEBUG: true
       
-      - name: Upload coverage to Codecov
+      - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
+        continue-on-error: true
+      
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: htmlcov/
         continue-on-error: true
 
   test-api:
