@@ -6,9 +6,16 @@ Ces schémas correspondent aux colonnes brutes du dataset avant preprocessing,
 permettant une validation stricte des inputs avec messages d'erreur clairs.
 """
 from enum import Enum
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator
+
+
+def validate_augmentation(v):
+    """Nettoie le format de l'augmentation (enlève % si présent)."""
+    if isinstance(v, str):
+        v = float(v.replace(" %", "").replace("%", ""))
+    return v
 
 
 # Enums pour les valeurs catégorielles
@@ -132,8 +139,10 @@ class EmployeeInput(BaseModel):
     heure_supplementaires: Literal["Oui", "Non"] = Field(
         ..., description="Fait des heures supplémentaires"
     )
-    augementation_salaire_precedente: float = Field(
-        ..., ge=0, le=100, description="Augmentation salaire précédente (%)"
+    augementation_salaire_precedente: Annotated[
+        float, BeforeValidator(validate_augmentation)
+    ] = Field(
+        default=..., ge=0, le=100, description="Augmentation salaire précédente (%)"
     )
 
     # === Données SIRH ===
@@ -163,14 +172,6 @@ class EmployeeInput(BaseModel):
     annees_dans_le_poste_actuel: int = Field(
         ..., ge=0, le=18, description="Années dans le poste actuel (0-18)"
     )
-
-    @field_validator("augementation_salaire_precedente")
-    @classmethod
-    def validate_augmentation(cls, v: float) -> float:
-        """Nettoie le format de l'augmentation (enlève % si présent)."""
-        if isinstance(v, str):
-            v = float(v.replace(" %", "").replace("%", ""))
-        return v
 
     model_config = ConfigDict(
         json_schema_extra={
