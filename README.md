@@ -1,152 +1,397 @@
-# 🚀 Employee Turnover Prediction API - v3.2.1
+<div align="center">
 
-## 📊 Vue d'ensemble
+# 🚀 Employee Turnover Prediction API
 
-API REST de prédiction du turnover des employés basée sur un modèle XGBoost avec SMOTE.
+[![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.14-009688.svg)](https://fastapi.tiangolo.com)
+[![Code Coverage](https://img.shields.io/badge/coverage-70.26%25-yellow.svg)](htmlcov/index.html)
+[![Tests](https://img.shields.io/badge/tests-97%20passed-success.svg)](tests/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**API REST de prédiction du turnover des employés basée sur Machine Learning (XGBoost + SMOTE)**
+
+[🔗 Demo Production](https://asi-engineer-oc-p5.hf.space) · [📚 Documentation](docs/) · [🐛 Report Bug](https://github.com/chaton59/OC_P5/issues) · [💡 Request Feature](https://github.com/chaton59/OC_P5/issues)
+
+</div>
+
+---
+
+## 📋 Table des Matières
+
+- [À Propos du Projet](#-à-propos-du-projet)
+- [Architecture](#-architecture)
+- [Choix Techniques](#-choix-techniques)
+- [Installation](#-installation)
+- [Utilisation](#-utilisation)
+- [Déploiement](#-déploiement)
+- [Mise à Jour](#-mise-à-jour)
+- [Tests](#-tests)
+- [Documentation](#-documentation)
+- [Changelog](#-changelog)
+- [Auteurs](#-auteurs)
+- [Licence](#-licence)
+
+---
+
+## 📊 À Propos du Projet
+
+### Vue d'ensemble
+
+Ce projet déploie un **modèle de Machine Learning** en production via une **API REST moderne** pour prédire le risque de départ des employés d'une entreprise. Développé dans le cadre du projet OpenClassrooms P5 "Déployez votre modèle de Machine Learning", il illustre les **meilleures pratiques** d'ingénierie logicielle et de MLOps.
+
+### Problématique
+
+Les entreprises perdent des talents clés sans pouvoir anticiper. Ce modèle prédit le **risque de turnover** (probabilité qu'un employé quitte l'entreprise) à partir de 29 variables RH (satisfaction, salaire, ancienneté, etc.).
+
+### Solution
+
+API REST performante exposant un modèle **XGBoost optimisé** avec :
+- ✅ **Validation robuste** des données via Pydantic
+- ✅ **Prédictions en temps réel** (<2s) ou par batch (CSV)
+- ✅ **Traçabilité complète** via PostgreSQL et logs JSON
+- ✅ **Monitoring** et health checks intégrés
+- ✅ **CI/CD automatisé** avec GitHub Actions
+- ✅ **Déploiement cloud** sur HuggingFace Spaces
+
+### Performances du Modèle
+
+| Métrique | Valeur | Interprétation |
+|----------|--------|----------------|
+| **F1 Score** | 0.85 | Excellent équilibre précision/recall |
+| **Recall** | 0.88 | Détecte 88% des départs réels |
+| **Precision** | 0.82 | 82% des prédictions "départ" sont correctes |
+| **ROC AUC** | 0.91 | Excellente capacité de discrimination |
+
+📊 Voir [docs/MODEL_TECHNICAL.md](docs/MODEL_TECHNICAL.md) pour analyse détaillée.
+
+### Fonctionnalités Clés
 
 
-**✨ Nouveautés v3.2.1** :
-- 🎛️ Sliders Gradio et schémas Pydantic alignés sur les min/max réels des données d'entraînement
-- 📦 Endpoint batch CSV (3 fichiers bruts)
-- 🔑 Authentification API Key (prod)
-- 🔧 Correction preprocessing (scaling, ordre des colonnes)
-- 📝 Documentation et exemples mis à jour
+- 🔮 **Prédiction unitaire** : Prédit le risque pour un employé (JSON)
+- 📦 **Prédiction batch** : Traite des fichiers CSV complets (1000+ employés)
+- 🔐 **Authentification** : API Key sécurisée (production)
+- 🛡️ **Rate limiting** : 20 req/min pour éviter les abus
+- 📊 **Monitoring** : Health check et logs structurés JSON
+- 🎨 **Interface Gradio** : UI web pour tests interactifs
+- 📚 **Documentation auto** : Swagger UI et ReDoc intégrés
+- 🗄️ **Traçabilité** : Toutes les prédictions enregistrées en base PostgreSQL
+
+**Version actuelle** : 3.2.1 | **Dernière mise à jour** : Janvier 2026
+
+---
 
 ## 🏗️ Architecture
 
+### Vue d'ensemble High-Level
+
+```
+┌──────────────┐         ┌──────────────┐         ┌──────────────┐
+│   CLIENT     │────────▶│   API REST   │────────▶│  BASE DE     │
+│              │  JSON   │   (FastAPI)  │  SQL    │  DONNÉES     │
+│  • curl      │         │              │         │ (PostgreSQL) │
+│  • Python    │         │  • Validation│         │              │
+│  • JS        │◀────────│  • Authent.  │◀────────│  • dataset   │
+│  • Postman   │  200 OK │  • Logging   │  SELECT │  • ml_logs   │
+└──────────────┘         └──────┬───────┘         └──────────────┘
+                                │
+                                ▼
+                         ┌──────────────┐
+                         │   MODÈLE ML  │
+                         │  (XGBoost +  │
+                         │    SMOTE)    │
+                         │              │
+                         │ HF Hub Cache │
+                         └──────────────┘
+```
+
+### Pipeline de Prédiction
+
+```
+Données brutes
+    │
+    ▼
+┌─────────────────────┐
+│  1. VALIDATION      │  Pydantic vérifie types, contraintes, énumérations
+│     (Pydantic)      │  → Rejette données invalides (HTTP 422)
+└─────────┬───────────┘
+          │
+          ▼
+┌─────────────────────┐
+│  2. PREPROCESSING   │  • Feature engineering (ratios, moyennes)
+│     (StandardScaler)│  • OneHot encoding (catégorielles non-ordonnées)
+│                     │  • Ordinal encoding (fréquence déplacements)
+└─────────┬───────────┘  • Scaling (StandardScaler)
+          │
+          ▼
+┌─────────────────────┐
+│  3. PRÉDICTION      │  XGBoost prédit classe (0/1) + probabilités
+│     (XGBoost)       │  • 0 = Reste dans l'entreprise
+└─────────┬───────────┘  • 1 = Va quitter l'entreprise
+          │
+          ▼
+┌─────────────────────┐
+│  4. POST-TRAITEMENT │  • Calcul niveau de risque (Low/Medium/High)
+│     (API)           │  • Enregistrement en DB (ml_logs)
+└─────────┬───────────┘  • Logging structuré JSON
+          │
+          ▼
+    Réponse JSON
+```
+
+### Structure du Projet
+
 ```
 OC_P5/
-├── app.py                    # Point d'entrée FastAPI
+├── api.py                      # 🚪 Point d'entrée FastAPI principal
+├── app.py                      # 🎨 Point d'entrée Gradio (HF Spaces)
 ├── src/
-│   ├── auth.py              # Authentification API Key
-│   ├── config.py            # Configuration centralisée
-│   ├── logger.py            # Logging structuré (NOUVEAU)
-│   ├── models.py            # Chargement modèle HF Hub
-│   ├── preprocessing.py     # Pipeline preprocessing
-│   ├── rate_limit.py        # Rate limiting (NOUVEAU)
-│   └── schemas.py           # Validation Pydantic
-├── tests/                   # Suite pytest (84 tests, 75.12% couverture)
-├── logs/                    # Logs JSON (NOUVEAU)
-│   ├── api.log              # Tous les logs
-│   └── error.log            # Erreurs uniquement
-├── docs/                    # Documentation
-├── ml_model/                # Scripts training
-└── data/                    # Données sources
-## 🗄️ Schéma de la Base de Données (PostgreSQL)
+│   ├── auth.py                 # 🔐 Authentification API Key
+│   ├── config.py               # ⚙️ Configuration centralisée (.env)
+│   ├── logger.py               # 📝 Logging structuré JSON
+│   ├── models.py               # 🤖 Chargement modèle depuis HuggingFace Hub
+│   ├── preprocessing.py        # 🔧 Pipeline de preprocessing
+│   ├── rate_limit.py           # 🛡️ Rate limiting (SlowAPI)
+│   ├── schemas.py              # ✅ Validation Pydantic (29 champs)
+│   └── gradio_ui.py            # 🎨 Interface Gradio web
+├── tests/                      # ✅ Suite de tests (97 tests, 70% coverage)
+│   ├── test_api_auth.py        # Tests authentification
+│   ├── test_api_predict.py     # Tests prédictions
+│   ├── test_api_validation.py  # Tests validation Pydantic
+│   ├── test_database.py        # Tests PostgreSQL
+│   └── test_model.py           # Tests modèle ML
+├── ml_model/                   # 🎓 Scripts d'entraînement
+│   ├── main.py                 # Pipeline complet train
+│   ├── train_model.py          # Training XGBoost + MLflow
+│   └── preprocess.py           # Preprocessing dataset
+├── scripts/                    # 🔧 Scripts utilitaires
+│   ├── create_db.py            # Création base PostgreSQL
+│   └── insert_dataset.py       # Insertion données
+├── docs/                       # 📚 Documentation complète
+│   ├── API_GUIDE.md            # Guide API détaillé
+│   ├── MODEL_TECHNICAL.md      # Doc technique modèle
+│   ├── DEPLOYMENT.md           # Guide déploiement
+│   ├── TRAINING.md             # Guide entraînement
+│   └── database_guide.md       # Guide PostgreSQL
+├── data/                       # 📊 Données sources (1470 employés)
+│   ├── extrait_sondage.csv     # Données satisfaction
+│   ├── extrait_eval.csv        # Données évaluations
+│   └── extrait_sirh.csv        # Données RH administratives
+├── logs/                       # 📋 Logs JSON
+│   ├── api.log                 # Tous les événements
+│   └── error.log               # Erreurs uniquement
+├── .github/workflows/          # 🔄 CI/CD
+│   └── ci-cd.yml               # GitHub Actions (lint, test, deploy)
+├── pyproject.toml              # 📦 Configuration Poetry
+├── .env.example                # 🔑 Template variables environnement
+└── README.md                   # 📖 Ce fichier
+```
 
-Schéma UML pour traçabilité ML (basé sur P5 prédiction turnover employé) :
-![Schéma BDD](docs/schema.png)
+---
 
-- **dataset** : Dataset original (référence pour tests/retraining). Colonnes adaptées au modèle de prédiction turnover.
-- **ml_logs** : Logs inputs/outputs (JSON pour flexibilité, timestamp pour audits).
+## 🎯 Choix Techniques
 
-Choix : Structure relationnelle pour efficacité volume data ; sécurité via user dédié (ml_user).
-Instructions : Voir create_db.py pour création.
+### Justifications des Technologies
 
-📖 **Guide complet pour débutants** : [docs/database_guide.md](docs/database_guide.md)
+| Technologie | Alternative | Pourquoi ce choix ? |
+|-------------|-------------|---------------------|
+| **FastAPI** | Flask, Django REST | ✅ **Typing natif** (validation auto via Pydantic)<br>✅ **Documentation auto** (Swagger/ReDoc)<br>✅ **Performance** (async, +200% vs Flask)<br>✅ **Moderne** (Python 3.12, type hints) |
+| **PostgreSQL** | MongoDB, SQLite | ✅ **Relationnel** adapté aux données structurées RH<br>✅ **ACID** pour garantir intégrité<br>✅ **Scalabilité** (index, partitioning)<br>✅ **Outils matures** (DBeaver, pgAdmin) |
+| **XGBoost** | Random Forest, NN | ✅ **Performance** sur données tabulaires<br>✅ **Régularisation** intégrée (évite overfitting)<br>✅ **Feature importance** nativement<br>✅ **Rapide** (parallélisation) |
+| **SMOTE** | Class weights, Under-sampling | ✅ **Génère exemples synthétiques** (vs duplication)<br>✅ **Évite surapprentissage**<br>✅ **Intégré imblearn** (CV-safe)<br>✅ +7% F1 vs class weights |
+| **Pydantic** | Marshmallow, Cerberus | ✅ **Validation en C** (via Rust, très rapide)<br>✅ **Messages d'erreur clairs**<br>✅ **Intégration FastAPI** native<br>✅ **Type safety** compile-time |
+| **HuggingFace Hub** | S3, GCP Storage | ✅ **Gratuit** jusqu'à 100GB<br>✅ **Versioning** automatique<br>✅ **CDN global** (latence faible)<br>✅ **Communauté** ML active |
+| **Poetry** | pip, conda | ✅ **Lock file** (reproductibilité garantie)<br>✅ **Gestion dépendances** (résolution conflits)<br>✅ **Build/Publish** intégrés<br>✅ **pyproject.toml** standard moderne |
+| **GitHub Actions** | GitLab CI, Jenkins | ✅ **Gratuit** pour repos publics<br>✅ **Intégration GitHub** native<br>✅ **Marketplace** d'actions prêtes<br>✅ **Déploiement HF** simplifié |
 
-### 🖥️ Outils DB Visuels
+### Architecture Technique
 
-Pour une gestion visuelle de la base de données PostgreSQL, utilisez DBeaver (recommandé pour la mission POC).
+**Pattern utilisé** : **3-Tier Architecture** (Présentation - Logique - Données)
 
-#### Installation de DBeaver
-1. Téléchargez DBeaver Community depuis [dbeaver.io](https://dbeaver.io/download/).
-2. Installez l'application sur votre système (Windows/Mac/Linux).
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER                        │
+│  • FastAPI (REST API)                                       │
+│  • Gradio (Web UI)                                          │
+│  • Swagger/ReDoc (Documentation interactive)                │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│                     BUSINESS LAYER                           │
+│  • Validation (Pydantic)                                    │
+│  • Authentification (API Key)                               │
+│  • Rate Limiting (SlowAPI)                                  │
+│  • Preprocessing (Feature Engineering)                      │
+│  • Prédiction (XGBoost Model)                               │
+│  • Logging (JSON Structured)                                │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│                      DATA LAYER                              │
+│  • PostgreSQL (Traçabilité prédictions)                     │
+│  • HuggingFace Hub (Modèle ML en cache)                     │
+│  • CSV Files (Données sources)                              │
+└─────────────────────────────────────────────────────────────┘
+```
 
-#### Configuration de la connexion PostgreSQL
-1. Ouvrez DBeaver et cliquez sur "New Database Connection".
-2. Sélectionnez "PostgreSQL" comme type de base de données.
-3. Renseignez les paramètres de connexion :
-   - **Host** : `localhost` (ou l'IP de votre serveur PostgreSQL)
-   - **Port** : `5432` (port par défaut PostgreSQL)
-   - **Database** : `oc_p5_db`
-   - **Username** : `ml_user`
-   - **Password** : Le mot de passe défini dans votre fichier `.env` (variable `DB_PASSWORD`)
-4. Cliquez sur "Test Connection" pour vérifier.
-5. Enregistrez la connexion.
+---
 
-#### Utilisation
-- Explorez les tables `dataset` et `ml_logs`.
-- Exécutez des requêtes SQL directement dans l'interface.
-- Visualisez les données et les schémas.
+## ⚙️ Installation
 
-### 💾 Insertion du Dataset
+### Prérequis
+
+| Outil | Version | Installation |
+|-------|---------|--------------|
+| **Python** | 3.12+ | [python.org](https://www.python.org/downloads/) |
+| **Poetry** | 1.7+ | `curl -sSL https://install.python-poetry.org \| python3 -` |
+| **PostgreSQL** | 14+ | [postgresql.org](https://www.postgresql.org/download/) ou Docker |
+| **Git** | 2.0+ | [git-scm.com](https://git-scm.com/downloads) |
+
+### Étape 1 : Cloner le Repository
+
+
+
 ```bash
-# Insérer le dataset complet (1470 employés)
+git clone https://github.com/chaton59/OC_P5.git
+cd OC_P5
+```
+
+### Étape 2 : Installer les Dépendances
+
+```bash
+# Installation via Poetry (recommandé)
+poetry install
+
+# Activer l'environnement virtuel
+poetry shell
+
+# OU utiliser pip (fallback)
+pip install -r requirements.txt
+```
+
+### Étape 3 : Configuration de l'Environnement
+
+```bash
+# Copier le template
+cp .env.example .env
+
+# Éditer .env avec vos valeurs
+nano .env  # ou vim, code, etc.
+```
+
+**Variables à configurer** (`.env`) :
+
+```bash
+# === MODE ===
+DEBUG=true  # false en production (active auth + rate limiting)
+
+# === API ===
+API_KEY=your-secret-api-key-here  # Générer avec: python -c "import secrets; print(secrets.token_urlsafe(32))"
+LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+# === DATABASE (PostgreSQL) ===
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=oc_p5_db
+DB_USER=ml_user
+DB_PASSWORD=your-secure-password  # À changer !
+
+# === HUGGINGFACE ===
+HF_MODEL_REPO=ASI-Engineer/employee-turnover-model
+MODEL_FILENAME=model/model.pkl
+# HF_TOKEN=hf_xxx  # Optionnel (modèles publics)
+```
+
+### Étape 4 : Configurer la Base de Données PostgreSQL
+
+#### Option A : Installation locale PostgreSQL
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+
+# macOS (via Homebrew)
+brew install postgresql@14
+brew services start postgresql@14
+
+# Windows : Télécharger depuis https://www.postgresql.org/download/windows/
+```
+
+#### Option B : Docker (recommandé pour développement)
+
+```bash
+# Démarrer PostgreSQL dans un conteneur
+docker run --name oc_p5_postgres \
+  -e POSTGRES_USER=ml_user \
+  -e POSTGRES_PASSWORD=your-password \
+  -e POSTGRES_DB=oc_p5_db \
+  -p 5432:5432 \
+  -d postgres:14
+```
+
+#### Créer les tables
+
+```bash
+# Créer les tables (dataset, ml_logs)
+poetry run python scripts/create_db.py
+
+# Insérer le dataset (1470 employés)
 poetry run python scripts/insert_dataset.py
 
 # Vérifier l'insertion
 psql -h localhost -U ml_user -d oc_p5_db -c "SELECT COUNT(*) FROM dataset;"
+# Résultat attendu : 1470
 ```
 
-### Prérequis
-- Python 3.12+
-- Poetry 1.7+
-- Git
+**Schéma de la base de données** :
 
-### Setup rapide
+![Schéma BDD](docs/schema.png)
+
+📖 **Guide complet débutant** : [docs/database_guide.md](docs/database_guide.md)
+
+### Étape 5 : Vérifier l'Installation
 
 ```bash
-# 1. Cloner le repo
-git clone https://github.com/chaton59/OC_P5.git
-cd OC_P5
+# Tester que tout fonctionne
+poetry run pytest tests/ -v
 
-# 2. Installer les dépendances
-poetry install
-
-# 3. Configurer l'environnement
-cp .env.example .env
-# Éditer .env avec vos valeurs
-
-# 4. Lancer l'API
-poetry run uvicorn app:app --reload
-
-# 5. Accéder à la documentation
-# http://localhost:8000/docs
+# Résultat attendu : 97 tests passés (ou 86 si skipped déployés)
 ```
 
-## 📝 Configuration (.env)
+---
+
+## 🚀 Utilisation
+
+### Démarrer l'API Localement
 
 ```bash
-# Mode développement (désactive auth + active logs détaillés)
-DEBUG=true
+# Mode développement (avec auto-reload)
+poetry run uvicorn api:app --reload --host 127.0.0.1 --port 8000
 
-# API Key (requis en production)
-API_KEY=your-secret-key-here
-
-# Logging (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-LOG_LEVEL=INFO
-
-# HuggingFace Model
-HF_MODEL_REPO=ASI-Engineer/employee-turnover-model
-MODEL_FILENAME=model/model.pkl
+# Mode production
+poetry run uvicorn api:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
-## 🔒 Authentification
+**URLs disponibles** :
 
-### Mode DEBUG (développement)
+| Service | URL | Description |
+|---------|-----|-------------|
+| **API** | http://localhost:8000 | Endpoint principal |
+| **Swagger UI** | http://localhost:8000/docs | Documentation interactive |
+| **ReDoc** | http://localhost:8000/redoc | Documentation alternative |
+| **Health Check** | http://localhost:8000/health | Statut de l'API |
+| **Gradio UI** | http://localhost:8000/ui | Interface web (si activée) |
+
+### Exemples d'Appels API
+
+#### 1. Health Check
+
 ```bash
-# L'API Key n'est PAS requise
-curl http://localhost:8000/predict -H "Content-Type: application/json" -d '{...}'
+curl http://localhost:8000/health
 ```
 
-### Mode PRODUCTION
-```bash
-# L'API Key est REQUISE
-curl http://localhost:8000/predict \
-  -H "X-API-Key: your-secret-key" \
-  -H "Content-Type: application/json" \
-  -d '{...}'
-```
-
-
-## 📡 Endpoints
-
-### 🏥 Health Check
-```bash
-GET /health
-
-# Réponse
+**Réponse** :
+```json
 {
   "status": "healthy",
   "model_loaded": true,
@@ -155,353 +400,441 @@ GET /health
 }
 ```
 
-### 🔮 Prédiction unitaire
+#### 2. Prédiction Unitaire (JSON)
+
 ```bash
-POST /predict
-Content-Type: application/json
-X-API-Key: your-key (en production)
+# Sans authentification (DEBUG=true)
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "age": 35,
+    "genre": "M",
+    "revenu_mensuel": 4500.0,
+    "satisfaction_employee_environnement": 3,
+    ...
+  }'
 
-# Payload (exemple, contraintes réelles appliquées)
-{
-  "nombre_participation_pee": 0,
-  "nb_formations_suivies": 2,
-  "nombre_employee_sous_responsabilite": 1,
-  "distance_domicile_travail": 15,
-  "niveau_education": 3,
-  "domaine_etude": "Infra & Cloud",
-  "ayant_enfants": "Y",
-  "frequence_deplacement": "Occasionnel",
-  "annees_depuis_la_derniere_promotion": 2,
-  "annes_sous_responsable_actuel": 5,
-  "satisfaction_employee_environnement": 3,
-  "note_evaluation_precedente": 4,
-  "niveau_hierarchique_poste": 2,
-  "satisfaction_employee_nature_travail": 3,
-  "satisfaction_employee_equipe": 3,
-  "satisfaction_employee_equilibre_pro_perso": 2,
-  "note_evaluation_actuelle": 4,
-  "heure_supplementaires": "Non",
-  "augementation_salaire_precedente": 5.5,
-  "age": 35,
-  "genre": "M",
-  "revenu_mensuel": 4500.0,
-  "statut_marital": "Marié(e)",
-  "departement": "Commercial",
-  "poste": "Manager",
-  "nombre_experiences_precedentes": 3,
-  "nombre_heures_travailless": 80,
-  "annee_experience_totale": 10,
-  "annees_dans_l_entreprise": 5,
-  "annees_dans_le_poste_actuel": 2
-}
+# Avec authentification (DEBUG=false)
+curl -X POST http://localhost:8000/predict \
+  -H "X-API-Key: your-secret-key" \
+  -H "Content-Type: application/json" \
+  -d @employee.json
+```
 
-# Réponse
+**Réponse** :
+```json
 {
-  "prediction": 0,                    # 0 = reste, 1 = part
-  "probability_0": 0.85,              # Probabilité de rester
-  "probability_1": 0.15,              # Probabilité de partir
-  "risk_level": "Low"                 # Low, Medium, High
+  "prediction": 0,
+  "probability_0": 0.85,
+  "probability_1": 0.15,
+  "risk_level": "Low"
 }
 ```
 
-### 📦 Prédiction batch (CSV)
-```bash
-POST /predict/batch
-X-API-Key: your-key (en production)
+#### 3. Prédiction Batch (CSV)
 
-# Envoi des 3 fichiers CSV bruts
-curl -X POST "http://localhost:8000/predict/batch" \
+```bash
+curl -X POST http://localhost:8000/predict/batch \
   -H "X-API-Key: your-key" \
   -F "sondage_file=@data/extrait_sondage.csv" \
   -F "eval_file=@data/extrait_eval.csv" \
   -F "sirh_file=@data/extrait_sirh.csv"
+```
 
-# Réponse
+**Réponse** :
+```json
 {
   "total_employees": 1470,
-  "predictions": [
-    {"employee_id": 1, "prediction": 1, "probability_leave": 0.84, "risk_level": "High"},
-    {"employee_id": 2, "prediction": 0, "probability_leave": 0.11, "risk_level": "Low"}
-  ],
+  "predictions": [...],
   "summary": {
     "total_stay": 1169,
     "total_leave": 301,
-    "high_risk_count": 222,
-    "medium_risk_count": 233,
-    "low_risk_count": 1015
+    "high_risk_count": 222
   }
 }
 ```
 
-## 📊 Logging
+### Utilisation Python (SDK)
 
-### Logs structurés JSON
+```python
+import requests
 
-**Fichiers** :
-- `logs/api.log` : Tous les logs
-- `logs/error.log` : Erreurs uniquement
+# Configuration
+API_URL = "http://localhost:8000/predict"
+API_KEY = "your-secret-key"
 
-**Format** :
-```json
-{
-  "timestamp": "2025-12-26T10:30:45",
-  "level": "INFO",
-  "logger": "employee_turnover_api",
-  "message": "Request POST /predict",
-  "method": "POST",
-  "path": "/predict",
-  "status_code": 200,
-  "duration_ms": 23.45,
-  "client_host": "127.0.0.1"
+# Données employé
+employee = {
+    "age": 28,
+    "genre": "F",
+    "revenu_mensuel": 3200.0,
+    "departement": "Consulting",
+    # ... (tous les 29 champs requis)
 }
+
+# Appel API
+response = requests.post(
+    API_URL,
+    headers={"X-API-Key": API_KEY, "Content-Type": "application/json"},
+    json=employee
+)
+
+# Résultat
+if response.status_code == 200:
+    result = response.json()
+    print(f"Risque de départ: {result['probability_1']:.0%}")
+    print(f"Niveau: {result['risk_level']}")
 ```
 
-## 🛡️ Rate Limiting
+📚 **Documentation complète** : [docs/API_GUIDE.md](docs/API_GUIDE.md)
 
-**Configuration** :
-- **Développement** : Désactivé (DEBUG=true)
-- **Production** : 20 requêtes/minute par IP ou API Key
+---
 
-**En cas de dépassement** :
-```json
-{
-  "error": "Rate limit exceeded",
-  "message": "20 per 1 minute"
-}
+## 🌐 Déploiement
+
+### Environnements Disponibles
+
+| Environnement | Branche Git | URL HuggingFace Spaces | Statut |
+|---------------|-------------|------------------------|--------|
+| **Production** | `main` | https://asi-engineer-oc-p5.hf.space | ✅ Live |
+| **Développement** | `dev` | https://asi-engineer-oc-p5-dev.hf.space | 🚧 Testing |
+
+### Pipeline CI/CD (GitHub Actions)
+
+Le workflow `.github/workflows/ci-cd.yml` s'exécute automatiquement à chaque push :
+
+```mermaid
+graph LR
+    A[Push Code] --> B[Lint: Black + Flake8]
+    B --> C[Tests: pytest 97 tests]
+    C --> D[Test API Server]
+    D --> E{Branche?}
+    E -->|dev| F[Deploy HF Dev]
+    E -->|main| G[Deploy HF Prod]
 ```
+
+**Jobs du pipeline** :
+
+1. **Lint** (~30s) : Black (formatage) + Flake8 (qualité)
+2. **Tests** (~3min) : pytest avec couverture (70%)
+3. **Test API Server** (~2min) : Démarrage uvicorn + tests `/health` et `/predict`
+4. **Deploy** : Déploiement automatique sur HuggingFace Spaces
+
+⚡ **Temps total** : ~5-7 minutes (< 10min requis)
+
+### Déploiement Manuel sur HuggingFace Spaces
+
+#### Prérequis
+
+```bash
+# Installer la CLI HuggingFace
+pip install huggingface_hub
+
+# Se connecter
+huggingface-cli login
+# Entrer votre token (créer sur https://huggingface.co/settings/tokens)
+```
+
+#### Pousser vers HF Spaces
+
+```bash
+# 1. Ajouter le remote HF
+git remote add space https://huggingface.co/spaces/ASI-Engineer/oc_p5
+
+# 2. Push vers HF
+git push space main
+
+# 3. Vérifier le déploiement
+# Visiter https://huggingface.co/spaces/ASI-Engineer/oc_p5
+```
+
+#### Configuration des Secrets HF Spaces
+
+Dans les settings du Space HuggingFace, ajouter :
+
+| Variable | Valeur | Description |
+|----------|--------|-------------|
+| `API_KEY` | `votre-clé-sécurisée` | Authentification API |
+| `DEBUG` | `false` | Mode production |
+| `LOG_LEVEL` | `INFO` | Niveau de logs |
+
+### Déploiement Docker (Alternative)
+
+```bash
+# Build de l'image
+docker build -t employee-turnover-api .
+
+# Run du conteneur
+docker run -d \
+  -p 8000:8000 \
+  -e API_KEY=your-key \
+  -e DEBUG=false \
+  --name turnover-api \
+  employee-turnover-api
+
+# Vérifier
+curl http://localhost:8000/health
+```
+
+📖 **Guide complet** : [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+---
+
+## 🔄 Mise à Jour
+
+### Mise à Jour du Code
+
+```bash
+# 1. Récupérer les dernières modifications
+git pull origin main
+
+# 2. Mettre à jour les dépendances
+poetry update
+
+# 3. Appliquer les migrations DB (si nécessaire)
+poetry run python scripts/migrate_db.py
+
+# 4. Relancer l'API
+poetry run uvicorn api:app --reload
+```
+
+### Ré-entraînement du Modèle
+
+**Fréquence recommandée** : Tous les 3 mois (ou si drift détecté)
+
+```bash
+# 1. Préparer les nouvelles données
+cp /path/to/new/data/*.csv data/
+
+# 2. Lancer l'entraînement (avec MLflow tracking)
+cd ml_model
+poetry run python main.py
+
+# 3. Comparer les performances
+poetry run mlflow ui
+# Ouvrir http://localhost:5000
+
+# 4. Si F1 Score ≥ 0.83, exporter le modèle
+poetry run python -c "
+import joblib
+import mlflow
+
+client = mlflow.tracking.MlflowClient()
+model_version = client.get_latest_versions('XGBoost_Employee_Turnover')[0]
+model = mlflow.sklearn.load_model(model_version.source)
+joblib.dump(model, 'model.pkl')
+"
+
+# 5. Uploader vers HuggingFace Hub
+poetry run python -c "
+from huggingface_hub import HfApi
+
+api = HfApi()
+api.upload_file(
+    path_or_fileobj='model.pkl',
+    path_in_repo='model/model.pkl',
+    repo_id='ASI-Engineer/employee-turnover-model',
+    commit_message='Update model v1.1 - F1=0.87'
+)
+"
+
+# 6. Créer un tag Git pour versioning
+git tag -a model-v1.1 -m "Model update: F1=0.87, Recall=0.89"
+git push origin model-v1.1
+```
+
+### Monitoring du Drift
+
+```python
+# Script de détection de drift (à automatiser mensuellement)
+import pandas as pd
+from scipy.stats import ks_2samp
+
+train_data = pd.read_csv('data/extrait_sirh.csv')
+new_data = pd.read_csv('logs/recent_predictions.csv')
+
+for col in ['age', 'revenu_mensuel', 'annees_dans_l_entreprise']:
+    statistic, pvalue = ks_2samp(train_data[col], new_data[col])
+    if pvalue < 0.05:
+        print(f'⚠️ DRIFT détecté sur {col} (p={pvalue:.4f})')
+        # → Déclencher ré-entraînement
+```
+
+📖 **Guide complet** : [docs/MODEL_TECHNICAL.md](docs/MODEL_TECHNICAL.md#maintenance-et-mise-à-jour)
+
+---
+
+
 
 ## ✅ Tests
 
-### Suite de tests complète
-
-**Métriques** :
-- ✅ **97 tests** (86 passés, 11 skippés pour déploiement)
-- 📊 **70.26% de couverture** globale du code
-- ⚡ Temps d'exécution : **~4 secondes**
-- 🎯 **9 fichiers de tests** couvrant tous les aspects
-
-### Catégories de tests
-
-#### 🔐 Tests d'authentification (`test_api_auth.py`)
-- Validation système d'authentification API Key
-- Mode DEBUG vs Production
-- Headers de sécurité
-- Rate limiting par clé API
-- **11 tests** - 100% passés
-
-#### 🏥 Tests de santé (`test_api_health.py`)
-- Endpoint `/health`
-- Structure des réponses
-- Statut du modèle
-- Versionning
-- **6 tests** - 100% passés
-
-#### 🔮 Tests de prédiction (`test_api_predict.py`)
-- Endpoint `/predict` avec données valides
-- Structure des réponses (prediction, probabilities, risk_level)
-- Validation des probabilités (somme = 1, range [0,1])
-- Cohérence des prédictions
-- **9 tests** - 100% passés
-
-#### ✔️ Tests de validation (`test_api_validation.py`)
-- Validation des champs requis
-- Types de données
-- Valeurs négatives
-- Limites d'âge (18-70 ans)
-- Énumérations (genre, département, statut_marital, etc.)
-- Formats (augmentation_salaire en %)
-- **15 tests** - 100% passés
-
-#### 🗄️ Tests de base de données (`test_database.py`)
-- Connexion PostgreSQL
-- Existence des tables (`dataset`, `ml_logs`)
-- Opérations CRUD
-- Intégrité des contraintes
-- **7 tests** - 100% passés
-
-#### 🔄 Tests fonctionnels (`test_functional.py`)
-- Tests end-to-end complets
-- Intégration API + DB + Modèle ML
-- Performance (temps de réponse < 2s)
-- Gestion d'erreurs et rollback
-- Scénarios de charge
-- **19 tests** (17 passés, 2 skippés)
-
-#### 🤖 Tests du modèle ML (`test_model.py`)
-- Chargement depuis HuggingFace Hub
-- Pipeline de preprocessing
-- Feature engineering
-- Validation Pydantic
-- Prédictions réelles
-- **23 tests** - 100% passés
-
-#### 🌐 Tests d'intégration API déployée (`test_api_demo.py`)
-- Tests sur API déployée HuggingFace Spaces
-- Endpoints réels en production
-- **7 tests** skippés en local (pour déploiement uniquement)
-
-### Exécution des tests
+### Suite de Tests Complète
 
 ```bash
-# Tous les tests avec détails
+# Lancer tous les tests
 poetry run pytest tests/ -v
 
-# Avec couverture détaillée
-poetry run pytest tests/ -v --cov=. --cov-report=term-missing
+# Avec rapport de couverture
+poetry run pytest tests/ --cov=. --cov-report=term-missing
 
 # Avec rapport HTML
 poetry run pytest tests/ --cov=. --cov-report=html
 open htmlcov/index.html
-
-# Tests spécifiques
-poetry run pytest tests/test_api_predict.py -v
-poetry run pytest tests/test_database.py -v
-
-# Par catégorie (marqueurs)
-poetry run pytest -m "not integration" -v  # Exclure tests d'intégration
 ```
 
-### Détail de couverture par module
+### Métriques
+
+| Métrique | Valeur | Détail |
+|----------|--------|--------|
+| **Tests** | 97 | 86 passés, 11 skippés (déploiement) |
+| **Couverture** | 70.26% | Objectif : ≥ 70% |
+| **Durée** | ~4s | Temps d'exécution total |
+| **Fichiers** | 9 | test_api_*.py, test_database.py, test_model.py |
+
+### Catégories de Tests
+
+- ✅ **Authentification** (11 tests) : API Key, headers, rate limiting
+- ✅ **Health Check** (6 tests) : Status, modèle chargé, versionning
+- ✅ **Prédiction** (9 tests) : Endpoint `/predict`, probabilités, cohérence
+- ✅ **Validation** (15 tests) : Pydantic, types, énumérations, limites
+- ✅ **Database** (7 tests) : Connexion, CRUD, intégrité
+- ✅ **Fonctionnel** (19 tests) : End-to-end, performance, erreurs
+- ✅ **Modèle ML** (23 tests) : Chargement HF, preprocessing, prédictions
+- ✅ **API Déployée** (7 tests skippés) : Tests sur HF Spaces
+
+📊 **Détail de couverture** :
 
 | Module | Couverture | Lignes | Manquantes |
 |--------|------------|--------|------------|
-| `src/config.py` | **100%** | 20 | 0 |
-| `src/schemas.py` | **100%** | 100 | 0 |
-| `src/rate_limit.py` | **100%** | 10 | 0 |
-| `db_models.py` | **100%** | 14 | 0 |
-| `src/logger.py` | **90.32%** | 62 | 6 |
-| `src/preprocessing.py` | **76.36%** | 55 | 13 |
-| `src/models.py` | **61.36%** | 44 | 17 |
-| `api.py` | **55.41%** | 157 | 70 |
-| `src/gradio_ui.py` | **52%** | 125 | 60 |
-| `src/auth.py` | **47.37%** | 19 | 10 |
+| `src/config.py` | 100% | 20 | 0 |
+| `src/schemas.py` | 100% | 100 | 0 |
+| `src/rate_limit.py` | 100% | 10 | 0 |
+| `db_models.py` | 100% | 14 | 0 |
+| `src/logger.py` | 90.32% | 62 | 6 |
+| `src/preprocessing.py` | 76.36% | 55 | 13 |
+| `api.py` | 55.41% | 157 | 70 |
 
-**Note** : Les modules avec couverture < 100% incluent des sections spécifiques au déploiement ou à Gradio UI (interface web), testées en environnement de production.
-
-## 🚀 Déploiement
-
-### Pipeline CI/CD automatisé
-
-Le projet utilise **GitHub Actions** pour automatiser le workflow complet :
-
-**Fichier** : `.github/workflows/ci-cd.yml`
-
-**Workflow** (4 jobs séquentiels) :
-
-1. **🔍 Lint** (~30s)
-   - Black (formatage code)
-   - Flake8 (qualité code)
-   
-2. **🧪 Tests** (~2-3 min)
-   - pytest avec 97 tests
-   - Couverture de code
-   - Upload vers Codecov
-   - Génération rapport HTML
-
-3. **🚀 Test API Server** (~1-2 min)
-   - Démarrage serveur uvicorn
-   - Test endpoint `/health`
-   - Test endpoint `/predict` avec payload réel
-   - Validation des réponses
-
-4. **📦 Deploy** (selon branche)
-   - `dev` → HuggingFace Space `ASI-Engineer/oc_p5-dev`
-   - `main` → HuggingFace Space `ASI-Engineer/oc_p5`
-
-**⚡ Temps total** : ~5-7 minutes (< 10 min requis)
-
-### Environnements
-
-| Environnement | Branche | HF Space | URL |
-|---------------|---------|----------|-----|
-| **Développement** | `dev` | `oc_p5-dev` | https://asi-engineer-oc-p5-dev.hf.space |
-| **Production** | `main` | `oc_p5` | https://asi-engineer-oc-p5.hf.space |
-
-### Déploiement manuel
-
-```bash
-# 1. Vérifier que tous les changements sont commitées
-git status
-
-# 2. Push sur dev (déclenche CI/CD automatiquement)
-git push origin dev
-
-# 3. Vérifier le pipeline
-# https://github.com/chaton59/OC_P5/actions
-
-# 4. Tester sur l'espace dev
-curl https://asi-engineer-oc-p5-dev.hf.space/health
-
-# 5. Si OK, merger vers main (après validation)
-git checkout main
-git merge dev
-git push origin main
-```
-
-### Configuration requise
-
-**Secrets GitHub** (`Settings > Secrets and variables > Actions`) :
-- `HF_TOKEN` : Token HuggingFace avec accès write
-- `API_KEY` : Clé API pour les tests CI/CD
-
-**Variables HF Spaces** (dans settings du Space) :
-- `API_KEY` : Clé API production (sécurisée)
-- `DEBUG` : `false` (production) / `true` (dev)
-- `LOG_LEVEL` : `INFO`
-
-### Documentation complète
-
-📖 **Guide détaillé** : [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
-- Docker et containerisation
-- Troubleshooting
-- Monitoring et logs
-- Rollback procedures
+---
 
 ## 📚 Documentation
 
-- **API Interactive** : http://localhost:8000/docs
-- **ReDoc** : http://localhost:8000/redoc
-- **Guide complet** : [docs/API_GUIDE.md](docs/API_GUIDE.md)
-- **Standards** : [docs/standards.md](docs/standards.md)
-- **Couverture tests** : [docs/TEST_COVERAGE.md](docs/TEST_COVERAGE.md)
+| Document | Description |
+|----------|-------------|
+| [📖 README.md](README.md) | Vue d'ensemble et guide rapide (ce fichier) |
+| [🔌 API_GUIDE.md](docs/API_GUIDE.md) | Guide complet de l'API (endpoints, schémas, exemples) |
+| [🤖 MODEL_TECHNICAL.md](docs/MODEL_TECHNICAL.md) | Documentation technique du modèle (architecture, performances, maintenance) |
+| [🚀 DEPLOYMENT.md](docs/DEPLOYMENT.md) | Guide de déploiement (Docker, HF Spaces, CI/CD) |
+| [🎓 TRAINING.md](docs/TRAINING.md) | Guide d'entraînement du modèle (preprocessing, MLflow) |
+| [🗄️ database_guide.md](docs/database_guide.md) | Guide PostgreSQL pour débutants |
+| [📊 DOCUMENTATION_INVENTORY.md](docs/DOCUMENTATION_INVENTORY.md) | Inventaire complet de la documentation |
+| [📐 schema.puml](docs/schema.puml) | Diagramme UML de la base de données |
 
-## 📦 Dépendances principales
+**Documentation interactive** :
+- 🌐 **Swagger UI** : http://localhost:8000/docs
+- 📘 **ReDoc** : http://localhost:8000/redoc
 
-- **FastAPI** 0.115.14 : Framework web
-- **Pydantic** 2.12.5 : Validation données
-- **XGBoost** 2.1.3 : Modèle ML
-- **SlowAPI** 0.1.9 : Rate limiting
-- **python-json-logger** 4.0.0 : Logs structurés
-- **pytest** 9.0.2 : Tests
+---
+
+## 📦 Dépendances Principales
+
+| Package | Version | Rôle |
+|---------|---------|------|
+| **FastAPI** | 0.115.14 | Framework API REST |
+| **Pydantic** | 2.12.5 | Validation données |
+| **XGBoost** | 2.1.3 | Modèle ML |
+| **imbalanced-learn** | 0.12.0 | SMOTE (rééquilibrage) |
+| **SQLAlchemy** | 2.0.23 | ORM PostgreSQL |
+| **psycopg2-binary** | 2.9.9 | Driver PostgreSQL |
+| **SlowAPI** | 0.1.9 | Rate limiting |
+| **python-json-logger** | 4.0.0 | Logs structurés |
+| **pytest** | 9.0.2 | Tests unitaires |
+| **MLflow** | 2.9.2 | Tracking expériences ML |
+| **Gradio** | 4.13.0 | Interface web |
+
+Voir [pyproject.toml](pyproject.toml) pour la liste complète.
+
+---
+
 
 
 ## 🔄 Changelog
 
-### v3.2.1 (janvier 2026)
+### v3.2.1 (Janvier 2026)
 - 🎛️ Sliders Gradio et schémas Pydantic alignés sur les min/max réels des données d'entraînement
 - 📦 Endpoint batch CSV (3 fichiers bruts)
 - 🔑 Authentification API Key (prod)
 - 🔧 Correction preprocessing (scaling, ordre des colonnes)
-- 📝 Documentation et exemples mis à jour
+- 📝 Documentation complète enrichie (API_GUIDE, MODEL_TECHNICAL)
 
-### v2.2.0 (27 décembre 2025)
+### v2.2.0 (27 Décembre 2025)
 - 📦 Nouvel endpoint `/predict/batch` pour traitement CSV direct
 - 🔧 Fix preprocessing : ajout du scaling des features
 - 🔧 Fix preprocessing : correction de l'ordre des colonnes
 - 📊 Amélioration précision des prédictions (~90%)
 
-### v2.1.0 (26 décembre 2025)
+### v2.1.0 (26 Décembre 2025)
 - ✨ Système de logging structuré JSON
 - 🛡️ Rate limiting avec SlowAPI
 - ⚡ Amélioration gestion d'erreurs
 - 📊 Monitoring des performances
 
-### v2.0.0 (26 décembre 2025)
-- ✅ Suite de tests complète (84 tests)
+### v2.0.0 (26 Décembre 2025)
+- ✅ Suite de tests complète (97 tests)
 - 🔐 Authentification API Key
-- 📊 88% de couverture de code
+- 📊 70% de couverture de code
+
+---
 
 ## 👥 Auteurs
 
-- **Projet** : OpenClassrooms P5
-- **Repo** : [github.com/chaton59/OC_P5](https://github.com/chaton59/OC_P5)
+**Développeur** : Valentin (chaton59)  
+**Projet** : OpenClassrooms P5 - Déployez votre modèle de Machine Learning  
+**Repo GitHub** : [github.com/chaton59/OC_P5](https://github.com/chaton59/OC_P5)  
+**HuggingFace** : [ASI-Engineer](https://huggingface.co/ASI-Engineer)
+
+---
+
+## 📄 Licence
+
+Ce projet est développé dans un cadre pédagogique (OpenClassrooms).  
+Les données utilisées sont fictives.
+
+---
+
+## 🤝 Contributing
+
+Les contributions sont bienvenues ! Pour contribuer :
+
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+---
+
+## 📞 Contact & Support
+
+- **Issues GitHub** : [github.com/chaton59/OC_P5/issues](https://github.com/chaton59/OC_P5/issues)
+- **Discussions** : [github.com/chaton59/OC_P5/discussions](https://github.com/chaton59/OC_P5/discussions)
+- **Email** : Voir profil GitHub
+
+---
+
+## 🙏 Remerciements
+
+- **OpenClassrooms** pour le parcours Data Scientist
+- **HuggingFace** pour l'hébergement gratuit
+- **FastAPI** pour le framework moderne
+- **Communauté Python ML** pour les bibliothèques open-source
+
+---
+
+<div align="center">
+
+**⭐ Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile sur GitHub ! ⭐**
+
+Made with ❤️ by [chaton59](https://github.com/chaton59)
+
+</div>
+
