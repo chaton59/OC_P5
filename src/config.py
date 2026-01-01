@@ -26,7 +26,7 @@ class Settings:
     API_KEY: str = os.getenv("API_KEY", "dev-key-change-me-in-production")
 
     # ===== API =====
-    API_VERSION: str = os.getenv("API_VERSION", "2.2.0")
+    API_VERSION: str = os.getenv("API_VERSION", "3.3.0")
     API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
     API_PORT: int = int(os.getenv("API_PORT", "8000"))
 

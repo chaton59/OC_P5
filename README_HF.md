@@ -10,9 +10,9 @@ app_port: 7860
 ---
 
 
-# Employee Turnover Prediction API 🚀 (v3.2.1)
+# Employee Turnover Prediction API 🚀 (v3.3.0)
 
-API de prédiction du turnover des employés (XGBoost + SMOTE) avec endpoints batch, validation stricte et documentation à jour.
+API de prédiction du turnover des employés (XGBoost + SMOTE) avec endpoints batch, validation stricte et **documentation complète**.
 
 ## 🎯 Fonctionnalités
 
@@ -23,7 +23,21 @@ API de prédiction du turnover des employés (XGBoost + SMOTE) avec endpoints ba
 - 🔐 Authentification API Key (obligatoire)
 - 📝 Logs structurés JSON
 - 🛡️ Rate limiting (20 req/min)
-- 📚 Documentation OpenAPI/Swagger
+- 📚 **Documentation exhaustive** (Étape 6 OpenClassrooms)
+
+
+## 📚 Documentation Complète
+
+| Document | Description | Lignes |
+|----------|-------------|--------|
+| **[README.md](https://github.com/chaton59/OC_P5/blob/main/README.md)** | Vue d'ensemble complète (restructuré Best-README-Template) | 841 |
+| **[API_GUIDE.md](https://github.com/chaton59/OC_P5/blob/main/docs/API_GUIDE.md)** | Guide API exhaustif avec 7 exemples (curl, Python, JS) | 981 |
+| **[MODEL_TECHNICAL.md](https://github.com/chaton59/OC_P5/blob/main/docs/MODEL_TECHNICAL.md)** | Documentation technique modèle (architecture, justifications) | 393 |
+| **[DEPLOYMENT.md](https://github.com/chaton59/OC_P5/blob/main/docs/DEPLOYMENT.md)** | Guide de déploiement (Docker, HF Spaces, CI/CD) | - |
+| **[TRAINING.md](https://github.com/chaton59/OC_P5/blob/main/docs/TRAINING.md)** | Guide d'entraînement (preprocessing, MLflow) | - |
+| **[Site MkDocs](https://github.com/chaton59/OC_P5/tree/main/docs)** | Documentation HTML navigable (17 pages, Material theme) | - |
+
+**🌐 Site de documentation** : Générez localement avec `poetry run mkdocs serve`
 
 
 ## 🔗 Endpoints

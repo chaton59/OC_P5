@@ -4,6 +4,41 @@ Historique des versions du projet Employee Turnover Prediction API.
 
 ---
 
+## v3.3.0 (Janvier 2026)
+
+### 📚 Documentation (Étape 6 OpenClassrooms)
+
+#### ✨ Nouvelles fonctionnalités documentation
+- 📝 **13 nouveaux fichiers** de documentation créés (~5000 lignes)
+- 🌐 **Site MkDocs** avec theme Material (17 pages HTML générées)
+- 📊 **Inventaire complet** : DOCUMENTATION_INVENTORY.md (314 lignes)
+- 🔧 **README restructuré** selon Best-README-Template (841 lignes)
+- 📖 **Guide API exhaustif** : API_GUIDE.md (981 lignes, 7 exemples)
+- 🤖 **Documentation technique modèle** : MODEL_TECHNICAL.md (393 lignes)
+- 📈 **Visualisation performances** : model_performance.png (metrics + confusion matrix)
+- ✅ **Vérification complète** : VERIFICATION_CHECKLIST.md
+
+#### 📁 Structure MkDocs
+- Configuration mkdocs.yml avec Material theme
+- Pages créées : index, installation, configuration, quickstart, changelog
+- Sections : API, Modèle ML, Déploiement, BDD, Tests
+- Extensions : Admonitions, tabs, code highlighting, recherche française
+- Build time : 0.70s, taille : ~3.5 MB
+
+#### 🔗 Navigation et cohérence
+- Liens internes vérifiés entre tous les documents
+- URLs HuggingFace cohérentes (prod/dev)
+- Métriques du modèle cohérentes (F1=0.85, etc.)
+- Commandes d'installation testées
+
+#### 📊 Livrables
+- 6 commits documentés
+- 5 sous-étapes complétées (inventaire, API, modèle, README, MkDocs)
+- Instructions reproductibles validées
+- Conformité 100% avec etapes.txt
+
+---
+
 ## v3.2.1 (Janvier 2026)
 
 ### ✨ Nouvelles fonctionnalités

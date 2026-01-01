@@ -759,6 +759,17 @@ Voir [pyproject.toml](pyproject.toml) pour la liste complète.
 
 ## 🔄 Changelog
 
+### v3.3.0 (Janvier 2026)
+- 📚 **Documentation complète** pour Étape 6 OpenClassrooms
+- 📝 Création de 13 nouveaux fichiers de documentation (~5000 lignes)
+- 🌐 Setup site MkDocs avec theme Material (17 pages HTML)
+- 📊 Inventaire complet de la documentation existante
+- 🔧 README restructuré selon Best-README-Template (841 lignes)
+- 📖 Guide API exhaustif avec 7 exemples (curl, Python, JS) - 981 lignes
+- 🤖 Documentation technique modèle avec diagrammes et justifications - 393 lignes
+- 📈 Visualisation des performances du modèle (model_performance.png)
+- ✅ Vérification complète : liens, cohérence, instructions testées
+
 ### v3.2.1 (Janvier 2026)
 - 🎛️ Sliders Gradio et schémas Pydantic alignés sur les min/max réels des données d'entraînement
 - 📦 Endpoint batch CSV (3 fichiers bruts)
