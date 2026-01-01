@@ -1,0 +1,175 @@
+site_name: Employee Turnover Prediction API
+site_description: Documentation complète de l'API de prédiction du turnover des employés
+site_author: Valentin (chaton59)
+site_url: https://github.com/chaton59/OC_P5
+
+# Repository
+repo_name: chaton59/OC_P5
+repo_url: https://github.com/chaton59/OC_P5
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: Copyright &copy; 2026 Valentin - Projet OpenClassrooms P5
+
+# Theme
+theme:
+  name: material
+  language: fr
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Passer au mode sombre
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Passer au mode clair
+  
+  font:
+    text: Roboto
+    code: Roboto Mono
+  
+  features:
+    - navigation.instant      # Navigation instantanée (SPA)
+    - navigation.tracking     # URL tracking
+    - navigation.tabs         # Tabs en haut
+    - navigation.tabs.sticky  # Tabs fixes au scroll
+    - navigation.sections     # Sections dans la sidebar
+    - navigation.expand       # Expand par défaut
+    - navigation.top          # Bouton retour en haut
+    - search.suggest          # Suggestions de recherche
+    - search.highlight        # Highlight des résultats
+    - search.share            # Partage des recherches
+    - content.code.copy       # Bouton copier pour code blocks
+    - content.tabs.link       # Tabs linkés
+  
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/chart-line
+
+# Extensions
+markdown_extensions:
+  # Python Markdown
+  - abbr                      # Abréviations
+  - admonition                # Notes/avertissements
+  - attr_list                 # Attributs HTML
+  - def_list                  # Listes de définitions
+  - footnotes                 # Notes de bas de page
+  - md_in_html                # Markdown dans HTML
+  - toc:
+      permalink: true         # Liens permanents pour headers
+      toc_depth: 3            # Profondeur de la table des matières
+  
+  # PyMdown Extensions
+  - pymdownx.arithmatex:
+      generic: true           # Support LaTeX/MathJax
+  - pymdownx.betterem:
+      smart_enable: all       # Meilleure gestion emphasis
+  - pymdownx.caret            # Superscript
+  - pymdownx.mark             # Highlight
+  - pymdownx.tilde            # Subscript
+  - pymdownx.critic           # Track changes
+  - pymdownx.details          # Collapsible admonitions
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true   # Ancres pour numéros de lignes
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite     # Highlight inline code
+  - pymdownx.keys             # Keyboard keys (++ctrl+c++)
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: chaton59
+      repo: OC_P5
+  - pymdownx.smartsymbols     # Symboles intelligents
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
+  - pymdownx.superfences:     # Code blocks avancés
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true   # Tabs de contenu
+  - pymdownx.tasklist:
+      custom_checkbox: true   # Listes de tâches
+
+# Plugins
+plugins:
+  - search:
+      lang: fr
+      separator: '[\s\-\.]+'
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/chaton59
+    - icon: fontawesome/brands/python
+      link: https://www.python.org
+  
+  version:
+    provider: mike
+    default: latest
+  
+  analytics:
+    feedback:
+      title: Cette page vous a-t-elle été utile ?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: Cette page m'a été utile
+          data: 1
+          note: >-
+            Merci pour votre retour !
+        - icon: material/emoticon-sad-outline
+          name: Cette page pourrait être améliorée
+          data: 0
+          note: >-
+            Merci pour votre retour. Aidez-nous à améliorer cette page en
+            <a href="https://github.com/chaton59/OC_P5/issues/new" target="_blank" rel="noopener">créant une issue</a>.
+
+# Navigation
+nav:
+  - Accueil:
+    - Vue d'ensemble: index.md
+    - Changelog: changelog.md
+  
+  - Guide de Démarrage:
+    - Installation: installation.md
+    - Configuration: configuration.md
+    - Premier déploiement: quickstart.md
+  
+  - API:
+    - Guide complet: api/guide.md
+    - Documentation API (complète): API_GUIDE.md
+  
+  - Modèle ML:
+    - Documentation technique: model/technical.md
+    - Documentation complète: MODEL_TECHNICAL.md
+    - Guide d'entraînement: TRAINING.md
+  
+  - Déploiement:
+    - Guide de déploiement: DEPLOYMENT.md
+  
+  - Base de Données:
+    - Guide de la base de données: database_guide.md
+  
+  - Référence:
+    - Inventaire documentation: DOCUMENTATION_INVENTORY.md

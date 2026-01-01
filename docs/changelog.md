@@ -1,0 +1,70 @@
+# Changelog
+
+Historique des versions du projet Employee Turnover Prediction API.
+
+---
+
+## v3.2.1 (Janvier 2026)
+
+### ✨ Nouvelles fonctionnalités
+- 🎛️ Sliders Gradio et schémas Pydantic alignés sur les min/max réels des données d'entraînement
+- 📦 Endpoint batch CSV (3 fichiers bruts)
+- 🔑 Authentification API Key (production)
+
+### 🔧 Corrections
+- Correction preprocessing (scaling, ordre des colonnes)
+- Fix de la validation Pydantic pour les contraintes
+
+### 📝 Documentation
+- Documentation complète enrichie (API_GUIDE, MODEL_TECHNICAL)
+- Setup MkDocs avec theme Material
+- Inventory complet de la documentation existante
+
+---
+
+## v2.2.0 (27 Décembre 2025)
+
+### ✨ Nouvelles fonctionnalités
+- 📦 Nouvel endpoint `/predict/batch` pour traitement CSV direct
+- 📊 Amélioration précision des prédictions (~90%)
+
+### 🔧 Corrections
+- Fix preprocessing : ajout du scaling des features
+- Fix preprocessing : correction de l'ordre des colonnes
+
+---
+
+## v2.1.0 (26 Décembre 2025)
+
+### ✨ Nouvelles fonctionnalités
+- ✨ Système de logging structuré JSON
+- 🛡️ Rate limiting avec SlowAPI
+- 📊 Monitoring des performances
+
+### 🔧 Améliorations
+- ⚡ Amélioration gestion d'erreurs
+- 📝 Meilleurs messages d'erreur
+
+---
+
+## v2.0.0 (26 Décembre 2025)
+
+### ✨ Nouvelles fonctionnalités
+- ✅ Suite de tests complète (97 tests)
+- 🔐 Authentification API Key
+- 📊 70% de couverture de code
+
+### 🏗️ Infrastructure
+- CI/CD avec GitHub Actions (4 jobs)
+- Déploiement automatique sur HuggingFace Spaces
+
+---
+
+## v1.0.0 (Décembre 2025)
+
+### 🎉 Version initiale
+- API REST FastAPI
+- Modèle XGBoost + SMOTE
+- Endpoints /health et /predict
+- Base de données PostgreSQL
+- Documentation Swagger/ReDoc

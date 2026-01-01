@@ -77,3 +77,9 @@ mlruns/
 # =====================
 .ipynb_checkpoints/
 *.ipynb_checkpoints/
+
+# =====================
+# MkDocs
+# =====================
+site/
+.cache/
