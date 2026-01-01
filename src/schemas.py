@@ -6,7 +6,7 @@ Ces schémas correspondent aux colonnes brutes du dataset avant preprocessing,
 permettant une validation stricte des inputs avec messages d'erreur clairs.
 """
 from enum import Enum
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
@@ -75,6 +75,20 @@ class FrequenceDeplacementEnum(str, Enum):
     FREQUENT = "Frequent"
 
 
+class AyantEnfantsEnum(str, Enum):
+    """L'employé a des enfants."""
+
+    OUI = "Y"
+    NON = "N"
+
+
+class HeureSupplementairesEnum(str, Enum):
+    """L'employé fait des heures supplémentaires."""
+
+    OUI = "Oui"
+    NON = "Non"
+
+
 class EmployeeInput(BaseModel):
     """
     Schéma de validation pour les données d'entrée d'un employé.
@@ -103,7 +117,7 @@ class EmployeeInput(BaseModel):
         ..., ge=1, le=5, description="Niveau d'éducation (1-5)"
     )
     domaine_etude: DomaineEtudeEnum = Field(..., description="Domaine d'études")
-    ayant_enfants: Literal["Y", "N"] = Field(..., description="A des enfants (Y/N)")
+    ayant_enfants: AyantEnfantsEnum = Field(..., description="A des enfants (Y/N)")
     frequence_deplacement: FrequenceDeplacementEnum = Field(
         ..., description="Fréquence des déplacements"
     )
@@ -136,7 +150,7 @@ class EmployeeInput(BaseModel):
     note_evaluation_actuelle: int = Field(
         ..., ge=3, le=4, description="Note évaluation actuelle (3-4)"
     )
-    heure_supplementaires: Literal["Oui", "Non"] = Field(
+    heure_supplementaires: HeureSupplementairesEnum = Field(
         ..., description="Fait des heures supplémentaires"
     )
     augementation_salaire_precedente: Annotated[

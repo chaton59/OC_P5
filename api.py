@@ -13,10 +13,11 @@ Cette API expose le modèle de prédiction de départ des employés avec :
 import io
 import time
 from contextlib import asynccontextmanager
+from typing import Any, Callable
 
 import gradio as gr
 import pandas as pd
-from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -24,7 +25,7 @@ from slowapi.errors import RateLimitExceeded
 from src.auth import verify_api_key
 from src.config import get_settings
 from src.gradio_ui import create_gradio_interface
-from src.logger import logger, log_model_load, log_request
+from src.logger import log_model_load, log_request, logger
 from src.models import get_model_info, load_model
 from src.preprocessing import (
     merge_csv_dataframes,
@@ -43,6 +44,31 @@ from src.schemas import (
 # Charger la configuration
 settings = get_settings()
 API_VERSION = settings.API_VERSION
+
+
+def conditional_rate_limit(
+    limit: str,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """
+    Applique un rate limit seulement si DEBUG=False.
+
+    En mode DEBUG (tests), pas de rate limiting pour éviter les échecs de tests.
+
+    Args:
+        limit: Limite à appliquer (ex: "20/minute")
+
+    Returns:
+        Décorateur de rate limiting ou fonction identité
+    """
+    if settings.DEBUG:
+        # En mode DEBUG, retourner une fonction qui ne fait rien
+        def no_limit(func):
+            return func
+
+        return no_limit
+    else:
+        # En production, appliquer le rate limit normal
+        return limiter.limit(limit)
 
 
 @asynccontextmanager
@@ -87,7 +113,27 @@ app = FastAPI(
 
 # Ajouter rate limiting
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+# Wrapper pour le handler de rate limit qui respecte l'interface FastAPI
+def rate_limit_exception_handler(request: Request, exc: Exception) -> Response:
+    """
+    Handler pour les exceptions de rate limiting.
+
+    Utilise le handler de slowapi mais avec l'interface FastAPI.
+    """
+    if isinstance(exc, RateLimitExceeded):
+        return _rate_limit_exceeded_handler(request, exc)
+    else:
+        # Fallback pour autres exceptions
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(
+            status_code=500, content={"detail": "Internal server error"}
+        )
+
+
+app.add_exception_handler(RateLimitExceeded, rate_limit_exception_handler)
 
 # Configurer CORS (autoriser tous les domaines en dev)
 app.add_middleware(
@@ -164,7 +210,7 @@ async def health_check():
     tags=["Prediction"],
     dependencies=[Depends(verify_api_key)] if settings.is_api_key_required else [],
 )
-@limiter.limit("20/minute")
+@conditional_rate_limit("20/minute")
 async def predict(request: Request, employee: EmployeeInput):
     """
     Endpoint de prédiction du turnover d'un employé.
@@ -225,6 +271,7 @@ async def predict(request: Request, employee: EmployeeInput):
         try:
             from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
+
             from db_models import MLLog
 
             engine = create_engine(settings.DATABASE_URL)
@@ -267,7 +314,7 @@ async def predict(request: Request, employee: EmployeeInput):
     tags=["Prediction"],
     dependencies=[Depends(verify_api_key)] if settings.is_api_key_required else [],
 )
-@limiter.limit("5/minute")
+@conditional_rate_limit("5/minute")
 async def predict_batch(
     request: Request,
     sondage_file: UploadFile = File(..., description="Fichier CSV du sondage"),

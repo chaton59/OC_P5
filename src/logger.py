@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger.jsonlogger import JsonFormatter
 
 from src.config import get_settings
 
@@ -28,7 +28,7 @@ LOG_FILE = LOG_DIR / "api.log"
 ERROR_LOG_FILE = LOG_DIR / "error.log"
 
 
-class CustomJsonFormatter(jsonlogger.JsonFormatter):
+class CustomJsonFormatter(JsonFormatter):
     """
     Formatter JSON personnalisé avec champs supplémentaires.
     """

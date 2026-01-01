@@ -7,12 +7,24 @@ Cette interface permet de:
 - Visualiser la documentation de l'API
 - Comprendre les champs requis
 """
-import gradio as gr
 import os
+from typing import cast
+
+import gradio as gr
 
 from src.models import get_model_info, load_model
 from src.preprocessing import preprocess_for_prediction
-from src.schemas import EmployeeInput
+from src.schemas import (
+    AyantEnfantsEnum,
+    DepartementEnum,
+    DomaineEtudeEnum,
+    EmployeeInput,
+    FrequenceDeplacementEnum,
+    GenreEnum,
+    HeureSupplementairesEnum,
+    PosteEnum,
+    StatutMaritalEnum,
+)
 
 
 def predict_turnover(
@@ -61,9 +73,9 @@ def predict_turnover(
             ),
             distance_domicile_travail=int(distance_domicile_travail),
             niveau_education=int(niveau_education),
-            domaine_etude=domaine_etude,
-            ayant_enfants=ayant_enfants,
-            frequence_deplacement=frequence_deplacement,
+            domaine_etude=cast(DomaineEtudeEnum, domaine_etude),
+            ayant_enfants=cast(AyantEnfantsEnum, ayant_enfants),
+            frequence_deplacement=cast(FrequenceDeplacementEnum, frequence_deplacement),
             annees_depuis_la_derniere_promotion=int(
                 annees_depuis_la_derniere_promotion
             ),
@@ -81,14 +93,14 @@ def predict_turnover(
                 satisfaction_employee_equilibre_pro_perso
             ),
             note_evaluation_actuelle=int(note_evaluation_actuelle),
-            heure_supplementaires=heure_supplementaires,
+            heure_supplementaires=cast(HeureSupplementairesEnum, heure_supplementaires),
             augementation_salaire_precedente=float(augementation_salaire_precedente),
             age=int(age),
-            genre=genre,
+            genre=cast(GenreEnum, genre),
             revenu_mensuel=float(revenu_mensuel),
-            statut_marital=statut_marital,
-            departement=departement,
-            poste=poste,
+            statut_marital=cast(StatutMaritalEnum, statut_marital),
+            departement=cast(DepartementEnum, departement),
+            poste=cast(PosteEnum, poste),
             nombre_experiences_precedentes=int(nombre_experiences_precedentes),
             nombre_heures_travailless=int(nombre_heures_travailless),
             annee_experience_totale=int(annee_experience_totale),
@@ -131,6 +143,7 @@ def predict_turnover(
             if os.getenv("SPACE_ID") is None:  # Pas sur HF Spaces
                 from sqlalchemy import create_engine
                 from sqlalchemy.orm import sessionmaker
+
                 from src.config import get_settings
 
                 settings = get_settings()

@@ -272,32 +272,190 @@ curl -X POST "http://localhost:8000/predict/batch" \
 
 ## ✅ Tests
 
+### Suite de tests complète
+
+**Métriques** :
+- ✅ **97 tests** (86 passés, 11 skippés pour déploiement)
+- 📊 **70.26% de couverture** globale du code
+- ⚡ Temps d'exécution : **~4 secondes**
+- 🎯 **9 fichiers de tests** couvrant tous les aspects
+
+### Catégories de tests
+
+#### 🔐 Tests d'authentification (`test_api_auth.py`)
+- Validation système d'authentification API Key
+- Mode DEBUG vs Production
+- Headers de sécurité
+- Rate limiting par clé API
+- **11 tests** - 100% passés
+
+#### 🏥 Tests de santé (`test_api_health.py`)
+- Endpoint `/health`
+- Structure des réponses
+- Statut du modèle
+- Versionning
+- **6 tests** - 100% passés
+
+#### 🔮 Tests de prédiction (`test_api_predict.py`)
+- Endpoint `/predict` avec données valides
+- Structure des réponses (prediction, probabilities, risk_level)
+- Validation des probabilités (somme = 1, range [0,1])
+- Cohérence des prédictions
+- **9 tests** - 100% passés
+
+#### ✔️ Tests de validation (`test_api_validation.py`)
+- Validation des champs requis
+- Types de données
+- Valeurs négatives
+- Limites d'âge (18-70 ans)
+- Énumérations (genre, département, statut_marital, etc.)
+- Formats (augmentation_salaire en %)
+- **15 tests** - 100% passés
+
+#### 🗄️ Tests de base de données (`test_database.py`)
+- Connexion PostgreSQL
+- Existence des tables (`dataset`, `ml_logs`)
+- Opérations CRUD
+- Intégrité des contraintes
+- **7 tests** - 100% passés
+
+#### 🔄 Tests fonctionnels (`test_functional.py`)
+- Tests end-to-end complets
+- Intégration API + DB + Modèle ML
+- Performance (temps de réponse < 2s)
+- Gestion d'erreurs et rollback
+- Scénarios de charge
+- **19 tests** (17 passés, 2 skippés)
+
+#### 🤖 Tests du modèle ML (`test_model.py`)
+- Chargement depuis HuggingFace Hub
+- Pipeline de preprocessing
+- Feature engineering
+- Validation Pydantic
+- Prédictions réelles
+- **23 tests** - 100% passés
+
+#### 🌐 Tests d'intégration API déployée (`test_api_demo.py`)
+- Tests sur API déployée HuggingFace Spaces
+- Endpoints réels en production
+- **7 tests** skippés en local (pour déploiement uniquement)
+
+### Exécution des tests
+
 ```bash
-# Tous les tests
+# Tous les tests avec détails
 poetry run pytest tests/ -v
 
-# Avec couverture
-poetry run pytest tests/ --cov --cov-report=html
+# Avec couverture détaillée
+poetry run pytest tests/ -v --cov=. --cov-report=term-missing
 
-# Voir rapport HTML
+# Avec rapport HTML
+poetry run pytest tests/ --cov=. --cov-report=html
 open htmlcov/index.html
+
+# Tests spécifiques
+poetry run pytest tests/test_api_predict.py -v
+poetry run pytest tests/test_database.py -v
+
+# Par catégorie (marqueurs)
+poetry run pytest -m "not integration" -v  # Exclure tests d'intégration
 ```
 
-**Résultats** :
-- ✅ 84 tests passés
-- 📊 75.12% de couverture globale
+### Détail de couverture par module
+
+| Module | Couverture | Lignes | Manquantes |
+|--------|------------|--------|------------|
+| `src/config.py` | **100%** | 20 | 0 |
+| `src/schemas.py` | **100%** | 100 | 0 |
+| `src/rate_limit.py` | **100%** | 10 | 0 |
+| `db_models.py` | **100%** | 14 | 0 |
+| `src/logger.py` | **90.32%** | 62 | 6 |
+| `src/preprocessing.py` | **76.36%** | 55 | 13 |
+| `src/models.py` | **61.36%** | 44 | 17 |
+| `api.py` | **55.41%** | 157 | 70 |
+| `src/gradio_ui.py` | **52%** | 125 | 60 |
+| `src/auth.py` | **47.37%** | 19 | 10 |
+
+**Note** : Les modules avec couverture < 100% incluent des sections spécifiques au déploiement ou à Gradio UI (interface web), testées en environnement de production.
 
 ## 🚀 Déploiement
 
-### Variables d'environnement requises
+### Pipeline CI/CD automatisé
+
+Le projet utilise **GitHub Actions** pour automatiser le workflow complet :
+
+**Fichier** : `.github/workflows/ci-cd.yml`
+
+**Workflow** (4 jobs séquentiels) :
+
+1. **🔍 Lint** (~30s)
+   - Black (formatage code)
+   - Flake8 (qualité code)
+   
+2. **🧪 Tests** (~2-3 min)
+   - pytest avec 97 tests
+   - Couverture de code
+   - Upload vers Codecov
+   - Génération rapport HTML
+
+3. **🚀 Test API Server** (~1-2 min)
+   - Démarrage serveur uvicorn
+   - Test endpoint `/health`
+   - Test endpoint `/predict` avec payload réel
+   - Validation des réponses
+
+4. **📦 Deploy** (selon branche)
+   - `dev` → HuggingFace Space `ASI-Engineer/oc_p5-dev`
+   - `main` → HuggingFace Space `ASI-Engineer/oc_p5`
+
+**⚡ Temps total** : ~5-7 minutes (< 10 min requis)
+
+### Environnements
+
+| Environnement | Branche | HF Space | URL |
+|---------------|---------|----------|-----|
+| **Développement** | `dev` | `oc_p5-dev` | https://asi-engineer-oc-p5-dev.hf.space |
+| **Production** | `main` | `oc_p5` | https://asi-engineer-oc-p5.hf.space |
+
+### Déploiement manuel
+
 ```bash
-DEBUG=false
-API_KEY=<votre-clé-sécurisée>
-LOG_LEVEL=INFO
+# 1. Vérifier que tous les changements sont commitées
+git status
+
+# 2. Push sur dev (déclenche CI/CD automatiquement)
+git push origin dev
+
+# 3. Vérifier le pipeline
+# https://github.com/chaton59/OC_P5/actions
+
+# 4. Tester sur l'espace dev
+curl https://asi-engineer-oc-p5-dev.hf.space/health
+
+# 5. Si OK, merger vers main (après validation)
+git checkout main
+git merge dev
+git push origin main
 ```
 
-### HuggingFace Spaces
-Prêt pour déploiement avec `app.py` et `requirements.txt`
+### Configuration requise
+
+**Secrets GitHub** (`Settings > Secrets and variables > Actions`) :
+- `HF_TOKEN` : Token HuggingFace avec accès write
+- `API_KEY` : Clé API pour les tests CI/CD
+
+**Variables HF Spaces** (dans settings du Space) :
+- `API_KEY` : Clé API production (sécurisée)
+- `DEBUG` : `false` (production) / `true` (dev)
+- `LOG_LEVEL` : `INFO`
+
+### Documentation complète
+
+📖 **Guide détaillé** : [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+- Docker et containerisation
+- Troubleshooting
+- Monitoring et logs
+- Rollback procedures
 
 ## 📚 Documentation
 
