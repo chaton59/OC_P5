@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
-from pythonjsonlogger.jsonlogger import JsonFormatter
+from pythonjsonlogger.json import JsonFormatter
 
 from src.config import get_settings
 
