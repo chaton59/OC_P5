@@ -17,25 +17,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Poetry Environment
+        uses: ./.github/actions/setup-poetry
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-      
-      - name: Install dependencies
-        run: poetry install --with dev
+          poetry-groups: dev
       
       - name: Lint with Black
         run: poetry run black --check .
@@ -51,25 +37,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Poetry Environment
+        uses: ./.github/actions/setup-poetry
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-      
-      - name: Install dependencies
-        run: poetry install --with dev
+          poetry-groups: dev
       
       - name: Run pytest with coverage
         run: |
@@ -100,25 +72,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Poetry Environment
+        uses: ./.github/actions/setup-poetry
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-      
-      - name: Install dependencies
-        run: poetry install
+          poetry-groups: dev
       
       - name: Create .env file
         run: |
@@ -213,49 +171,65 @@ jobs:
           fi
 
   deploy-hf-dev:
-    name: 🚀 Deploy to HF Spaces (Dev)
+    name: 📚 Build Documentation & 🚀 Deploy HF (Dev)
     runs-on: ubuntu-latest
-    needs: [test, test-api]
+    needs: test-api
     if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Python
+      - name: Setup Poetry Environment
+        uses: ./.github/actions/setup-poetry
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          poetry-groups: dev
+      
+      - name: Build MkDocs documentation
+        run: poetry run mkdocs build --clean --strict
+        continue-on-error: true
+      
+      - name: Setup Python for HF deployment
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       
-      - name: Install dependencies
-        run: |
-          pip install huggingface-hub
+      - name: Install HF tools
+        run: pip install huggingface-hub
       
       - name: Deploy to HF Space (Dev)
-        run: |
-          python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5-dev
+        run: python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5-dev
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
   deploy-hf-prod:
-    name: 🚀 Deploy to HF Spaces (Prod)
+    name: 📚 Build Documentation & 🚀 Deploy HF (Prod)
     runs-on: ubuntu-latest
-    needs: [test, test-api]
+    needs: test-api
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Python
+      - name: Setup Poetry Environment
+        uses: ./.github/actions/setup-poetry
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          poetry-groups: dev
+      
+      - name: Build MkDocs documentation
+        run: poetry run mkdocs build --clean --strict
+        continue-on-error: true
+      
+      - name: Setup Python for HF deployment
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       
-      - name: Install dependencies
-        run: |
-          pip install huggingface-hub
+      - name: Install HF tools
+        run: pip install huggingface-hub
       
       - name: Deploy to HF Space (Prod)
-        run: |
-          python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5
+        run: python .github/scripts/deploy_to_hf.py ASI-Engineer/oc_p5
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
