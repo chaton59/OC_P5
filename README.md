@@ -1,3 +1,14 @@
+---
+title: Employee Turnover Prediction API
+emoji: 🚀
+colorFrom: blue
+colorTo: green
+sdk: gradio
+sdk_version: "5.9.1"
+app_file: app.py
+pinned: false
+---
+
 <div align="center">
 
 # 🚀 Employee Turnover Prediction API
