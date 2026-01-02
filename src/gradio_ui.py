@@ -590,8 +590,8 @@ def launch_standalone():
 
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        force=True
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        force=True,
     )
     logger = logging.getLogger(__name__)
 
@@ -614,7 +614,9 @@ def launch_standalone():
         demo = create_gradio_interface()
         logger.info("✅ Interface Gradio créée avec succès")
     except Exception as e:
-        logger.error(f"❌ Erreur lors de la création de l'interface: {e}", exc_info=True)
+        logger.error(
+            f"❌ Erreur lors de la création de l'interface: {e}", exc_info=True
+        )
         sys.exit(1)
 
     # Configuration pour HuggingFace Spaces

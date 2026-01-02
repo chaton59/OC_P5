@@ -49,6 +49,7 @@ def load_model(force_reload: bool = False) -> Any:
     try:
         import joblib
         import logging
+
         logger = logging.getLogger(__name__)
 
         logger.info(f"🔄 Chargement du modèle depuis HF Hub: {HF_MODEL_REPO}")
@@ -56,8 +57,8 @@ def load_model(force_reload: bool = False) -> Any:
         # Télécharger le modèle depuis Hugging Face Hub avec timeout
         try:
             model_path = hf_hub_download(
-                repo_id=HF_MODEL_REPO, 
-                filename=MODEL_FILENAME, 
+                repo_id=HF_MODEL_REPO,
+                filename=MODEL_FILENAME,
                 repo_type="model",
                 timeout=60,  # Timeout de 60 secondes
             )
@@ -78,6 +79,7 @@ def load_model(force_reload: bool = False) -> Any:
 
     except Exception as e:
         import logging
+
         logger = logging.getLogger(__name__)
         error_msg = f"❌ Erreur lors du chargement du modèle: {str(e)}"
         logger.error(error_msg)
