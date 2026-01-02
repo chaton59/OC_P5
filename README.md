@@ -31,6 +31,8 @@
 - [Auteurs](#-auteurs)
 - [Licence](#-licence)
 
+> **Note**: La documentation de la mission OpenClassrooms est archivée dans [`docs/etapes_archive.txt`](docs/etapes_archive.txt). Les dépendances complètes (transitives) sont listées dans [`requirements_dev.txt`](requirements_dev.txt) pour installation de développement complet.
+
 ---
 
 ## 📊 À Propos du Projet
@@ -498,6 +500,72 @@ if response.status_code == 200:
 |---------------|-------------|------------------------|--------|
 | **Production** | `main` | https://asi-engineer-oc-p5.hf.space | ✅ Live |
 | **Développement** | `dev` | https://asi-engineer-oc-p5-dev.hf.space | 🚧 Testing |
+
+### 🤗 HuggingFace Spaces Integration
+
+L'API est déployée sur **HuggingFace Spaces** avec une interface interactive Gradio.
+
+#### Métadonnées HF Spaces
+
+Le fichier `README_HF.md` est fusionné dans cette section pour HF Spaces:
+
+```yaml
+title: Employee Turnover Prediction API
+emoji: 👔
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+pinned: true
+license: mit
+app_port: 7860
+```
+
+#### Endpoints HF Spaces
+
+| Endpoint | Description | Accès |
+|----------|-------------|-------|
+| `/docs` | Documentation interactive Swagger | Public |
+| `/health` | Status de l'API | Public |
+| `/ui` | Interface Gradio interactive | Public |
+| `/predict` | Prédiction unitaire (JSON, contraintes réelles) | API Key requis |
+| `/predict/batch` | Prédiction batch (3 fichiers CSV bruts) | API Key requis |
+
+#### Exemple Utilisation HF Spaces
+
+**Prédiction unitaire** (avec toutes contraintes appliquées):
+```bash
+curl -X POST https://asi-engineer-oc-p5.hf.space/predict \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-key" \
+  -d '{
+    "nombre_participation_pee": 0,
+    "nb_formations_suivies": 2,
+    "nombre_employee_sous_responsabilite": 1,
+    ...
+  }'
+```
+
+**Prédiction batch** (3 fichiers CSV):
+```bash
+curl -X POST https://asi-engineer-oc-p5.hf.space/predict/batch \
+  -H "X-API-Key: your-key" \
+  -F "sondage_file=@extrait_sondage.csv" \
+  -F "eval_file=@extrait_eval.csv" \
+  -F "sirh_file=@extrait_sirh.csv"
+```
+
+**Réponse batch**:
+```json
+{
+  "total_employees": 1470,
+  "predictions": [...],
+  "summary": {
+    "total_stay": 1169,
+    "total_leave": 301,
+    "high_risk_count": 222
+  }
+}
+```
 
 ### Pipeline CI/CD (GitHub Actions)
 

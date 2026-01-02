@@ -157,12 +157,10 @@ nav:
     - Premier déploiement: quickstart.md
   
   - API:
-    - Guide complet: api/guide.md
-    - Documentation API (complète): API_GUIDE.md
+    - Guide complet: API_GUIDE.md
   
   - Modèle ML:
-    - Documentation technique: model/technical.md
-    - Documentation complète: MODEL_TECHNICAL.md
+    - Documentation technique: MODEL_TECHNICAL.md
     - Guide d'entraînement: TRAINING.md
   
   - Déploiement:
@@ -173,3 +171,4 @@ nav:
   
   - Référence:
     - Inventaire documentation: DOCUMENTATION_INVENTORY.md
+    - Archive mission OC: etapes_archive.txt

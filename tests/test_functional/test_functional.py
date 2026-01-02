@@ -237,7 +237,8 @@ class TestDatabaseFailureScenarios:
 
         # Patcher create_engine pour qu'elle lève une exception
         monkeypatch.setattr(
-            "tests.test_functional.create_engine", mock_create_engine_error
+            "tests.test_functional.test_functional.create_engine",
+            mock_create_engine_error,
         )
 
         # La prédiction devrait quand même fonctionner (sans logging DB)
