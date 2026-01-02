@@ -81,9 +81,9 @@ def main():
         ],
     )
 
-    # Upload README for HF Spaces
+    # Upload README for HF Spaces (use consolidated README)
     api.upload_file(
-        path_or_fileobj="README_HF.md",
+        path_or_fileobj="README.md",
         path_in_repo="README.md",
         repo_id=repo_id,
         repo_type="space",
