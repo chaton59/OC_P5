@@ -54,13 +54,12 @@ def load_model(force_reload: bool = False) -> Any:
 
         logger.info(f"🔄 Chargement du modèle depuis HF Hub: {HF_MODEL_REPO}")
 
-        # Télécharger le modèle depuis Hugging Face Hub avec timeout
+        # Télécharger le modèle depuis Hugging Face Hub
         try:
             model_path = hf_hub_download(
                 repo_id=HF_MODEL_REPO,
                 filename=MODEL_FILENAME,
                 repo_type="model",
-                timeout=60,  # Timeout de 60 secondes
             )
         except Exception as download_error:
             logger.error(f"Erreur téléchargement HF Hub: {download_error}")
