@@ -48,15 +48,24 @@ def load_model(force_reload: bool = False) -> Any:
 
     try:
         import joblib
+        import logging
 
-        print(f"🔄 Chargement du modèle depuis HF Hub: {HF_MODEL_REPO}")
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"🔄 Chargement du modèle depuis HF Hub: {HF_MODEL_REPO}")
 
         # Télécharger le modèle depuis Hugging Face Hub
-        model_path = hf_hub_download(
-            repo_id=HF_MODEL_REPO, filename=MODEL_FILENAME, repo_type="model"
-        )
+        try:
+            model_path = hf_hub_download(
+                repo_id=HF_MODEL_REPO,
+                filename=MODEL_FILENAME,
+                repo_type="model",
+            )
+        except Exception as download_error:
+            logger.error(f"Erreur téléchargement HF Hub: {download_error}")
+            raise
 
-        print(f"📦 Modèle téléchargé: {model_path}")
+        logger.info(f"📦 Modèle téléchargé: {model_path}")
 
         # Charger le modèle avec joblib
         model = joblib.load(model_path)
@@ -64,12 +73,15 @@ def load_model(force_reload: bool = False) -> Any:
         # Mettre en cache
         _model_cache = model
 
-        print(f"✅ Modèle chargé avec succès: {type(model).__name__}")
+        logger.info(f"✅ Modèle chargé avec succès: {type(model).__name__}")
         return model
 
     except Exception as e:
+        import logging
+
+        logger = logging.getLogger(__name__)
         error_msg = f"❌ Erreur lors du chargement du modèle: {str(e)}"
-        print(error_msg)
+        logger.error(error_msg)
         raise HTTPException(
             status_code=500,
             detail={

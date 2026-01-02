@@ -35,10 +35,11 @@ EXPOSE 7860
 ENV DEBUG=false
 ENV LOG_LEVEL=INFO
 ENV API_KEY=change-me-in-production
+ENV PYTHONUNBUFFERED=1
 
-# Healthcheck - vérifier que FastAPI répond sur /health
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:7860/health || exit 1
+# Healthcheck - vérifier que Gradio répond
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+  CMD curl -f http://localhost:7860/ || exit 1
 
-# Commande de démarrage - FastAPI avec Gradio monté sur /ui
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
+# Commande de démarrage - Lancer l'app Gradio directement
+CMD ["python", "app.py"]

@@ -586,37 +586,55 @@ def create_gradio_interface():
 def launch_standalone():
     """Lance Gradio en mode standalone (pour HuggingFace Spaces)."""
     import sys
+    import logging
 
-    print("🚀 Démarrage de l'application Gradio...", flush=True)
-    print(f"Python version: {sys.version}", flush=True)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        force=True,
+    )
+    logger = logging.getLogger(__name__)
+
+    logger.info("🚀 Démarrage de l'application Gradio...")
+    logger.info(f"Python version: {sys.version}")
 
     # Pré-charger le modèle pour éviter le timeout au premier appel
-    print("📦 Pré-chargement du modèle...", flush=True)
+    logger.info("📦 Pré-chargement du modèle...")
     try:
         from src.models import load_model
 
         model = load_model()
-        print(f"✅ Modèle chargé: {type(model).__name__}", flush=True)
+        logger.info(f"✅ Modèle chargé: {type(model).__name__}")
     except Exception as e:
-        print(f"⚠️ Erreur chargement modèle: {e}", flush=True)
+        logger.warning(f"⚠️ Erreur chargement modèle au démarrage: {e}")
+        logger.warning("L'application continuera sans préchargement du modèle")
 
-    print("🎨 Création de l'interface Gradio...", flush=True)
-    demo = create_gradio_interface()
+    try:
+        logger.info("🎨 Création de l'interface Gradio...")
+        demo = create_gradio_interface()
+        logger.info("✅ Interface Gradio créée avec succès")
+    except Exception as e:
+        logger.error(
+            f"❌ Erreur lors de la création de l'interface: {e}", exc_info=True
+        )
+        sys.exit(1)
 
     # Configuration pour HuggingFace Spaces
-    # Ne pas utiliser queue() qui peut causer des problèmes sur HF Spaces
-    # car il nécessite un serveur websocket supplémentaire
-
-    print("🌐 Lancement du serveur sur 0.0.0.0:7860...", flush=True)
+    logger.info("🌐 Lancement du serveur sur 0.0.0.0:7860...")
     sys.stdout.flush()
     sys.stderr.flush()
 
-    demo.launch(
-        server_name="0.0.0.0",
-        server_port=7860,
-        share=False,
-        show_error=True,
-    )
+    try:
+        demo.launch(
+            server_name="0.0.0.0",
+            server_port=7860,
+            share=False,
+            show_error=True,
+            quiet=False,
+        )
+    except Exception as e:
+        logger.error(f"❌ Erreur lors du lancement du serveur: {e}", exc_info=True)
+        sys.exit(1)
 
 
 # Pour lancer en standalone
