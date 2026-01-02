@@ -1,3 +1,13 @@
+---
+title: Employee Turnover Prediction API
+emoji: 👔
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_file: app.py
+pinned: false
+---
+
 <div align="center">
 
 # 🚀 Employee Turnover Prediction API
