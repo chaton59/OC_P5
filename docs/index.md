@@ -11,7 +11,7 @@
 **API REST de prédiction du turnover des employés basée sur Machine Learning (XGBoost + SMOTE)**
 
 [🔗 Demo Production](https://asi-engineer-oc-p5.hf.space){ .md-button .md-button--primary } 
-[📚 Documentation API](api/guide.md){ .md-button } 
+[📚 Documentation API](API_GUIDE.md){ .md-button } 
 [🐛 Report Bug](https://github.com/chaton59/OC_P5/issues){ .md-button }
 
 </div>
@@ -249,6 +249,81 @@ Les contributions sont bienvenues ! Processus :
 
 Projet développé dans un cadre pédagogique (OpenClassrooms).  
 Les données utilisées sont fictives.
+
+---
+
+## 📚 Navigation Documentation
+
+### 🚀 Guides de Démarrage
+
+| Document | Description | Niveau |
+|----------|-------------|--------|
+| [Installation](installation.md) | Guide d'installation complet (Poetry, PostgreSQL, config) | **Débutant** |
+| [Configuration](configuration.md) | Variables d'environnement (.env), secrets, modes | **Débutant** |
+| [Quickstart](quickstart.md) | Démarrage rapide en 5 minutes | **Débutant** |
+
+### 📖 Documentation API
+
+| Document | Description | Pages |
+|----------|-------------|-------|
+| [API_GUIDE.md](API_GUIDE.md) | **Guide complet de l'API** (7 sections, exemples curl/Python/JS) | 980 lignes |
+
+### 🤖 Documentation Modèle ML
+
+| Document | Description | Pages |
+|----------|-------------|-------|
+| [MODEL_TECHNICAL.md](MODEL_TECHNICAL.md) | **Documentation technique du modèle** (architecture, métriques, maintenance) | 393 lignes |
+| [TRAINING.md](TRAINING.md) | Guide d'entraînement du modèle (preprocessing, MLflow) | 148 lignes |
+
+### 🚀 Déploiement & CI/CD
+
+| Document | Description | Contenu |
+|----------|-------------|---------|
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Guide déploiement (Docker, HF Spaces, GitHub Actions) | CI/CD pipeline |
+
+### 🗄️ Base de Données
+
+| Document | Description | Contenu |
+|----------|-------------|---------|
+| [database_guide.md](database_guide.md) | Guide PostgreSQL (création, insertion, requêtes) | Scripts SQL |
+
+### 📊 Rapports & Inventaire
+
+| Document | Description | Type |
+|----------|-------------|------|
+| [Coverage Report](coverage_report/index.html) | **Rapport de couverture des tests** (HTML interactif) | 70.27% |
+| [DOCUMENTATION_INVENTORY.md](DOCUMENTATION_INVENTORY.md) | Inventaire complet de la documentation | Référence |
+| [changelog.md](changelog.md) | Historique des versions et changements | Changelog |
+
+### 🎓 Documents Pédagogiques (OpenClassrooms)
+
+| Document | Description | Status |
+|----------|-------------|--------|
+| [ETAPE_6_COMPLETE.md](ETAPE_6_COMPLETE.md) | Rapport complet Étape 6 (documentation finale) | Terminé |
+| [VERIFICATION_CHECKLIST.md](VERIFICATION_CHECKLIST.md) | Checklist de vérification projet | Validation |
+| [etapes_archive.txt](etapes_archive.txt) | **Mission OpenClassrooms originale** (archivé) | Archive |
+
+### 🧹 Rapports de Nettoyage
+
+| Document | Description | Date |
+|----------|-------------|------|
+| [ETAT_PRE_SOUS_ETAPE_2.md](ETAT_PRE_SOUS_ETAPE_2.md) | État du projet avant nettoyage Phase 1 | 2 janv. 2026 |
+| [SOUS_ETAPE_2_RAPPORT.md](SOUS_ETAPE_2_RAPPORT.md) | Rapport Sous-Étape 2: Validations | 2 janv. 2026 |
+| [SOUS_ETAPE_3_RAPPORT.md](SOUS_ETAPE_3_RAPPORT.md) | Rapport Sous-Étape 3: Clean Racine | 2 janv. 2026 |
+| [SOUS_ETAPE_4_RAPPORT.md](SOUS_ETAPE_4_RAPPORT.md) | Rapport Sous-Étape 4: Consolidation Docs | 2 janv. 2026 |
+
+### 📋 MkDocs
+
+| Document | Description | Rôle |
+|----------|-------------|------|
+| [README_MKDOCS.md](README_MKDOCS.md) | Guide utilisation MkDocs pour ce projet | Setup |
+
+---
+
+!!! tip "Navigation Optimale"
+    - **Nouveaux utilisateurs** : Commencez par [Quickstart](quickstart.md)
+    - **Développeurs** : Consultez [API_GUIDE.md](API_GUIDE.md) et [Coverage Report](coverage_report/index.html)
+    - **Évaluateurs** : Voir [ETAPE_6_COMPLETE.md](ETAPE_6_COMPLETE.md) et rapports de nettoyage
 
 ---
 
