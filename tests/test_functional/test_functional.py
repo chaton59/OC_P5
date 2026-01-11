@@ -231,15 +231,13 @@ class TestDatabaseFailureScenarios:
         Simule une perte de connexion et vérifie la gestion d'erreur.
         """
 
-        # Mock pour simuler une erreur de connexion
+        # Mock pour simuler une erreur de connexion côté API
         def mock_create_engine_error(*args, **kwargs):
             raise SQLAlchemyError("Connection lost")
 
-        # Patcher create_engine pour qu'elle lève une exception
-        monkeypatch.setattr(
-            "tests.test_functional.test_functional.create_engine",
-            mock_create_engine_error,
-        )
+        # Patcher la référence utilisée par l'API (`from sqlalchemy import create_engine`)
+        # afin que la tentative de logging en BDD échoue sans impacter la prédiction.
+        monkeypatch.setattr("api.create_engine", mock_create_engine_error)
 
         # La prédiction devrait quand même fonctionner (sans logging DB)
         # mais retourner une erreur appropriée

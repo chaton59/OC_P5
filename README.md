@@ -840,6 +840,8 @@ poetry run pytest tests/ --cov=. --cov-report=html
 open htmlcov/index.html
 ```
 
+Pour le détail de l'organisation et des catégories de tests, voir `tests/README.md`.
+
 ### Métriques
 
 | Métrique | Valeur | Détail |

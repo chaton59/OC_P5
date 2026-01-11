@@ -21,13 +21,13 @@ from src.config import get_settings
 def main():
     """Crée la base de données et toutes les tables."""
     print("🔧 Création de la base de données...")
-    
+
     settings = get_settings()
     engine = create_engine(settings.DATABASE_URL)
-    
+
     # Création de toutes les tables
     Base.metadata.create_all(engine)
-    
+
     print("✅ Base de données et tables créées avec succès !")
     print("📊 Tables créées :")
     print("   - dataset : Stockage des données d'entraînement")

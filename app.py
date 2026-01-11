@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Ajouter le répertoire src au path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-from src.config import get_settings
+from src.config import get_settings  # noqa: E402
 
 if __name__ == "__main__":
     try:

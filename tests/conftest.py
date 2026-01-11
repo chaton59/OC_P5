@@ -14,6 +14,8 @@ from fastapi.testclient import TestClient
 # flake8: noqa: E402  # Import de l'app doit se faire après configuration DEBUG
 os.environ["DEBUG"] = "True"
 os.environ["API_KEY"] = "test-api-key-12345"
+os.environ["HF_TOKEN"] = "test-hf-token"
+os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 
 from api import app
 
@@ -49,6 +51,22 @@ def mock_model_loading(monkeypatch):
     mock_model = MockXGBoostModel()
     monkeypatch.setattr("src.models.load_model", lambda: mock_model)
     monkeypatch.setattr("src.models._model_cache", mock_model)  # Aussi patcher le cache
+
+    # Par sécurité, mocker aussi hf_hub_download pour éviter tout accès réseau accidentel
+    try:
+        import tempfile
+        from huggingface_hub import hf_hub_download
+
+        dummy_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pkl")
+        dummy_path = dummy_file.name
+        dummy_file.close()
+
+        monkeypatch.setattr(
+            "huggingface_hub.hf_hub_download", lambda *args, **kwargs: dummy_path
+        )
+    except Exception:
+        # Si huggingface_hub n'est pas disponible, ignorer silencieusement
+        pass
 
 
 @pytest.fixture
