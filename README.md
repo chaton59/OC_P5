@@ -178,7 +178,9 @@ OC_P5/
 │   └── preprocess.py           # Preprocessing dataset
 ├── scripts/                    # 🔧 Scripts utilitaires
 │   ├── create_db.py            # Création base PostgreSQL
-│   └── insert_dataset.py       # Insertion données
+│   ├── insert_dataset.py       # Insertion données (1470 employés)
+│   ├── generate_requirements_hf.sh  # Génération requirements.txt pour HF
+│   └── run_local.sh            # Lancement local développement
 ├── docs/                       # 📚 Documentation (5 fichiers minimaux)
 │   ├── architecture.md         # 🏗️ Vue d'ensemble architecture + schéma BDD
 │   ├── api_documentation.md    # 📡 Endpoints REST + exemples cURL/Python
@@ -370,6 +372,83 @@ poetry run pytest tests/ -v
 
 # Résultat attendu : 97 tests passés (ou 86 si skipped déployés)
 ```
+
+---
+
+## 🔧 Scripts Utilitaires
+
+Le dossier `scripts/` contient les scripts essentiels pour la gestion de la base de données et le déploiement. **Minimalisme** : 4 fichiers maximum, code principal dans `src/`, tests dans `tests/`.
+
+### 🗄️ `create_db.py` - Création de la base de données
+
+**Rôle** : Crée la base de données PostgreSQL et les tables nécessaires (étape 4 du projet).
+
+```bash
+# Créer les tables (dataset, ml_logs)
+poetry run python scripts/create_db.py
+```
+
+**Tables créées** :
+- `dataset` : Stockage des données d'entraînement (features_json, target)
+- `ml_logs` : Logs des prédictions de l'API (inputs, outputs, timestamps)
+
+### 📊 `insert_dataset.py` - Insertion du dataset
+
+**Rôle** : Charge les 3 fichiers CSV (sondage, eval, sirh), les fusionne et insère 1470 employés dans PostgreSQL (étape 4 du projet).
+
+```bash
+# Insérer le dataset complet
+poetry run python scripts/insert_dataset.py
+
+# Vérifier l'insertion
+psql -h localhost -U ml_user -d oc_p5_db -c "SELECT COUNT(*) FROM dataset;"
+# Résultat attendu : 1470
+```
+
+**Fonctionnalités** :
+- Fusionne automatiquement les 3 sources de données
+- Nettoie les valeurs manquantes (NaN → None)
+- Commits par batch de 100 pour performance
+- Validation de l'intégrité des données
+
+### 📦 `generate_requirements_hf.sh` - Requirements pour HF Spaces
+
+**Rôle** : Génère un fichier `requirements.txt` minimaliste pour déploiement sur Hugging Face Spaces (étape 1 & 2).
+
+```bash
+# Générer requirements.txt optimisé pour HF
+bash scripts/generate_requirements_hf.sh
+```
+
+**Pourquoi nécessaire ?** HF Spaces nécessite des dépendances minimales (pas dev/test). Ce script extrait uniquement les packages essentiels depuis `pyproject.toml`.
+
+### 🚀 `run_local.sh` - Lancement local
+
+**Rôle** : Script de démarrage rapide pour développement local.
+
+```bash
+# Lancer l'application en mode développement
+bash scripts/run_local.sh
+```
+
+**Actions effectuées** :
+1. Installation des dépendances (Poetry)
+2. Vérification du fichier `.env` (copie `.env.example` si nécessaire)
+3. Lancement de l'interface Gradio sur http://localhost:7860
+
+### 📝 Organisation des Scripts
+
+**Principe de séparation** :
+- **`scripts/`** : Utilitaires BDD et déploiement uniquement (4 fichiers max)
+- **`src/`** : Code applicatif principal (API, modèles, preprocessing)
+- **`tests/`** : Tests unitaires et fonctionnels (séparé pour clarté)
+- **`.github/workflows/`** : CI/CD (GitHub Actions, pas dans scripts/)
+
+**Justifications** (liées aux étapes du projet) :
+- ✅ **create_db.py** + **insert_dataset.py** : Étape 4 (script Python pour créer BDD + insérer dataset)
+- ✅ **generate_requirements_hf.sh** : Étape 1 (requirements.txt à la racine) + Étape 2 (CI/CD, environnements)
+- ✅ **run_local.sh** : Développement local (pas obligatoire mais pratique)
+- ✅ **Tests dans `tests/`** : Étape 5 (scripts de tests + rapport couverture)
 
 ---
 

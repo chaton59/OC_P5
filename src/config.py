@@ -14,6 +14,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _str_to_bool(value: str, default: bool = False) -> bool:
+    """Convertit une chaîne d'environnement en booléen robuste."""
+
+    if value is None:
+        return default
+
+    return value.lower() in {"1", "true", "yes", "y", "on"}
+
+
 class Settings:
     """
     Configuration de l'application.
@@ -37,8 +46,9 @@ class Settings:
     MODEL_FILENAME: str = os.getenv("MODEL_FILENAME", "model/model.pkl")
 
     # ===== ENVIRONNEMENT =====
-    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
+    DEBUG: bool = _str_to_bool(os.getenv("DEBUG", "False"))
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    GRADIO_ENABLED: bool = _str_to_bool(os.getenv("GRADIO_ENABLED", "True"), True)
 
     # ===== BASE DE DONNÉES =====
     DATABASE_URL: str = os.getenv(

@@ -7,7 +7,7 @@ Cette API expose le modèle de prédiction de départ des employés avec :
 - Preprocessing automatique
 - Health check pour monitoring
 - Documentation OpenAPI/Swagger automatique
-- Interface Gradio pour utilisation interactive
+- Interface Gradio optionnelle pour utilisation interactive
 - Endpoint batch pour traitement de fichiers CSV
 """
 import io
@@ -15,7 +15,6 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, Callable
 
-import gradio as gr
 import pandas as pd
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +23,6 @@ from slowapi.errors import RateLimitExceeded
 
 from src.auth import verify_api_key
 from src.config import get_settings
-from src.gradio_ui import create_gradio_interface
 from src.logger import log_model_load, log_request, logger
 from src.models import get_model_info, load_model
 from src.preprocessing import (
@@ -44,6 +42,7 @@ from src.schemas import (
 # Charger la configuration
 settings = get_settings()
 API_VERSION = settings.API_VERSION
+GRADIO_ENABLED = settings.GRADIO_ENABLED
 
 
 def conditional_rate_limit(
@@ -450,9 +449,16 @@ async def predict_batch(
         )
 
 
-# Monter l'interface Gradio sur / (racine pour HuggingFace Spaces)
-gradio_app = create_gradio_interface()
-app = gr.mount_gradio_app(app, gradio_app, path="/")
+if GRADIO_ENABLED:
+    # Importer Gradio uniquement si l'UI est activée pour éviter une dépendance inutile en prod API-only
+    import gradio as gr
+
+    from src.gradio_ui import create_gradio_interface
+
+    gradio_app = create_gradio_interface()
+    app = gr.mount_gradio_app(app, gradio_app, path="/")
+else:
+    logger.info("Gradio UI désactivée (GRADIO_ENABLED=False)")
 
 
 if __name__ == "__main__":

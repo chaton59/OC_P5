@@ -20,8 +20,15 @@ logger = logging.getLogger(__name__)
 # Ajouter le répertoire src au path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
+from src.config import get_settings
+
 if __name__ == "__main__":
     try:
+        settings = get_settings()
+        if not settings.GRADIO_ENABLED:
+            logger.info("Gradio désactivée (GRADIO_ENABLED=False) - arrêt.")
+            sys.exit(0)
+
         logger.info("🚀 Démarrage de l'application Gradio...")
         from src.gradio_ui import launch_standalone
 
