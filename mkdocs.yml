@@ -147,28 +147,18 @@ extra:
 
 # Navigation
 nav:
-  - Accueil:
-    - Vue d'ensemble: index.md
-    - Changelog: changelog.md
+  - Accueil: index.md
   
-  - Guide de Démarrage:
+  - Guide:
     - Installation: installation.md
     - Configuration: configuration.md
-    - Premier déploiement: quickstart.md
-  
-  - API:
-    - Guide complet: API_GUIDE.md
-  
-  - Modèle ML:
-    - Documentation technique: MODEL_TECHNICAL.md
-    - Guide d'entraînement: TRAINING.md
-  
-  - Déploiement:
-    - Guide de déploiement: DEPLOYMENT.md
-  
-  - Base de Données:
-    - Guide de la base de données: database_guide.md
+    - API: api.md
+    - Modèle ML: model.md
+    - Entraînement: training.md
+    - Déploiement: deployment.md
   
   - Référence:
-    - Inventaire documentation: DOCUMENTATION_INVENTORY.md
+    - Changelog: changelog.md
+    - Base de données: database_guide.md
     - Archive mission OC: etapes_archive.txt
+
