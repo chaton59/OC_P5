@@ -237,7 +237,7 @@ class TestDatabaseFailureScenarios:
 
         # Patcher la référence utilisée par l'API (`from sqlalchemy import create_engine`)
         # afin que la tentative de logging en BDD échoue sans impacter la prédiction.
-        monkeypatch.setattr("api.create_engine", mock_create_engine_error)
+        monkeypatch.setattr("sqlalchemy.create_engine", mock_create_engine_error)
 
         # La prédiction devrait quand même fonctionner (sans logging DB)
         # mais retourner une erreur appropriée

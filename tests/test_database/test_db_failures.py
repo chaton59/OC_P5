@@ -22,7 +22,7 @@ def test_predict_handles_db_logging_failure_gracefully(
     def mock_create_engine_error(*args, **kwargs):
         raise SQLAlchemyError("Connection lost")
 
-    monkeypatch.setattr("api.create_engine", mock_create_engine_error)
+    monkeypatch.setattr("sqlalchemy.create_engine", mock_create_engine_error)
 
     # Appeler l'API: la prédiction doit réussir même si le logging BDD échoue
     response = client.post("/predict", json=valid_employee_data)
