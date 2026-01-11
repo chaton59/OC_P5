@@ -10,11 +10,14 @@ from sqlalchemy.exc import SQLAlchemyError
 
 
 @pytest.mark.usefixtures("client", "valid_employee_data")
-def test_predict_handles_db_logging_failure_gracefully(client, valid_employee_data, monkeypatch):
+def test_predict_handles_db_logging_failure_gracefully(
+    client, valid_employee_data, monkeypatch
+):
     """
     Simule une erreur de connexion BDD lors du logging et vérifie
     que l'endpoint `/predict` continue de répondre sans planter.
     """
+
     # Forcer create_engine utilisé par l'API à lever une erreur
     def mock_create_engine_error(*args, **kwargs):
         raise SQLAlchemyError("Connection lost")
