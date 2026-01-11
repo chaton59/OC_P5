@@ -42,7 +42,7 @@ pinned: false
 - [Auteurs](#-auteurs)
 - [Licence](#-licence)
 
-> **Note**: La documentation de la mission OpenClassrooms est archivée dans [`docs/etapes_archive.txt`](docs/etapes_archive.txt). Les dépendances complètes (transitives) sont listées dans [`requirements_dev.txt`](requirements_dev.txt) pour installation de développement complet.
+> **Note**: Les dépendances complètes (transitives) sont listées dans [`requirements_dev.txt`](requirements_dev.txt) pour installation de développement complet.
 
 ---
 
@@ -75,7 +75,7 @@ API REST performante exposant un modèle **XGBoost optimisé** avec :
 | **Precision** | 0.82 | 82% des prédictions "départ" sont correctes |
 | **ROC AUC** | 0.91 | Excellente capacité de discrimination |
 
-📊 Voir [docs/MODEL_TECHNICAL.md](docs/MODEL_TECHNICAL.md) pour analyse détaillée.
+
 
 ### Fonctionnalités Clés
 
@@ -179,12 +179,6 @@ OC_P5/
 ├── scripts/                    # 🔧 Scripts utilitaires
 │   ├── create_db.py            # Création base PostgreSQL
 │   └── insert_dataset.py       # Insertion données
-├── docs/                       # 📚 Documentation complète
-│   ├── API_GUIDE.md            # Guide API détaillé
-│   ├── MODEL_TECHNICAL.md      # Doc technique modèle
-│   ├── DEPLOYMENT.md           # Guide déploiement
-│   ├── TRAINING.md             # Guide entraînement
-│   └── database_guide.md       # Guide PostgreSQL
 ├── docs/                       # 📚 Documentation (5 fichiers minimaux)
 │   ├── architecture.md         # 🏗️ Vue d'ensemble architecture + schéma BDD
 │   ├── api_documentation.md    # 📡 Endpoints REST + exemples cURL/Python
@@ -505,7 +499,7 @@ if response.status_code == 200:
     print(f"Niveau: {result['risk_level']}")
 ```
 
-📚 **Documentation complète** : [docs/API_GUIDE.md](docs/API_GUIDE.md)
+📚 **Documentation API** : [docs/api_documentation.md](docs/api_documentation.md)
 
 ---
 
@@ -661,7 +655,7 @@ docker run -d \
 curl http://localhost:8000/health
 ```
 
-📖 **Guide complet** : [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+📖 **Guide complet** : [docs/deployment_guide.md](docs/deployment_guide.md)
 
 ---
 
@@ -745,7 +739,7 @@ for col in ['age', 'revenu_mensuel', 'annees_dans_l_entreprise']:
         # → Déclencher ré-entraînement
 ```
 
-📖 **Guide complet** : [docs/MODEL_TECHNICAL.md](docs/MODEL_TECHNICAL.md#maintenance-et-mise-à-jour)
+📖 **Détails modèle & maintenance** : inclus dans [docs/architecture.md](docs/architecture.md) (section Pipeline ML) et [docs/tests_report.md](docs/tests_report.md) pour les vérifications automatiques.
 
 ---
 
@@ -849,22 +843,16 @@ Voir [pyproject.toml](pyproject.toml) pour la liste complète.
 ## 🔄 Changelog
 
 ### v3.3.0 (Janvier 2026)
-- 📚 **Documentation complète** pour Étape 6 OpenClassrooms
-- 📝 Création de 13 nouveaux fichiers de documentation (~5000 lignes)
-- 🌐 Setup site MkDocs avec theme Material (17 pages HTML)
-- 📊 Inventaire complet de la documentation existante
-- 🔧 README restructuré selon Best-README-Template (841 lignes)
-- 📖 Guide API exhaustif avec 7 exemples (curl, Python, JS) - 981 lignes
-- 🤖 Documentation technique modèle avec diagrammes et justifications - 393 lignes
-- 📈 Visualisation des performances du modèle (model_performance.png)
-- ✅ Vérification complète : liens, cohérence, instructions testées
+- 📚 Documentation minimaliste consolidée en 5 fichiers (architecture, API, BDD, tests, déploiement)
+- 🧹 Suppression des documents redondants et archives pour alléger la page HF
+- 📝 README simplifié avec navigation claire vers la nouvelle doc
 
 ### v3.2.1 (Janvier 2026)
 - 🎛️ Sliders Gradio et schémas Pydantic alignés sur les min/max réels des données d'entraînement
 - 📦 Endpoint batch CSV (3 fichiers bruts)
 - 🔑 Authentification API Key (prod)
 - 🔧 Correction preprocessing (scaling, ordre des colonnes)
-- 📝 Documentation complète enrichie (API_GUIDE, MODEL_TECHNICAL)
+- 📝 Documentation mise à jour (API, modèle)
 
 ### v2.2.0 (27 Décembre 2025)
 - 📦 Nouvel endpoint `/predict/batch` pour traitement CSV direct
