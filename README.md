@@ -185,6 +185,12 @@ OC_P5/
 │   ├── DEPLOYMENT.md           # Guide déploiement
 │   ├── TRAINING.md             # Guide entraînement
 │   └── database_guide.md       # Guide PostgreSQL
+├── docs/                       # 📚 Documentation (5 fichiers minimaux)
+│   ├── architecture.md         # 🏗️ Vue d'ensemble architecture + schéma BDD
+│   ├── api_documentation.md    # 📡 Endpoints REST + exemples cURL/Python
+│   ├── database_setup.md       # 🗄️ Setup PostgreSQL + requêtes SQL
+│   ├── tests_report.md         # 🧪 Couverture tests (73%) + résultats
+│   └── deployment_guide.md     # 🚀 CI/CD + déploiement HF Spaces
 ├── data/                       # 📊 Données sources (1470 employés)
 │   ├── extrait_sondage.csv     # Données satisfaction
 │   ├── extrait_eval.csv        # Données évaluations
@@ -797,16 +803,20 @@ open htmlcov/index.html
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| [📖 README.md](README.md) | Vue d'ensemble et guide rapide (ce fichier) |
-| [🔌 API_GUIDE.md](docs/API_GUIDE.md) | Guide complet de l'API (endpoints, schémas, exemples) |
-| [🤖 MODEL_TECHNICAL.md](docs/MODEL_TECHNICAL.md) | Documentation technique du modèle (architecture, performances, maintenance) |
-| [🚀 DEPLOYMENT.md](docs/DEPLOYMENT.md) | Guide de déploiement (Docker, HF Spaces, CI/CD) |
-| [🎓 TRAINING.md](docs/TRAINING.md) | Guide d'entraînement du modèle (preprocessing, MLflow) |
-| [🗄️ database_guide.md](docs/database_guide.md) | Guide PostgreSQL pour débutants |
-| [📊 DOCUMENTATION_INVENTORY.md](docs/DOCUMENTATION_INVENTORY.md) | Inventaire complet de la documentation |
-| [📐 schema.puml](docs/schema.puml) | Diagramme UML de la base de données |
+
+### Navigation dans le dossier `docs/`
+
+Documentation **minimaliste et structurée** en **5 fichiers** couvrant tous les aspects du projet :
+
+| Document | Description | Étapes OC |
+|----------|-------------|-----------|
+| [🏗️ architecture.md](docs/architecture.md) | Vue d'ensemble du projet, schéma architecture, diagramme BDD (PlantUML), flux de données | Étape 4, 6 |
+| [📡 api_documentation.md](docs/api_documentation.md) | Documentation API REST : endpoints, schémas Pydantic, exemples cURL/Python, codes erreurs | Étape 3, 6 |
+| [🗄️ database_setup.md](docs/database_setup.md) | Configuration PostgreSQL, scripts création BDD, requêtes SQL utiles, sauvegarde/restauration | Étape 4 |
+| [🧪 tests_report.md](docs/tests_report.md) | Rapport de couverture (73%), détail des 48 tests unitaires/fonctionnels, commandes pytest | Étape 5 |
+| [🚀 deployment_guide.md](docs/deployment_guide.md) | CI/CD GitHub Actions, déploiement HuggingFace Spaces, gestion secrets, monitoring | Étape 2, 6 |
+
+**Choix de conception** : Documentation concise (1-2 pages par fichier) privilégiant la **clarté** et **l'actionnable** sur l'exhaustivité.
 
 **Documentation interactive** :
 - 🌐 **Swagger UI** : http://localhost:8000/docs
