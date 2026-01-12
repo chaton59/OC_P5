@@ -9,6 +9,7 @@ Cette interface permet de:
 """
 import os
 from typing import cast
+import pandas as pd
 
 import gradio as gr
 
@@ -536,6 +537,97 @@ def create_gradio_interface():
                     ],
                     outputs=result,
                     api_name="predict",
+                )
+
+            # Onglet Batch
+            with gr.TabItem("📦 Batch"):
+                gr.Markdown("### Prédictions batch à partir de 3 CSV (sondage, évaluation, SIRH)")
+                with gr.Column():
+                    sondage_file = gr.File(label="CSV Sondage", file_types=[".csv"], type="filepath")
+                    eval_file = gr.File(label="CSV Évaluation", file_types=[".csv"], type="filepath")
+                    sirh_file = gr.File(label="CSV SIRH", file_types=[".csv"], type="filepath")
+                    batch_btn = gr.Button("📦 Prédire en batch", variant="primary")
+                    batch_result = gr.JSON(label="Résultat batch")
+
+                def predict_batch_gradio(sondage_path: str, eval_path: str, sirh_path: str):
+                    try:
+                        # Lire CSV
+                        sondage_df = pd.read_csv(sondage_path)
+                        eval_df = pd.read_csv(eval_path)
+                        sirh_df = pd.read_csv(sirh_path)
+
+                        # Fusion
+                        from src.preprocessing import merge_csv_dataframes, preprocess_dataframe_for_prediction
+                        merged_df = merge_csv_dataframes(sondage_df, eval_df, sirh_df)
+                        employee_ids = merged_df["original_employee_id"].tolist()
+                        merged_df = merged_df.drop(columns=["original_employee_id"])
+                        if "a_quitte_l_entreprise" in merged_df.columns:
+                            merged_df = merged_df.drop(columns=["a_quitte_l_entreprise"])
+
+                        # Preprocessing
+                        X = preprocess_dataframe_for_prediction(merged_df)
+
+                        # Modèle et prédictions
+                        from src.models import load_model
+                        model = load_model()
+                        predictions = model.predict(X.values)
+                        probabilities = model.predict_proba(X.values)
+
+                        results = []
+                        risk_counts = {"Low": 0, "Medium": 0, "High": 0}
+                        leave_count = 0
+
+                        for i, emp_id in enumerate(employee_ids):
+                            prob_stay = float(probabilities[i][0])
+                            prob_leave = float(probabilities[i][1])
+                            pred = int(predictions[i])
+
+                            if prob_leave < 0.3:
+                                risk = "Low"
+                            elif prob_leave < 0.7:
+                                risk = "Medium"
+                            else:
+                                risk = "High"
+
+                            risk_counts[risk] += 1
+                            if pred == 1:
+                                leave_count += 1
+
+                            results.append(
+                                {
+                                    "employee_id": int(emp_id),
+                                    "prediction": pred,
+                                    "probability_stay": prob_stay,
+                                    "probability_leave": prob_leave,
+                                    "risk_level": risk,
+                                }
+                            )
+
+                        summary = {
+                            "total_stay": len(results) - leave_count,
+                            "total_leave": leave_count,
+                            "high_risk_count": risk_counts["High"],
+                            "medium_risk_count": risk_counts["Medium"],
+                            "low_risk_count": risk_counts["Low"],
+                        }
+
+                        return {
+                            "total_employees": len(results),
+                            "predictions": results,
+                            "summary": summary,
+                        }
+                    except pd.errors.EmptyDataError:
+                        return {"error": "Empty CSV file", "message": "Un des fichiers CSV est vide."}
+                    except KeyError as e:
+                        return {"error": "Missing column", "message": f"Colonne manquante dans les CSV: {e}"}
+                    except Exception as e:
+                        return {"error": "Batch prediction failed", "message": str(e)}
+
+                batch_btn.click(
+                    fn=predict_batch_gradio,
+                    inputs=[sondage_file, eval_file, sirh_file],
+                    outputs=batch_result,
+                    api_name="predict_batch",
                 )
 
             # Onglet Documentation
