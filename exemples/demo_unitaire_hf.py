@@ -7,6 +7,7 @@ Prérequis: pip install gradio_client
 """
 
 import os
+import re
 import sys
 
 try:
@@ -165,23 +166,34 @@ try:
     print("📊 RÉSULTAT DE LA PRÉDICTION (HF)")
     print("═" * 60)
 
-    # Le résultat Gradio peut être un dict ou une string
-    if isinstance(result, dict):
-        prediction = result.get("prediction", "N/A")
-        prob_stay = result.get("probability_stay", 0) * 100
-        prob_leave = result.get("probability_leave", 0) * 100
-        risk = result.get("risk_level", "N/A")
+    # Le résultat est du Markdown - on extrait les valeurs clés
+    if isinstance(result, str):
+        # Extraire les probabilités du Markdown
+        prob_depart = re.search(r"Probabilité de départ[^:]*:\s*([\d.]+)%", result)
+        prob_maintien = re.search(r"Probabilité de maintien[^:]*:\s*([\d.]+)%", result)
+        confiance = re.search(r"Confiance[^:]*:\s*([\d.]+)%", result)
 
-        if prediction == 1:
+        # Détecter le risque
+        if "RISQUE ÉLEVÉ" in result:
+            print("\n🔴 RISQUE ÉLEVÉ DE DÉPART")
+        elif "RISQUE MOYEN" in result:
+            print("\n🟠 RISQUE MOYEN DE DÉPART")
+        else:
+            print("\n🟢 RISQUE FAIBLE DE DÉPART")
+
+        # Afficher les probabilités
+        if prob_maintien:
+            print(f"\n📈 Probabilité de rester:  {prob_maintien.group(1)}%")
+        if prob_depart:
+            print(f"📉 Probabilité de partir: {prob_depart.group(1)}%")
+        if confiance:
+            print(f"🎯 Confiance du modèle: {confiance.group(1)}%")
+
+        # Afficher la prédiction
+        if "Départ probable" in result:
             print("\n🚨 PRÉDICTION: VA PARTIR")
         else:
             print("\n✅ PRÉDICTION: VA RESTER")
-
-        print(f"\n📈 Probabilité de rester:  {prob_stay:.1f}%")
-        print(f"📉 Probabilité de partir: {prob_leave:.1f}%")
-
-        risk_emoji = {"Low": "🟢", "Medium": "🟠", "High": "🔴"}.get(risk, "⚪")
-        print(f"\n{risk_emoji} Niveau de risque: {risk}")
     else:
         print(f"\n📋 Résultat: {result}")
 
