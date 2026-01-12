@@ -5,7 +5,6 @@
 Usage: python demo_unitaire.py
 """
 
-import json
 import requests
 
 # ═══════════════════════════════════════════════════════════════

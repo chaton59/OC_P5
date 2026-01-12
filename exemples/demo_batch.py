@@ -58,7 +58,7 @@ for path in [sondage_path, eval_path, sirh_path]:
         print(f"\n❌ ERREUR: Fichier introuvable: {path}")
         exit(1)
 
-print(f"\n✅ Fichiers chargés:")
+print("\n✅ Fichiers chargés:")
 print(f"   - Sondage: {os.path.basename(sondage_path)}")
 print(f"   - Évaluation: {os.path.basename(eval_path)}")
 print(f"   - SIRH: {os.path.basename(sirh_path)}")
@@ -139,7 +139,7 @@ try:
     print(f"🟢 Risque FAIBLE: {summary['low_risk_count']}")
 
     print("\n" + "═" * 60)
-    print(f"💾 Résultats sauvegardés dans:")
+    print("💾 Résultats sauvegardés dans:")
     print(f"   {output_path}")
     print("═" * 60)
 
