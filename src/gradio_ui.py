@@ -541,15 +541,25 @@ def create_gradio_interface():
 
             # Onglet Batch
             with gr.TabItem("📦 Batch"):
-                gr.Markdown("### Prédictions batch à partir de 3 CSV (sondage, évaluation, SIRH)")
+                gr.Markdown(
+                    "### Prédictions batch à partir de 3 CSV (sondage, évaluation, SIRH)"
+                )
                 with gr.Column():
-                    sondage_file = gr.File(label="CSV Sondage", file_types=[".csv"], type="filepath")
-                    eval_file = gr.File(label="CSV Évaluation", file_types=[".csv"], type="filepath")
-                    sirh_file = gr.File(label="CSV SIRH", file_types=[".csv"], type="filepath")
+                    sondage_file = gr.File(
+                        label="CSV Sondage", file_types=[".csv"], type="filepath"
+                    )
+                    eval_file = gr.File(
+                        label="CSV Évaluation", file_types=[".csv"], type="filepath"
+                    )
+                    sirh_file = gr.File(
+                        label="CSV SIRH", file_types=[".csv"], type="filepath"
+                    )
                     batch_btn = gr.Button("📦 Prédire en batch", variant="primary")
                     batch_result = gr.JSON(label="Résultat batch")
 
-                def predict_batch_gradio(sondage_path: str, eval_path: str, sirh_path: str):
+                def predict_batch_gradio(
+                    sondage_path: str, eval_path: str, sirh_path: str
+                ):
                     try:
                         # Lire CSV
                         sondage_df = pd.read_csv(sondage_path)
@@ -557,18 +567,25 @@ def create_gradio_interface():
                         sirh_df = pd.read_csv(sirh_path)
 
                         # Fusion
-                        from src.preprocessing import merge_csv_dataframes, preprocess_dataframe_for_prediction
+                        from src.preprocessing import (
+                            merge_csv_dataframes,
+                            preprocess_dataframe_for_prediction,
+                        )
+
                         merged_df = merge_csv_dataframes(sondage_df, eval_df, sirh_df)
                         employee_ids = merged_df["original_employee_id"].tolist()
                         merged_df = merged_df.drop(columns=["original_employee_id"])
                         if "a_quitte_l_entreprise" in merged_df.columns:
-                            merged_df = merged_df.drop(columns=["a_quitte_l_entreprise"])
+                            merged_df = merged_df.drop(
+                                columns=["a_quitte_l_entreprise"]
+                            )
 
                         # Preprocessing
                         X = preprocess_dataframe_for_prediction(merged_df)
 
                         # Modèle et prédictions
                         from src.models import load_model
+
                         model = load_model()
                         predictions = model.predict(X.values)
                         probabilities = model.predict_proba(X.values)
@@ -617,9 +634,15 @@ def create_gradio_interface():
                             "summary": summary,
                         }
                     except pd.errors.EmptyDataError:
-                        return {"error": "Empty CSV file", "message": "Un des fichiers CSV est vide."}
+                        return {
+                            "error": "Empty CSV file",
+                            "message": "Un des fichiers CSV est vide.",
+                        }
                     except KeyError as e:
-                        return {"error": "Missing column", "message": f"Colonne manquante dans les CSV: {e}"}
+                        return {
+                            "error": "Missing column",
+                            "message": f"Colonne manquante dans les CSV: {e}",
+                        }
                     except Exception as e:
                         return {"error": "Batch prediction failed", "message": str(e)}
 

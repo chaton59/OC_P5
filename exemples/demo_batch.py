@@ -41,7 +41,7 @@ print(f"   - {os.path.basename(default_eval)}")
 print(f"   - {os.path.basename(default_sirh)}")
 use_defaults = input("\nUtiliser ces fichiers ? (O/n): ").strip().lower()
 
-if use_defaults in ['', 'o', 'oui', 'y', 'yes']:
+if use_defaults in ["", "o", "oui", "y", "yes"]:
     sondage_path = default_sondage
     eval_path = default_eval
     sirh_path = default_sirh
@@ -72,7 +72,7 @@ print("\n⏳ Envoi des fichiers à l'API...")
 files = {
     "sondage_file": open(sondage_path, "rb"),
     "eval_file": open(eval_path, "rb"),
-    "sirh_file": open(sirh_path, "rb")
+    "sirh_file": open(sirh_path, "rb"),
 }
 
 headers = {}
@@ -81,76 +81,75 @@ if API_KEY:
 
 try:
     response = requests.post(
-        f"{API_URL}/predict/batch",
-        files=files,
-        headers=headers,
-        timeout=120
+        f"{API_URL}/predict/batch", files=files, headers=headers, timeout=120
     )
     response.raise_for_status()
     result = response.json()
-    
+
     # ═══════════════════════════════════════════════════════════════
     # CRÉATION DU CSV DE SORTIE
     # ═══════════════════════════════════════════════════════════════
-    
+
     print("\n✅ Prédictions reçues!")
     print(f"   Total employés traités: {result['total_employees']}")
-    
+
     # Créer un DataFrame avec les résultats
     predictions_data = []
     for pred in result["predictions"]:
-        predictions_data.append({
-            "employee_id": pred["employee_id"],
-            "prediction": "VA PARTIR" if pred["prediction"] == 1 else "VA RESTER",
-            "prediction_code": pred["prediction"],
-            "risk_level": pred["risk_level"],
-            "probability_stay": f"{pred['probability_stay']:.2%}",
-            "probability_leave": f"{pred['probability_leave']:.2%}"
-        })
-    
+        predictions_data.append(
+            {
+                "employee_id": pred["employee_id"],
+                "prediction": "VA PARTIR" if pred["prediction"] == 1 else "VA RESTER",
+                "prediction_code": pred["prediction"],
+                "risk_level": pred["risk_level"],
+                "probability_stay": f"{pred['probability_stay']:.2%}",
+                "probability_leave": f"{pred['probability_leave']:.2%}",
+            }
+        )
+
     df_results = pd.DataFrame(predictions_data)
-    
+
     # Générer le nom du fichier de sortie
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_filename = f"predictions_batch_{timestamp}.csv"
-    
+
     # Sauvegarder dans le même dossier que ce script
     script_dir = os.path.dirname(os.path.abspath(__file__))
     output_path = os.path.join(script_dir, output_filename)
-    
+
     # Sauvegarder dans le même dossier que ce script
     script_dir = os.path.dirname(os.path.abspath(__file__))
     output_path = os.path.join(script_dir, output_filename)
-    
-    df_results.to_csv(output_path, index=False, encoding='utf-8-sig')
-    
+
+    df_results.to_csv(output_path, index=False, encoding="utf-8-sig")
+
     # ═══════════════════════════════════════════════════════════════
     # AFFICHAGE DU RÉSUMÉ
     # ═══════════════════════════════════════════════════════════════
-    
-    print("\n" + "═"*60)
+
+    print("\n" + "═" * 60)
     print("                    📊 RÉSUMÉ")
-    print("═"*60)
-    
+    print("═" * 60)
+
     summary = result["summary"]
     print(f"\n✅ Employés qui vont RESTER: {summary['total_stay']}")
     print(f"🏃 Employés qui vont PARTIR: {summary['total_leave']}")
     print(f"\n🔴 Risque ÉLEVÉ: {summary['high_risk_count']}")
     print(f"🟡 Risque MOYEN: {summary['medium_risk_count']}")
     print(f"🟢 Risque FAIBLE: {summary['low_risk_count']}")
-    
-    print("\n" + "═"*60)
+
+    print("\n" + "═" * 60)
     print(f"💾 Résultats sauvegardés dans:")
     print(f"   {output_path}")
-    print("═"*60)
-    
+    print("═" * 60)
+
     # Afficher un échantillon
     print("\n📋 Aperçu des 5 premiers résultats:")
     print(df_results.head(5).to_string(index=False))
-    
+
 except requests.exceptions.RequestException as e:
     print(f"\n❌ ERREUR API: {e}")
-    if hasattr(e, 'response') and e.response is not None:
+    if hasattr(e, "response") and e.response is not None:
         print(f"Détails: {e.response.text}")
 except Exception as e:
     print(f"\n❌ ERREUR: {e}")

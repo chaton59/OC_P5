@@ -33,7 +33,9 @@ nombre_participation_pee = int(input("Nombre participations PEE (0-3): "))
 nb_formations_suivies = int(input("Nombre formations suivies (0-6): "))
 distance_domicile_travail = int(input("Distance domicile-travail en km (1-30): "))
 niveau_education = int(input("Niveau d'éducation (1-5): "))
-domaine_etude = input("Domaine d'étude (Infra & Cloud, Transformation Digitale, Marketing, Entrepreunariat, Ressources Humaines, Autre): ")
+domaine_etude = input(
+    "Domaine d'étude (Infra & Cloud, Transformation Digitale, Marketing, Entrepreunariat, Ressources Humaines, Autre): "
+)
 ayant_enfants = input("A des enfants? (Y/N): ").upper()
 frequence_deplacement = input("Fréquence déplacement (Aucun, Occasionnel, Frequent): ")
 annees_depuis_la_derniere_promotion = int(input("Années depuis dernière promotion: "))
@@ -46,10 +48,14 @@ note_evaluation_precedente = int(input("Note évaluation précédente (1-4): "))
 niveau_hierarchique_poste = int(input("Niveau hiérarchique (1-5): "))
 satisfaction_employee_nature_travail = int(input("Satisfaction nature travail (1-4): "))
 satisfaction_employee_equipe = int(input("Satisfaction équipe (1-4): "))
-satisfaction_employee_equilibre_pro_perso = int(input("Satisfaction équilibre pro/perso (1-4): "))
+satisfaction_employee_equilibre_pro_perso = int(
+    input("Satisfaction équilibre pro/perso (1-4): ")
+)
 note_evaluation_actuelle = int(input("Note évaluation actuelle (3-4): "))
 heure_supplementaires = input("Heures supplémentaires? (Oui/Non): ")
-augementation_salaire_precedente = float(input("Augmentation salaire précédente en % (0-100): "))
+augementation_salaire_precedente = float(
+    input("Augmentation salaire précédente en % (0-100): ")
+)
 
 # === SIRH ===
 print("\n💼 DONNÉES RH")
@@ -58,7 +64,9 @@ genre = input("Genre (M/F): ").upper()
 revenu_mensuel = float(input("Revenu mensuel en € (1000-20000): "))
 statut_marital = input("Statut marital (Célibataire, Marié(e), Divorcé(e)): ")
 departement = input("Département (Commercial, Consulting, Ressources Humaines): ")
-poste = input("Poste (Cadre Commercial, Assistant de Direction, Consultant, Tech Lead, Manager, Senior Manager, Représentant Commercial, Directeur Technique, Ressources Humaines): ")
+poste = input(
+    "Poste (Cadre Commercial, Assistant de Direction, Consultant, Tech Lead, Manager, Senior Manager, Représentant Commercial, Directeur Technique, Ressources Humaines): "
+)
 nombre_experiences_precedentes = int(input("Nombre expériences précédentes (0-9): "))
 annee_experience_totale = int(input("Années expérience totale: "))
 annees_dans_l_entreprise = int(input("Années dans l'entreprise (0-40): "))
@@ -98,7 +106,7 @@ employee_data = {
     "nombre_heures_travailless": 80,
     "annee_experience_totale": annee_experience_totale,
     "annees_dans_l_entreprise": annees_dans_l_entreprise,
-    "annees_dans_le_poste_actuel": annees_dans_le_poste_actuel
+    "annees_dans_le_poste_actuel": annees_dans_le_poste_actuel,
 }
 
 print("\n⏳ Envoi de la requête à l'API...")
@@ -109,34 +117,31 @@ if API_KEY:
 
 try:
     response = requests.post(
-        f"{API_URL}/predict",
-        json=employee_data,
-        headers=headers,
-        timeout=30
+        f"{API_URL}/predict", json=employee_data, headers=headers, timeout=30
     )
     response.raise_for_status()
     result = response.json()
-    
+
     # ═══════════════════════════════════════════════════════════════
     # AFFICHAGE DU RÉSULTAT
     # ═══════════════════════════════════════════════════════════════
-    
-    print("\n" + "═"*60)
+
+    print("\n" + "═" * 60)
     print("                    📊 RÉSULTAT")
-    print("═"*60)
-    
+    print("═" * 60)
+
     if result["prediction"] == 1:
         print("\n🏃 PRÉDICTION: L'EMPLOYÉ VA QUITTER L'ENTREPRISE")
     else:
         print("\n✅ PRÉDICTION: L'EMPLOYÉ VA RESTER")
-    
+
     print(f"\n🎯 Niveau de risque: {result['risk_level']}")
     print(f"   Probabilité de rester: {result['probability_0']:.1%}")
     print(f"   Probabilité de partir: {result['probability_1']:.1%}")
-    
-    print("\n" + "═"*60)
-    
+
+    print("\n" + "═" * 60)
+
 except requests.exceptions.RequestException as e:
     print(f"\n❌ ERREUR: {e}")
-    if hasattr(e, 'response') and e.response is not None:
+    if hasattr(e, "response") and e.response is not None:
         print(f"Détails: {e.response.text}")

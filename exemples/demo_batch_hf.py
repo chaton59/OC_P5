@@ -52,14 +52,24 @@ if api_key:
 
 try:
     # 1) Tente FastAPI (si exposé)
-    r = requests.post(f"{API_URL}/predict/batch", files=files, headers=headers, timeout=90)
+    r = requests.post(
+        f"{API_URL}/predict/batch", files=files, headers=headers, timeout=90
+    )
     if r.status_code == 404:
         # 2) Fallback: endpoint Gradio API
-        print("\nℹ️ Endpoint FastAPI indisponible, tentative via Gradio API (/api/predict_batch)...")
-        r = requests.post(f"{API_URL}/api/predict_batch", files=files, headers=headers, timeout=90)
+        print(
+            "\nℹ️ Endpoint FastAPI indisponible, tentative via Gradio API (/api/predict_batch)..."
+        )
+        r = requests.post(
+            f"{API_URL}/api/predict_batch", files=files, headers=headers, timeout=90
+        )
         if r.status_code == 404:
-            print("\n❌ Endpoint HF introuvable (/predict/batch et /api/predict_batch).")
-            print("   Vérifiez que la Space expose l'API FastAPI ou l'onglet Batch Gradio.")
+            print(
+                "\n❌ Endpoint HF introuvable (/predict/batch et /api/predict_batch)."
+            )
+            print(
+                "   Vérifiez que la Space expose l'API FastAPI ou l'onglet Batch Gradio."
+            )
             print("   Sinon, utilisez l'API locale (lancer_api.sh).")
             raise SystemExit(1)
     r.raise_for_status()
@@ -68,14 +78,18 @@ try:
     # Construire le CSV de sortie
     predictions_data = []
     for pred in result.get("predictions", []):
-        predictions_data.append({
-            "employee_id": pred.get("employee_id"),
-            "prediction": "VA PARTIR" if pred.get("prediction") == 1 else "VA RESTER",
-            "prediction_code": pred.get("prediction"),
-            "risk_level": pred.get("risk_level"),
-            "probability_stay": f"{pred.get('probability_stay', 0):.2%}",
-            "probability_leave": f"{pred.get('probability_leave', 0):.2%}",
-        })
+        predictions_data.append(
+            {
+                "employee_id": pred.get("employee_id"),
+                "prediction": (
+                    "VA PARTIR" if pred.get("prediction") == 1 else "VA RESTER"
+                ),
+                "prediction_code": pred.get("prediction"),
+                "risk_level": pred.get("risk_level"),
+                "probability_stay": f"{pred.get('probability_stay', 0):.2%}",
+                "probability_leave": f"{pred.get('probability_leave', 0):.2%}",
+            }
+        )
 
     df = pd.DataFrame(predictions_data)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -84,11 +98,15 @@ try:
 
     # Affichage
     summary = result.get("summary", {})
-    print("\n" + "═"*60)
+    print("\n" + "═" * 60)
     print("                    📊 RÉSULTAT (HF)")
-    print("═"*60)
-    print(f"\n✅ Traités: {result.get('total_employees')} | RESTER: {summary.get('total_stay')} | PARTIR: {summary.get('total_leave')}")
-    print(f"🔴 High: {summary.get('high_risk_count')}  🟡 Medium: {summary.get('medium_risk_count')}  🟢 Low: {summary.get('low_risk_count')}\n")
+    print("═" * 60)
+    print(
+        f"\n✅ Traités: {result.get('total_employees')} | RESTER: {summary.get('total_stay')} | PARTIR: {summary.get('total_leave')}"
+    )
+    print(
+        f"🔴 High: {summary.get('high_risk_count')}  🟡 Medium: {summary.get('medium_risk_count')}  🟢 Low: {summary.get('low_risk_count')}\n"
+    )
     print("📄 Aperçu:")
     print(df.head(5).to_string(index=False))
     print(f"\n💾 Sauvegardé: {output_path}")

@@ -28,7 +28,9 @@ nombre_participation_pee = int(input("Nombre participations PEE (0-3): "))
 nb_formations_suivies = int(input("Nombre formations suivies (0-6): "))
 distance_domicile_travail = int(input("Distance domicile-travail (1-30): "))
 niveau_education = int(input("Niveau d'éducation (1-5): "))
-domaine_etude = input("Domaine d'étude: (Infra & Cloud, Transformation Digitale, Marketing, Entrepreunariat, Ressources Humaines, Autre): ")
+domaine_etude = input(
+    "Domaine d'étude: (Infra & Cloud, Transformation Digitale, Marketing, Entrepreunariat, Ressources Humaines, Autre): "
+)
 ayant_enfants = input("A des enfants? (Y/N): ").upper()
 frequence_deplacement = input("Fréquence déplacement (Aucun, Occasionnel, Frequent): ")
 annees_depuis_la_derniere_promotion = int(input("Années depuis dernière promotion: "))
@@ -40,7 +42,9 @@ note_evaluation_precedente = int(input("Note évaluation précédente (1-4): "))
 niveau_hierarchique_poste = int(input("Niveau hiérarchique (1-5): "))
 satisfaction_employee_nature_travail = int(input("Satisfaction nature travail (1-4): "))
 satisfaction_employee_equipe = int(input("Satisfaction équipe (1-4): "))
-satisfaction_employee_equilibre_pro_perso = int(input("Satisfaction équilibre pro/perso (1-4): "))
+satisfaction_employee_equilibre_pro_perso = int(
+    input("Satisfaction équilibre pro/perso (1-4): ")
+)
 note_evaluation_actuelle = int(input("Note évaluation actuelle (3-4): "))
 heure_supplementaires = input("Heures supplémentaires? (Oui/Non): ")
 augementation_salaire_precedente = float(input("Augmentation salaire précédente (%): "))
@@ -98,23 +102,30 @@ if api_key:
     headers["X-API-Key"] = api_key
 
 try:
-    r = requests.post(f"{API_URL}/predict", json=employee_data, headers=headers, timeout=45)
+    r = requests.post(
+        f"{API_URL}/predict", json=employee_data, headers=headers, timeout=45
+    )
     if r.status_code == 404:
-        print("\n❌ Endpoint HF introuvable (/predict). Vérifiez que la Space expose l'API FastAPI.")
+        print(
+            "\n❌ Endpoint HF introuvable (/predict). Vérifiez que la Space expose l'API FastAPI."
+        )
         print("   Sinon, utilisez l'API locale (lancer_api.sh) ou GRADIO.")
         raise SystemExit(1)
     r.raise_for_status()
     result = r.json()
 
-    print("\n" + "═"*60)
+    print("\n" + "═" * 60)
     print("                    📊 RÉSULTAT (HF)")
-    print("═"*60)
-    print("\n✅ PRÉDICTION: " + ("VA RESTER" if result.get("prediction", 0) == 0 else "VA PARTIR"))
+    print("═" * 60)
+    print(
+        "\n✅ PRÉDICTION: "
+        + ("VA RESTER" if result.get("prediction", 0) == 0 else "VA PARTIR")
+    )
     print(f"🎯 Niveau de risque: {result.get('risk_level')}")
     print(f"   Prob rester: {result.get('probability_0', 0):.1%}")
     print(f"   Prob partir: {result.get('probability_1', 0):.1%}")
 
 except requests.exceptions.RequestException as e:
     print(f"\n❌ ERREUR API HF: {e}")
-    if getattr(e, 'response', None) is not None:
+    if getattr(e, "response", None) is not None:
         print(f"Détails: {e.response.text}")
