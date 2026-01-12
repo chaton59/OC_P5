@@ -77,8 +77,6 @@ def start_gradio():
 
 def cleanup(signum=None, frame=None):
     """Nettoie les processus avant de quitter."""
-    global fastapi_process
-
     logger.info("🛑 Arrêt des services...")
 
     if fastapi_process:
@@ -126,7 +124,7 @@ if __name__ == "__main__":
                     logger.info("✅ FastAPI démarré et opérationnel")
                     break
             except Exception:
-                logger.info(f"⏳ Tentative {i+1}/10 de connexion à FastAPI...")
+                logger.info(f"⏳ Tentative {i + 1}/10 de connexion à FastAPI...")
                 time.sleep(2)
         else:
             logger.warning("⚠️ FastAPI ne répond pas, mais on continue...")
