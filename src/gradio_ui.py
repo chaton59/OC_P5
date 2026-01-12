@@ -542,17 +542,26 @@ def create_gradio_interface():
             # Onglet Batch
             with gr.TabItem("📦 Batch"):
                 gr.Markdown(
-                    "### Prédictions batch à partir de 3 CSV (sondage, évaluation, SIRH)"
+                    """### Prédictions batch à partir de 3 CSV (sondage, évaluation, SIRH)
+
+⚠️ **Ordre important :** Assurez-vous d'uploader les bons fichiers dans chaque champ.
+"""
                 )
                 with gr.Column():
                     sondage_file = gr.File(
-                        label="CSV Sondage", file_types=[".csv"], type="filepath"
+                        label="📋 CSV Sondage (ex: 02_predict_batch_sondage.csv)",
+                        file_types=[".csv"],
+                        type="filepath",
                     )
                     eval_file = gr.File(
-                        label="CSV Évaluation", file_types=[".csv"], type="filepath"
+                        label="📊 CSV Évaluation (ex: 02_predict_batch_eval.csv)",
+                        file_types=[".csv"],
+                        type="filepath",
                     )
                     sirh_file = gr.File(
-                        label="CSV SIRH", file_types=[".csv"], type="filepath"
+                        label="👤 CSV SIRH (ex: 02_predict_batch_sirh.csv)",
+                        file_types=[".csv"],
+                        type="filepath",
                     )
                     batch_btn = gr.Button("📦 Prédire en batch", variant="primary")
                     batch_result = gr.JSON(label="Résultat batch")
