@@ -19,6 +19,9 @@ RUN poetry config virtualenvs.create false
 # Installer les dépendances Python via Poetry
 RUN poetry install --no-dev --no-interaction --no-ansi
 
+# Vérifier que les dépendances critiques sont bien installées
+RUN python -c "import slowapi; import fastapi; import gradio; print('All critical dependencies installed ✓')"
+
 # Copier le code de l'application
 COPY app.py .
 COPY api.py .
