@@ -1,0 +1,11 @@
+﻿employee_id,prediction,prediction_code,risk_level,probability_stay,probability_leave
+1,VA PARTIR,1,High,16.41%,83.59%
+2,VA RESTER,0,Low,88.46%,11.54%
+3,VA PARTIR,1,Medium,35.19%,64.81%
+4,VA PARTIR,1,High,24.39%,75.61%
+5,VA PARTIR,1,Medium,32.16%,67.84%
+6,VA RESTER,0,Low,95.30%,4.70%
+7,VA RESTER,0,Low,81.61%,18.39%
+8,VA PARTIR,1,High,20.77%,79.23%
+9,VA RESTER,0,Low,96.22%,3.78%
+10,VA RESTER,0,Low,92.47%,7.53%
