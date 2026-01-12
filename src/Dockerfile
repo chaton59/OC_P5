@@ -8,11 +8,11 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copier le fichier de dépendances (généré via poetry export)
-COPY requirements_prod.txt .
+COPY requirements.txt .
 
 # Installer les dépendances Python directement via pip
 # Cette approche est plus robuste que poetry install sur HF Spaces
-RUN pip install --no-cache-dir -r requirements_prod.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Vérifier que les dépendances critiques sont bien installées
 RUN python -c "import slowapi; import fastapi; import gradio; print('✓ All critical dependencies installed')"
