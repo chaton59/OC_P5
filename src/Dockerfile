@@ -21,15 +21,15 @@ RUN poetry install --no-dev --no-interaction --no-ansi
 
 # Copier le code de l'application
 COPY app.py .
+COPY api.py .
 COPY db_models.py .
 COPY src/ ./src/
-COPY .env.example .env
 
 # Créer le dossier logs
 RUN mkdir -p logs
 
-# Exposer le port (7860 = Gradio par défaut sur HuggingFace Spaces)
-EXPOSE 7860
+# Exposer les ports (7860 = Gradio, 8000 = FastAPI)
+EXPOSE 7860 8000
 
 # Variables d'environnement par défaut
 ENV DEBUG=false
