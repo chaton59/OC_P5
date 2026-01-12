@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔮 Prédiction UNITAIRE via Hugging Face - Entrées numériques uniquement
+🔮 Prédiction UNITAIRE - API Hugging Face (Gradio)
 
 Usage: python demo_unitaire_hf.py
 Prérequis: pip install gradio_client
@@ -17,10 +17,13 @@ except ImportError:
     print("   pip install gradio_client")
     sys.exit(1)
 
+# ═══════════════════════════════════════════════════════════════
+# CONFIGURATION
+# ═══════════════════════════════════════════════════════════════
 API_URL = os.getenv("HF_API_URL", "https://asi-engineer-oc-p5.hf.space")
 
 # ═══════════════════════════════════════════════════════════════
-# OPTIONS À AFFICHER (pour référence utilisateur)
+# OPTIONS (menus numérotés)
 # ═══════════════════════════════════════════════════════════════
 DOMAINES = {
     1: "Infra & Cloud",
@@ -46,13 +49,12 @@ POSTES = {
 }
 
 print("╔══════════════════════════════════════════════════════════╗")
-print("║  🔮 PRÉDICTION UNITAIRE - Hugging Face Spaces            ║")
-print("║     (Entrées numériques uniquement)                      ║")
-print("╚══════════════════════════════════════════════════════════╝\n")
-print(f"🌐 API: {API_URL}\n")
+print("║  🔮 PRÉDICTION UNITAIRE - API Hugging Face               ║")
+print("╚══════════════════════════════════════════════════════════╝")
+print(f"\n🌐 API: {API_URL}\n")
 
 # ═══════════════════════════════════════════════════════════════
-# COLLECTE DES DONNÉES - Tout en nombres !
+# COLLECTE DES DONNÉES
 # ═══════════════════════════════════════════════════════════════
 
 print("═" * 60)
@@ -119,13 +121,13 @@ annees_entreprise = int(input("Années dans l'entreprise [0-40]: "))
 annees_poste = int(input("Années dans le poste actuel [0-18]: "))
 
 # ═══════════════════════════════════════════════════════════════
-# PRÉDICTION VIA GRADIO CLIENT
+# PRÉDICTION
 # ═══════════════════════════════════════════════════════════════
-print("\n⏳ Connexion à l'API Gradio HF...")
+print("\n⏳ Connexion à l'API...")
 
 try:
     client = Client(API_URL)
-    print("✅ Connecté\n")
+    print("✅ Connecté")
     print("⏳ Envoi de la prédiction...")
 
     result = client.predict(
@@ -162,40 +164,46 @@ try:
         api_name="/predict",
     )
 
+    # ═══════════════════════════════════════════════════════════════
+    # AFFICHAGE DU RÉSULTAT
+    # ═══════════════════════════════════════════════════════════════
     print("\n" + "═" * 60)
-    print("📊 RÉSULTAT DE LA PRÉDICTION (HF)")
+    print("📊 RÉSULTAT DE LA PRÉDICTION")
     print("═" * 60)
 
-    # Le résultat est du Markdown - on extrait les valeurs clés
     if isinstance(result, str):
         # Extraire les probabilités du Markdown
         prob_depart = re.search(r"Probabilité de départ[^:]*:\s*([\d.]+)%", result)
         prob_maintien = re.search(r"Probabilité de maintien[^:]*:\s*([\d.]+)%", result)
         confiance = re.search(r"Confiance[^:]*:\s*([\d.]+)%", result)
 
-        # Détecter le risque
+        # Niveau de risque
         if "RISQUE ÉLEVÉ" in result:
-            print("\n🔴 RISQUE ÉLEVÉ DE DÉPART")
+            print("\n🔴 Niveau de risque: ÉLEVÉ")
         elif "RISQUE MOYEN" in result:
-            print("\n🟠 RISQUE MOYEN DE DÉPART")
+            print("\n🟠 Niveau de risque: MOYEN")
         else:
-            print("\n🟢 RISQUE FAIBLE DE DÉPART")
+            print("\n🟢 Niveau de risque: FAIBLE")
 
-        # Afficher les probabilités
+        # Probabilités
         if prob_maintien:
             print(f"\n📈 Probabilité de rester:  {prob_maintien.group(1)}%")
         if prob_depart:
             print(f"📉 Probabilité de partir: {prob_depart.group(1)}%")
         if confiance:
-            print(f"🎯 Confiance du modèle: {confiance.group(1)}%")
+            print(f"🎯 Confiance du modèle:   {confiance.group(1)}%")
 
-        # Afficher la prédiction
+        # Prédiction finale
+        print("\n" + "─" * 60)
         if "Départ probable" in result:
-            print("\n🚨 PRÉDICTION: VA PARTIR")
+            print("🚨 PRÉDICTION FINALE: VA PARTIR")
         else:
-            print("\n✅ PRÉDICTION: VA RESTER")
+            print("✅ PRÉDICTION FINALE: VA RESTER")
+        print("─" * 60)
     else:
         print(f"\n📋 Résultat: {result}")
+
+    print("\n✅ Prédiction unitaire terminée avec succès!")
 
 except Exception as e:
     print(f"\n❌ Erreur: {e}")

@@ -1,109 +1,154 @@
 #!/usr/bin/env python3
 """
-📦 Prédiction BATCH via API Hugging Face (Gradio Client)
+📦 Prédiction BATCH - API Hugging Face (Gradio)
 
 Usage: python demo_batch_hf.py
-- Utilise par défaut les CSV d'exemple du dossier
-- Envoie les 3 fichiers à la Space HF via Gradio Client
-- Sauvegarde un CSV de résultats
-
-Prérequis: pip install gradio_client
+Prérequis: pip install gradio_client pandas
 """
 
 import os
 import sys
-import pandas as pd
 from datetime import datetime
 
 try:
+    import pandas as pd
     from gradio_client import Client, handle_file
 except ImportError:
-    print("❌ gradio_client non installé. Installez-le avec:")
-    print("   pip install gradio_client")
+    print("❌ Dépendances manquantes. Installez avec:")
+    print("   pip install gradio_client pandas")
     sys.exit(1)
 
+# ═══════════════════════════════════════════════════════════════
+# CONFIGURATION
+# ═══════════════════════════════════════════════════════════════
 API_URL = os.getenv("HF_API_URL", "https://asi-engineer-oc-p5.hf.space")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Fichiers par défaut
+DEFAULT_FILES = {
+    "eval": os.path.join(SCRIPT_DIR, "02_predict_batch_eval.csv"),
+    "sirh": os.path.join(SCRIPT_DIR, "02_predict_batch_sirh.csv"),
+    "sondage": os.path.join(SCRIPT_DIR, "02_predict_batch_sondage.csv"),
+}
 
 print("╔══════════════════════════════════════════════════════════╗")
-print("║  📦 Prédiction BATCH - API Hugging Face (Gradio)        ║")
-print("╚══════════════════════════════════════════════════════════╝\n")
-print(f"🌐 API: {API_URL}\n")
+print("║  📦 PRÉDICTION BATCH - API Hugging Face                  ║")
+print("╚══════════════════════════════════════════════════════════╝")
+print(f"\n🌐 API: {API_URL}\n")
 
-# Dossier du script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sondage_path = os.path.join(script_dir, "02_predict_batch_sondage.csv")
-eval_path = os.path.join(script_dir, "02_predict_batch_eval.csv")
-sirh_path = os.path.join(script_dir, "02_predict_batch_sirh.csv")
+# ═══════════════════════════════════════════════════════════════
+# SÉLECTION DES FICHIERS
+# ═══════════════════════════════════════════════════════════════
+print("═" * 60)
+print("📁 SÉLECTION DES FICHIERS CSV")
+print("═" * 60)
 
-# Vérifier existence
-for path in [sondage_path, eval_path, sirh_path]:
+use_default = (
+    input("\nUtiliser les fichiers exemples par défaut? [O/n]: ").strip().lower()
+)
+
+if use_default in ("", "o", "oui", "y", "yes"):
+    fichier_eval = DEFAULT_FILES["eval"]
+    fichier_sirh = DEFAULT_FILES["sirh"]
+    fichier_sondage = DEFAULT_FILES["sondage"]
+    print(f"\n📄 Évaluation: {os.path.basename(fichier_eval)}")
+    print(f"📄 SIRH:       {os.path.basename(fichier_sirh)}")
+    print(f"📄 Sondage:    {os.path.basename(fichier_sondage)}")
+else:
+    print("\nEntrez les chemins des fichiers CSV:")
+    fichier_eval = input("📄 Fichier évaluation: ").strip()
+    fichier_sirh = input("📄 Fichier SIRH: ").strip()
+    fichier_sondage = input("📄 Fichier sondage: ").strip()
+
+# Vérification des fichiers
+for name, path in [
+    ("Évaluation", fichier_eval),
+    ("SIRH", fichier_sirh),
+    ("Sondage", fichier_sondage),
+]:
     if not os.path.exists(path):
-        print(f"❌ Fichier introuvable: {path}")
+        print(f"\n❌ Fichier {name} introuvable: {path}")
         sys.exit(1)
 
-print("✅ Fichiers d'exemple détectés:")
-print(f"   - {os.path.basename(sondage_path)}")
-print(f"   - {os.path.basename(eval_path)}")
-print(f"   - {os.path.basename(sirh_path)}\n")
+# ═══════════════════════════════════════════════════════════════
+# PRÉDICTION BATCH
+# ═══════════════════════════════════════════════════════════════
+print("\n" + "═" * 60)
+print("⏳ TRAITEMENT EN COURS...")
+print("═" * 60)
 
-print("⏳ Connexion à l'API Gradio...")
 try:
+    print("\n⏳ Connexion à l'API...")
     client = Client(API_URL)
-    print("✅ Connecté à l'API Gradio\n")
-except Exception as e:
-    print(f"❌ Impossible de se connecter: {e}")
-    sys.exit(1)
+    print("✅ Connecté")
 
-print("⏳ Envoi des fichiers pour prédiction batch...")
-try:
+    print("⏳ Envoi des fichiers...")
     result = client.predict(
-        sondage_path=handle_file(sondage_path),
-        eval_path=handle_file(eval_path),
-        sirh_path=handle_file(sirh_path),
+        fichier_eval=handle_file(fichier_eval),
+        fichier_sirh=handle_file(fichier_sirh),
+        fichier_sondage=handle_file(fichier_sondage),
         api_name="/predict_batch",
     )
+
+    # ═══════════════════════════════════════════════════════════════
+    # AFFICHAGE DU RÉSULTAT
+    # ═══════════════════════════════════════════════════════════════
+    print("\n" + "═" * 60)
+    print("📊 RÉSULTAT DE LA PRÉDICTION BATCH")
+    print("═" * 60)
+
+    if isinstance(result, dict):
+        # Lecture du fichier résultat
+        result_path = result.get("value") or result.get("path")
+        if result_path and os.path.exists(result_path):
+            df = pd.read_csv(result_path)
+            total = len(df)
+
+            # Statistiques
+            if "prediction" in df.columns:
+                restent = (df["prediction"] == "Reste").sum()
+                partent = (df["prediction"] == "Part").sum()
+            else:
+                restent = partent = 0
+
+            if "risk_level" in df.columns:
+                risque_eleve = (df["risk_level"] == "Élevé").sum()
+                risque_moyen = (df["risk_level"] == "Moyen").sum()
+                risque_faible = (df["risk_level"] == "Faible").sum()
+            else:
+                risque_eleve = risque_moyen = risque_faible = 0
+
+            # Affichage des stats
+            print(f"\n👥 Total employés analysés: {total}")
+            print(f"\n📈 Vont RESTER:  {restent} ({100 * restent / total:.1f}%)")
+            print(f"📉 Vont PARTIR:  {partent} ({100 * partent / total:.1f}%)")
+
+            print(f"\n🟢 Risque faible: {risque_faible}")
+            print(f"🟠 Risque moyen:  {risque_moyen}")
+            print(f"🔴 Risque élevé:  {risque_eleve}")
+
+            # Sauvegarde
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_file = os.path.join(SCRIPT_DIR, f"predictions_batch_{timestamp}.csv")
+            df.to_csv(output_file, index=False)
+
+            print("\n" + "─" * 60)
+            print(f"💾 Fichier sauvegardé: {os.path.basename(output_file)}")
+            print("─" * 60)
+
+            # Aperçu
+            print("\n📋 Aperçu des résultats:")
+            cols = ["employee_id", "prediction", "prob_depart", "risk_level"]
+            cols_exist = [c for c in cols if c in df.columns]
+            if cols_exist:
+                print(df[cols_exist].head(10).to_string(index=False))
+        else:
+            print(f"\n⚠️ Fichier résultat non trouvé: {result_path}")
+    else:
+        print(f"\n📋 Résultat: {result}")
+
+    print("\n✅ Prédiction batch terminée avec succès!")
+
 except Exception as e:
-    print(f"❌ Erreur lors de la prédiction: {e}")
+    print(f"\n❌ Erreur: {e}")
     sys.exit(1)
-
-# Vérifier si erreur dans le résultat
-if isinstance(result, dict) and "error" in result:
-    print(f"\n❌ Erreur API: {result.get('error')}")
-    print(f"   Message: {result.get('message')}")
-    sys.exit(1)
-
-# Construire le CSV de sortie
-predictions_data = []
-for pred in result.get("predictions", []):
-    predictions_data.append(
-        {
-            "employee_id": pred.get("employee_id"),
-            "prediction": "VA PARTIR" if pred.get("prediction") == 1 else "VA RESTER",
-            "prediction_code": pred.get("prediction"),
-            "risk_level": pred.get("risk_level"),
-            "probability_stay": f"{pred.get('probability_stay', 0):.2%}",
-            "probability_leave": f"{pred.get('probability_leave', 0):.2%}",
-        }
-    )
-
-df = pd.DataFrame(predictions_data)
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-output_path = os.path.join(script_dir, f"predictions_batch_hf_{timestamp}.csv")
-df.to_csv(output_path, index=False, encoding="utf-8-sig")
-
-# Affichage résumé
-summary = result.get("summary", {})
-total = result.get("total_employees", len(predictions_data))
-
-print("\n" + "=" * 50)
-print("📊 RÉSULTATS DE LA PRÉDICTION BATCH")
-print("=" * 50)
-print(f"\n👥 Total employés analysés: {total}")
-print(f"✅ Vont rester:  {summary.get('total_stay', 'N/A')}")
-print(f"❌ Vont partir:  {summary.get('total_leave', 'N/A')}")
-print(f"\n🔴 Risque élevé:  {summary.get('high_risk_count', 'N/A')}")
-print(f"🟠 Risque moyen:  {summary.get('medium_risk_count', 'N/A')}")
-print(f"🟢 Risque faible: {summary.get('low_risk_count', 'N/A')}")
-
-print(f"\n💾 Résultats sauvegardés: {os.path.basename(output_path)}")
-print("\n✅ Prédiction batch terminée avec succès!")
