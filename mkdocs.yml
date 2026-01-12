@@ -149,16 +149,12 @@ extra:
 nav:
   - Accueil: index.md
   
-  - Guide:
-    - Installation: installation.md
-    - Configuration: configuration.md
-    - API: api.md
-    - Modèle ML: model.md
-    - Entraînement: training.md
-    - Déploiement: deployment.md
+  - Documentation:
+    - API: api_documentation.md
+    - Architecture: architecture.md
+    - Déploiement: deployment_guide.md
   
   - Référence:
-    - Changelog: changelog.md
-    - Base de données: database_guide.md
-    - Archive mission OC: etapes_archive.txt
+    - Base de données: database_setup.md
+    - Tests: tests_report.md
 
